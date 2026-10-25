@@ -25,5 +25,5 @@ cosign sign --yes "$repo@$digest"
 cosign attest --yes --type cyclonedx --predicate artifacts/sbom.cdx.json "$repo@$digest"
 cosign attest --yes --type 'https://github.com/jayekwere/hardened-container-supply-chain/evidence/v1' --predicate artifacts/release-evidence.json "$repo@$digest"
 ./scripts/verify-release.sh "$repo@$digest" "$GITHUB_REF_NAME"
-helm package charts/supply-demo --destination artifacts
-sha256sum artifacts/sbom.cdx.json artifacts/scan.json artifacts/release-evidence.json artifacts/supply-demo-*.tgz > artifacts/checksums.txt
+helm package charts/supply-demo --destination artifacts --version "${GITHUB_REF_NAME#v}" --app-version "$GITHUB_REF_NAME"
+(cd artifacts && sha256sum sbom.cdx.json scan.json release-evidence.json supply-demo-*.tgz > checksums.txt)

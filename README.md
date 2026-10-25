@@ -10,7 +10,7 @@ See [verification evidence](docs/verification.md) for dated local results and ho
 
 ## Run the complete checks
 
-Requirements: a Unix shell, Make, Python 3.12+, a C compiler for Go's race detector, and a running OCI-compatible local engine with `docker buildx` and timestamp rewriting support (BuildKit 0.13+). Internet access is required for locked tool downloads, the pinned builder image, and a vulnerability database updated within 24 hours. Linux amd64 and macOS arm64 tool installations are locked in `tools.lock.json`.
+Requirements: a Unix shell, Make, Python 3.12+, a C compiler for Go's race detector, and a running OCI-compatible local engine with `docker buildx` and support for its container builder driver. The build script creates and removes a disposable BuildKit 0.30.0 builder pinned by image digest. Internet access is required for locked tool downloads, the pinned builder image, and a vulnerability database updated within 24 hours. Linux amd64 and macOS arm64 tool installations are locked in `tools.lock.json`.
 
 ```sh
 git clone https://github.com/jayekwere/hardened-container-supply-chain.git

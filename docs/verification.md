@@ -42,13 +42,13 @@ PASS local signature valid; tampered content rejected; ephemeral private key del
 
 ## Hosted execution
 
-Hosted quality and keyless release checks have not yet been executed in this initial source snapshot. Their workflow definitions are included; this record will be updated with actual run links after publication. Local-key signing does not establish that hosted OIDC signing works.
+The [first hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40245866237) passed unit, archive and chart checks, then rejected an unsupported exporter on the runner's default builder. The build path now uses a digest-pinned disposable container builder. The corrected hosted run and keyless release are pending verification; local-key signing does not establish that hosted OIDC signing works.
 
 ## Operational limitations
 
 - The default disposable-cluster CNI does not enforce NetworkPolicy. The rendered selectors/rules are checked, but no runtime traffic-denial result is claimed. Port-forwarding verifies service behavior and bypasses ordinary pod networking policy.
 - Runtime seccomp is set to RuntimeDefault and accepted by the cluster; exact allowed/denied syscall behavior is platform-dependent and is not individually probed.
-- Reproducibility is two uncached builds in one configured environment, not an independent cross-host rebuild. The host engine, BuildKit frontend, runner image, Python, C compiler and other host tools are not all digest-pinned.
+- Reproducibility is two uncached builds in one configured environment, not an independent cross-host rebuild. The host engine, runner image, Python, C compiler and other host tools are not all digest-pinned. BuildKit itself now uses a digest-pinned disposable container builder.
 - Inventory and scanning cover discovered packages in the final image, including the Go standard library. They do not audit builder-image packages, pipeline-tool vulnerabilities, every application logic bug, or unknown vulnerabilities. Zero findings is a dated scanner result only.
 - LOW/MEDIUM findings are visible but do not block. A high-severity risk acceptance is not an exploitability determination; no VEX is emitted.
 - The chart has one replica, fixed small resources and no ingress, TLS, authentication or availability guarantees. CPU or memory pressure can make probes fail. Its diagnostics are for a small functional demonstration.
