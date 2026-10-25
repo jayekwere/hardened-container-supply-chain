@@ -8,7 +8,7 @@ Observed on 2026-10-25. Results below were executed, not inferred from configura
 | Go package coverage | policy 99.3%; service library 47.1%; policy CLI 56.5%; service entrypoint 0.0% under unit coverage (binary exercised separately) |
 | Archive regressions | 2 Python test methods pass, including 5 negative mutations: root, identity, architecture, ownership, extra file |
 | `make chart` | Helm lint: 1 chart, 0 failed; hardened render exit 0; writable-root render exit 1 with `K8S-READONLY` |
-| `make reproduce` | Exit 0; two uncached Linux amd64 builds have identical manifest digest listed below |
+| `make reproduce` | Exit 0; two uncached Linux amd64 builds have identical manifest digest listed below; OCI transfer regression preserves it |
 | `make integration` | 3 top-level Go tests pass; HTTP and kernel runtime diagnostics pass; all 3 deliberately unsafe runtime settings are rejected; `/bin/sh` absent |
 | `make scan` | Exit 0; CycloneDX inventory contains stdlib v1.27.3; 0 findings; config identity and fresh DB checks pass; empty exception ledger |
 | `scripts/sign-local.sh` | Exit 0; valid SBOM signature accepted; tampered bytes rejected; ephemeral private key deleted |
@@ -42,7 +42,9 @@ PASS local signature valid; tampered content rejected; ephemeral private key del
 
 ## Hosted execution
 
-The [first hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40245866237) passed unit, archive and chart checks, then rejected an unsupported exporter on the runner's default builder. The build path now uses a digest-pinned disposable container builder. The corrected hosted run and keyless release are pending verification; local-key signing does not establish that hosted OIDC signing works.
+The [corrected hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40246098784) passed every step for source commit `908eb2e2a2ad00667d8778cbf53cc3b083b9766a`: unit/archive/chart gates, both uncached builds, all container tests, fresh scan/SBOM, local signature/tamper test, and disposable Kubernetes integration. The hosted Linux amd64 builds also produced the same manifest and config digests observed locally.
+
+The [first run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40245866237) stopped at an exporter unsupported by the runner's default builder. The digest-pinned disposable builder corrected that portability issue. The [initial tagged publishing attempt](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40246350655) correctly stopped when the engine recompressed a layer during upload and changed the manifest digest. It created no supported release. Publication now copies the original OCI archive without conversion, and a local transfer regression checks digest preservation. A corrected version tag is being verified separately.
 
 ## Operational limitations
 

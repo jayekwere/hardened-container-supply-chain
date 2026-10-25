@@ -19,7 +19,8 @@ assert any(c.get('name') == 'stdlib' and c.get('version') == expected for c in s
 print('PASS SBOM contains versioned stdlib')
 CHECK
 image_id=$(python3 scripts/check-image.py)
-# Local evidence uses the config digest. A published release MUST supply its manifest digest.
-subject=${SUBJECT_DIGEST:-$image_id}
+# Both local and release exceptions bind to the exported image manifest digest.
+built_subject=$(python3 -c 'import json;print(json.load(open("artifacts/build-metadata.json"))["containerimage.digest"])')
+subject=${SUBJECT_DIGEST:-$built_subject}
 go build -mod=readonly -o bin/policy ./cmd/policy
 bin/policy scan --file artifacts/scan.json --image-id "$image_id" --subject "$subject" | tee artifacts/scan-policy.txt

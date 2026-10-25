@@ -30,7 +30,7 @@ This is documentation, not an active entry. It intentionally cannot pass without
 
 An evidence document should identify the exact artifact, describe reachable paths and compensating controls, link the upstream advisory or patch, specify the remediation owner/deadline, and explain the residual risk. The executable gate checks matching, lifetime and document presence; it cannot judge the truth of the rationale. Review the document and ledger together.
 
-Local `make scan` scopes exceptions to the saved image config digest. The release path supplies the actual build manifest digest before pushing and checks that the registry preserves it; release exceptions must match that manifest digest. A changed binary, dependency or layer requires reassessment and a new scoped entry.
+Both local `make scan` and the release path scope exceptions to the exported image manifest digest. The config digest separately binds the scanner inventory to the saved image. The release uses an OCI copy that preserves the original compressed layer and manifest bytes, then checks the registry digest equals the gated digest. A changed binary, dependency or layer requires reassessment and a new scoped entry.
 
 ## VEX decision
 

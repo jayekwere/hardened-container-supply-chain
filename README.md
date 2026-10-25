@@ -1,5 +1,7 @@
 # hardened-container-supply-chain
 
+[![quality](https://github.com/jayekwere/hardened-container-supply-chain/actions/workflows/quality.yml/badge.svg)](https://github.com/jayekwere/hardened-container-supply-chain/actions/workflows/quality.yml)
+
 A working container supply chain for a tiny Go HTTP service: build a scratch image, test its runtime restrictions, render and gate a Helm deployment, inventory and scan the exact image, then publish and verify a signed release by digest.
 
 The application is intentionally small so the controls can be inspected end to end. It serves `GET /healthz`, `/readyz`, and `/version` on port 8080, needs no credentials, writes no application data, and makes no outbound requests.
@@ -82,7 +84,7 @@ Take the exact reference from the release's `image-reference.txt` asset. Do not 
 
 ```sh
 export IMAGE='ghcr.io/jayekwere/hardened-container-supply-chain@sha256:REPLACE_WITH_RELEASE_DIGEST'
-export TAG='v0.1.0'
+export TAG='v0.1.1'
 ./scripts/verify-release.sh "$IMAGE" "$TAG"
 
 export PATH="$PWD/.tools/bin:$PATH"

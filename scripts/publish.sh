@@ -12,8 +12,7 @@ expected=$(python3 -c 'import json;print(json.load(open("artifacts/build-metadat
 SUBJECT_DIGEST="$expected" ./scripts/scan.sh
 printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
 trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
-docker tag supply-demo:local "$repo:$GITHUB_REF_NAME"
-docker push "$repo:$GITHUB_REF_NAME"
+oras cp --from-oci-layout "artifacts/image.tar@$expected" "$repo:$GITHUB_REF_NAME"
 digest=$(docker buildx imagetools inspect "$repo:$GITHUB_REF_NAME" --format '{{.Manifest.Digest}}')
 [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
 test "$digest" = "$expected"
