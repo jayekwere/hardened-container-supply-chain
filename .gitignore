@@ -1,0 +1,12 @@
+/artifacts/
+/.tools/
+/.cache/
+/bin/
+*.test
+*.key
+*.pem
+*.p12
+*.env
+
+__pycache__/
+/artifacts-coverage.tmp

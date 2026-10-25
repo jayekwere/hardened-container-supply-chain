@@ -1,0 +1,21 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "SYNTHETIC: never a real scan",
+  "Metadata": {
+    "ImageID": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "Results": [
+    {
+      "Target": "service",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Packages": [
+        {
+          "Name": "stdlib",
+          "Version": "v0.0.0-synthetic"
+        }
+      ],
+      "Vulnerabilities": []
+    }
+  ]
+}

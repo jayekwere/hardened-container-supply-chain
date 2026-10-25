@@ -1,0 +1,8 @@
+**
+!go.mod
+!cmd
+!cmd/service
+!cmd/service/**
+!internal
+!internal/service
+!internal/service/**

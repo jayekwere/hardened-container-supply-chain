@@ -1,0 +1,5 @@
+image:
+  repository: ghcr.io/jayekwere/hardened-container-supply-chain
+  digest: ""
+security:
+  readOnlyRootFilesystem: true

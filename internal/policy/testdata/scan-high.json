@@ -1,0 +1,29 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "SYNTHETIC: never a real scan",
+  "Metadata": {
+    "ImageID": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "Results": [
+    {
+      "Target": "service",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Packages": [
+        {
+          "Name": "stdlib",
+          "Version": "v0.0.0-synthetic"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2099-0001",
+          "PkgName": "stdlib",
+          "InstalledVersion": "v0.0.0-synthetic",
+          "FixedVersion": "v0.0.1-synthetic",
+          "Severity": "HIGH"
+        }
+      ]
+    }
+  ]
+}

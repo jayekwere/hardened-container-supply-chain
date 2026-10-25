@@ -1,0 +1,27 @@
+{
+  "apiVersion": "apps/v1", "kind": "Deployment",
+  "metadata": {"name": {{ .Release.Name | quote }}},
+  "spec": {
+    "replicas": 1,
+    "selector": {"matchLabels": {"app.kubernetes.io/instance": {{ .Release.Name | quote }}}},
+    "template": {
+      "metadata": {"labels": {"app.kubernetes.io/instance": {{ .Release.Name | quote }}}},
+      "spec": {
+        "serviceAccountName": {{ .Release.Name | quote }},
+        "automountServiceAccountToken": false,
+        "terminationGracePeriodSeconds": 10,
+        "securityContext": {"runAsNonRoot": true, "runAsUser": 65532, "runAsGroup": 65532, "seccompProfile": {"type": "RuntimeDefault"}},
+        "containers": [{
+          "name": "service",
+          "image": {{ printf "%s@%s" .Values.image.repository .Values.image.digest | quote }},
+          "imagePullPolicy": "IfNotPresent",
+          "ports": [{"name": "http", "containerPort": 8080, "protocol": "TCP"}],
+          "securityContext": {"privileged": false, "allowPrivilegeEscalation": false, "readOnlyRootFilesystem": {{ .Values.security.readOnlyRootFilesystem | toJson }}, "capabilities": {"drop": ["ALL"]}},
+          "resources": {"requests": {"cpu": "10m", "memory": "16Mi"}, "limits": {"cpu": "100m", "memory": "32Mi"}},
+          "readinessProbe": {"httpGet": {"path": "/readyz", "port": 8080}, "initialDelaySeconds": 1, "periodSeconds": 2},
+          "livenessProbe": {"httpGet": {"path": "/healthz", "port": 8080}, "initialDelaySeconds": 3, "periodSeconds": 5}
+        }]
+      }
+    }
+  }
+}

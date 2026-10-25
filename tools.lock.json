@@ -1,0 +1,107 @@
+{
+  "helm": {
+    "version": "3.19.0",
+    "platforms": {
+      "linux-amd64": {
+        "url": "https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz",
+        "sha256": "a7f81ce08007091b86d8bd696eb4d86b8d0f2e1b9f6c714be62f82f96a594496",
+        "checksumSource": "https://get.helm.sh/helm-v3.19.0-linux-amd64.tar.gz.sha256sum"
+      },
+      "darwin-arm64": {
+        "url": "https://get.helm.sh/helm-v3.19.0-darwin-arm64.tar.gz",
+        "sha256": "31513e1193da4eb4ae042eb5f98ef9aca7890cfa136f4707c8d4f70e2115bef6",
+        "checksumSource": "https://get.helm.sh/helm-v3.19.0-darwin-arm64.tar.gz.sha256sum"
+      }
+    }
+  },
+  "trivy": {
+    "version": "0.72.0",
+    "platforms": {
+      "linux-amd64": {
+        "url": "https://github.com/aquasecurity/trivy/releases/download/v0.72.0/trivy_0.72.0_Linux-64bit.tar.gz",
+        "sha256": "bbb64b9695866ce4a7a8f5c9592002c5961cab378577fa3f8a040df362b9b2ea",
+        "checksumSource": "https://github.com/aquasecurity/trivy/releases/download/v0.72.0/trivy_0.72.0_checksums.txt"
+      },
+      "darwin-arm64": {
+        "url": "https://github.com/aquasecurity/trivy/releases/download/v0.72.0/trivy_0.72.0_macOS-ARM64.tar.gz",
+        "sha256": "88f208680dc05da2b459e19b4f5aa2b4dc7c2117892ba4aab2ae63baba330016",
+        "checksumSource": "https://github.com/aquasecurity/trivy/releases/download/v0.72.0/trivy_0.72.0_checksums.txt"
+      }
+    }
+  },
+  "cosign": {
+    "version": "2.6.1",
+    "platforms": {
+      "linux-amd64": {
+        "url": "https://github.com/sigstore/cosign/releases/download/v2.6.1/cosign-linux-amd64",
+        "sha256": "064954c5d8c7e3b28188eee5b1727b31c411550bc5fefd41aa672d3c761d103a",
+        "checksumSource": "https://github.com/sigstore/cosign/releases/download/v2.6.1/cosign_checksums.txt"
+      },
+      "darwin-arm64": {
+        "url": "https://github.com/sigstore/cosign/releases/download/v2.6.1/cosign-darwin-arm64",
+        "sha256": "54047052cf46f40a5c3c95a510db276e164ba77e096aea1ca1b733f770359689",
+        "checksumSource": "https://github.com/sigstore/cosign/releases/download/v2.6.1/cosign_checksums.txt"
+      }
+    }
+  },
+  "kind": {
+    "version": "0.30.0",
+    "platforms": {
+      "linux-amd64": {
+        "url": "https://github.com/kubernetes-sigs/kind/releases/download/v0.30.0/kind-linux-amd64",
+        "sha256": "517ab7fc89ddeed5fa65abf71530d90648d9638ef0c4cde22c2c11f8097b8889",
+        "checksumSource": "https://github.com/kubernetes-sigs/kind/releases/download/v0.30.0/kind-linux-amd64.sha256sum"
+      },
+      "darwin-arm64": {
+        "url": "https://github.com/kubernetes-sigs/kind/releases/download/v0.30.0/kind-darwin-arm64",
+        "sha256": "ceaf40df1d1551c481fb50e3deb5c3deecad5fd599df5469626b70ddf52a1518",
+        "checksumSource": "https://github.com/kubernetes-sigs/kind/releases/download/v0.30.0/kind-darwin-arm64.sha256sum"
+      }
+    }
+  },
+  "kubectl": {
+    "version": "1.34.0",
+    "platforms": {
+      "linux-amd64": {
+        "url": "https://dl.k8s.io/release/v1.34.0/bin/linux/amd64/kubectl",
+        "sha256": "cfda68cba5848bc3b6c6135ae2f20ba2c78de20059f68789c090166d6abc3e2c",
+        "checksumSource": "https://dl.k8s.io/release/v1.34.0/bin/linux/amd64/kubectl.sha256"
+      },
+      "darwin-arm64": {
+        "url": "https://dl.k8s.io/release/v1.34.0/bin/darwin/arm64/kubectl",
+        "sha256": "d491f4c47c34856188d38e87a27866bd94a66a57b8db3093a82ae43baf3bb20d",
+        "checksumSource": "https://dl.k8s.io/release/v1.34.0/bin/darwin/arm64/kubectl.sha256"
+      }
+    }
+  },
+  "actionlint": {
+    "version": "1.7.7",
+    "platforms": {
+      "linux-amd64": {
+        "url": "https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz",
+        "sha256": "023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757",
+        "checksumSource": "https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_checksums.txt"
+      },
+      "darwin-arm64": {
+        "url": "https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_darwin_arm64.tar.gz",
+        "sha256": "2693315b9093aeacb4ebd91a993fea54fc215057bf0da2659056b4bc033873db",
+        "checksumSource": "https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_checksums.txt"
+      }
+    }
+  },
+  "go": {
+    "version": "1.27.3",
+    "platforms": {
+      "linux-amd64": {
+        "url": "https://go.dev/dl/go1.27.3.linux-amd64.tar.gz",
+        "sha256": "65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40",
+        "checksumSource": "https://go.dev/dl/?mode=json"
+      },
+      "darwin-arm64": {
+        "url": "https://go.dev/dl/go1.27.3.darwin-arm64.tar.gz",
+        "sha256": "dd3908cf20959d798c1e06ebe5b72213f0505ce01373b40ce3110975a6cd99c2",
+        "checksumSource": "https://go.dev/dl/?mode=json"
+      }
+    }
+  }
+}

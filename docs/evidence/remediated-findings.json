@@ -1,0 +1,14 @@
+{
+  "kind": "observed-remediated",
+  "observedAt": "2026-10-25",
+  "imageConfigDigest": "sha256:85d73d03e3d4fc8c92e9b143c753dd22fb699dfcda9c403b6c458beeb56ae4ce",
+  "toolchain": "go1.27.3",
+  "scannerVersion": "0.72.0",
+  "database": {
+    "Version": 2,
+    "NextUpdate": "2026-10-26T19:10:35.479132182Z",
+    "UpdatedAt": "2026-10-25T19:10:35.479132794Z",
+    "DownloadedAt": "2026-10-25T23:34:17.50537Z"
+  },
+  "findings": []
+}

@@ -1,0 +1,3 @@
+# Rendering fixture only: the zero digest is not a published artifact.
+image:
+  digest: sha256:0000000000000000000000000000000000000000000000000000000000000000

@@ -1,0 +1,69 @@
+name: release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  quality:
+    uses: ./.github/workflows/quality.yml
+    permissions:
+      contents: read
+  publish:
+    needs: quality
+    if: github.repository == 'jayekwere/hardened-container-supply-chain'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: make tools
+      - name: Build, gate, publish, sign and verify exact digest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./scripts/publish.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: release-evidence-${{ github.ref_name }}-${{ github.run_attempt }}
+          path: |
+            artifacts/*.json
+            artifacts/*.txt
+            artifacts/*.jsonl
+            artifacts/*.cdx.json
+            artifacts/*.tgz
+          retention-days: 90
+          if-no-files-found: error
+  record:
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-evidence-${{ github.ref_name }}-${{ github.run_attempt }}
+          path: evidence
+      - name: Record verified release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          image = Path('evidence/image-reference.txt').read_text().strip()
+          body = 'Digest-addressed release with signed SBOM and scan evidence.\n\nImage: `' + image + '`\n\nVerify with `./scripts/verify-release.sh IMAGE ' + __import__('os').environ['RELEASE_TAG'] + '`. See repository documentation for trust boundaries and limitations.\n'
+          Path('release-notes.txt').write_text(body)
+          PYTHON
+          gh release create "$RELEASE_TAG" --verify-tag --title "$RELEASE_TAG" --notes-file release-notes.txt evidence/*

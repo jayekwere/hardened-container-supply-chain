@@ -1,0 +1,5 @@
+# Deliberately unsafe. Helm accepts the type; the executable policy rejects it.
+image:
+  digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+security:
+  readOnlyRootFilesystem: false

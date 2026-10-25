@@ -1,0 +1,7 @@
+apiVersion: v2
+name: supply-demo
+description: A restricted, digest-pinned HTTP service
+type: application
+version: 0.1.0
+appVersion: "1"
+kubeVersion: ">=1.30.0-0"

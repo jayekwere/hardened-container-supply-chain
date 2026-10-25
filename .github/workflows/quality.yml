@@ -1,0 +1,47 @@
+name: quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '35 6 * * *'
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Install checksum-locked tools
+        run: make tools
+      - name: Validate workflow definitions and trust boundaries
+        run: |
+          .tools/bin/actionlint
+          python3 scripts/check-workflows.py
+      - name: Unit, policy, chart, reproducibility, runtime, SBOM and vulnerability gates
+        run: make check
+      - name: Local signature and tamper rejection
+        run: ./scripts/sign-local.sh
+      - name: Disposable cluster integration
+        run: make cluster
+      - name: Retain evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: quality-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/*.json
+            artifacts/*.txt
+            artifacts/*.cdx.json
+            artifacts/*.yaml
+            artifacts/cluster/tests.txt
+          retention-days: 14
+          if-no-files-found: error
