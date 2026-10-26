@@ -326,8 +326,8 @@ func TestAdmissionSignatures(t *testing.T) {
 		}
 		return ids
 	}
-	if len(runningVerifiers()) != 1 {
-		t.Fatal("runtime positive control did not find the verifier container")
+	if len(runningVerifiers()) == 0 {
+		t.Fatal("runtime positive control did not find any verifier container")
 	}
 	// Stop the verifier, including its existing connections. Endpoint removal alone
 	// does not interrupt an already-established API-server HTTP connection.

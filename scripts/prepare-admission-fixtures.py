@@ -122,9 +122,9 @@ rogue_sbom = envelope('rogue-sbom', sbom_type, sbom, key='rogue')
 wrong_subject = envelope('wrong-subject', evidence_type,
                          dict(evidence, image=image.split('@')[0] + '@sha256:' + '0' * 64), subject='0' * 64)
 tampered = json.loads(good_evidence.read_text())
-payload = json.loads(base64.b64decode(tampered['payload']))
-payload['predicate']['sourceRevision'] = '0' * 40
-tampered['payload'] = base64.b64encode(json.dumps(payload).encode()).decode()
+# Preserve all valid claims while changing the signed bytes. A content-only
+# checker would accept this; the signature verifier must reject it.
+tampered['payload'] = base64.b64encode(base64.b64decode(tampered['payload']) + b'\n').decode()
 tampered_evidence = work / 'tampered-envelope.json'
 tampered_evidence.write_text(json.dumps(tampered) + '\n')
 sets = {
