@@ -27,6 +27,13 @@ class BootstrapTests(unittest.TestCase):
         self.assertEqual(len(calls), 2)
         self.assertIn('--kubeconfig', calls[0])
 
+    def test_validation_eof_recovers(self):
+        failed = 'failed calling webhook "validating.clusterimagepolicy.sigstore.dev": Post validating: EOF'
+        passed, observations, calls = self.execute([(1, failed), (0, 'configured\n')])
+        self.assertTrue(passed)
+        self.assertEqual([x['outcome'] for x in observations], ['webhook-unavailable', 'applied'])
+        self.assertEqual(len(calls), 2)
+
     def test_denial_is_not_retried(self):
         denied = 'admission webhook "validation.clusterimagepolicy.sigstore.dev" denied the request: invalid policy'
         passed, observations, calls = self.execute([(1, denied)])

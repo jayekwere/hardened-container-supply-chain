@@ -17,9 +17,11 @@ type policyWriteAttempt struct {
 	Output    string   `json:"output"`
 }
 
-func conversionUnavailable(output string) bool {
+func policyWebhookUnavailable(output string) bool {
 	s := strings.ToLower(output)
-	if strings.Contains(s, "denied the request") || !strings.Contains(s, "conversion webhook for policy.sigstore.dev/") || !strings.Contains(s, "failed:") {
+	conversion := strings.Contains(s, "conversion webhook for policy.sigstore.dev/") && strings.Contains(s, "failed:")
+	admission := strings.Contains(s, "failed calling webhook") && strings.Contains(s, ".clusterimagepolicy.sigstore.dev")
+	if strings.Contains(s, "denied the request") || !(conversion || admission) {
 		return false
 	}
 	for _, message := range []string{"eof", "connection refused", "context deadline exceeded", "tls handshake timeout", "i/o timeout"} {
@@ -43,7 +45,7 @@ func applyPolicyCommand(command func([]byte, ...string) ([]byte, int), input []b
 		if isPolicy {
 			attempts = append(attempts, policyWriteAttempt{attempt, at, args, code, string(out)})
 		}
-		if !isPolicy || code == 0 || !conversionUnavailable(string(out)) || attempt >= 10 || time.Since(started) >= 60*time.Second {
+		if !isPolicy || code == 0 || !policyWebhookUnavailable(string(out)) || attempt >= 10 || time.Since(started) >= 60*time.Second {
 			return out, code, attempts
 		}
 		pause(time.Second)
@@ -57,6 +59,9 @@ func TestPolicyWriteClassification(t *testing.T) {
 		retry        bool
 	}{
 		{"conversion-eof", prefix + "Post resource-conversion: EOF", true},
+		{"policy-validation-eof", `failed calling webhook "validating.clusterimagepolicy.sigstore.dev": Post validating: EOF`, true},
+		{"policy-defaulting-eof", `failed calling webhook "defaulting.clusterimagepolicy.sigstore.dev": Post defaulting: EOF`, true},
+		{"workload-webhook-eof", `failed calling webhook "policy.sigstore.dev": EOF`, false},
 		{"conversion-refused", prefix + "connection refused", true},
 		{"conversion-timeout", prefix + "context deadline exceeded", true},
 		{"real-denial", `admission webhook denied the request: ` + prefix + "EOF", false},
@@ -64,7 +69,7 @@ func TestPolicyWriteClassification(t *testing.T) {
 		{"foreign-conversion", `conversion webhook for other.invalid/v1 failed: EOF`, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			if conversionUnavailable(tc.output) != tc.retry {
+			if policyWebhookUnavailable(tc.output) != tc.retry {
 				t.Fatal("incorrect administrative retry classification")
 			}
 		})
