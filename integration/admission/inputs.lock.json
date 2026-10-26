@@ -1,0 +1,19 @@
+{
+  "chart": {
+    "version": "0.10.8",
+    "url": "https://github.com/sigstore/helm-charts/releases/download/policy-controller-0.10.8/policy-controller-0.10.8.tgz",
+    "sha256": "71ecc9f1168dd7ad04b2f7456c2d492b5ca3e09a31883bb71f6369213ceeb814",
+    "checksumSource": "https://sigstore.github.io/helm-charts/index.yaml"
+  },
+  "controller": {
+    "version": "v0.15.1",
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "image": "ghcr.io/sigstore/policy-controller/policy-controller@sha256:0492bb264fb1d9bdc8e3f343ef542cc85b7dd7c7fd8d9524b453c2bd31a1d128"
+  },
+  "cleanupHelperImage": "registry.k8s.io/kubectl@sha256:497d298f891edb7608dfce9dae4bb08dffc4ddcd7f5d24a0512d4bbf33e04f26",
+  "signedImage": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22",
+  "unsignedImage": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/release.yml@refs/tags/v0.1.1",
+  "notes": "Chart 0.10.8 advertises controller 0.13.1; the deployed image is explicitly overridden to pinned 0.15.1. The unsigned fixture is the existing repacked manifest from the unsupported v0.1.0 upload; its manifest existence is checked separately."
+}

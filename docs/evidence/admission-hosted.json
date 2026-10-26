@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-25",
+  "timezone": "America/Vancouver",
+  "codeRevision": "d5af44361b55d313b4cd378d45fac8cec7104fc1",
+  "workflowRunURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40252400191",
+  "workflowConclusion": "success",
+  "artifactId": 12620504867,
+  "artifactDigest": "sha256:d11a64fadcc16b8557ebaee43da7d25132ad2ab02aa0a6a17c46c16c8c9004b2",
+  "startedAtUTC": "2026-10-26T01:09:23Z",
+  "finishedAtUTC": "2026-10-26T01:10:12Z",
+  "outcome": "passed",
+  "caseCount": 16,
+  "requestCount": 17,
+  "classificationRegressionCases": 13,
+  "transitionAttempts": 1,
+  "finalDecisionCounts": {
+    "allowed": 7,
+    "signature-denied": 5,
+    "no-policy-denied": 1,
+    "identity-denied": 2,
+    "unavailable": 1
+  },
+  "requestDecisionCounts": {
+    "allowed": 7,
+    "signature-denied": 5,
+    "no-policy-denied": 1,
+    "identity-denied": 2,
+    "unavailable": 2
+  },
+  "cases": [
+    {
+      "name": "signed-pod-persisted",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "signed-chart-deployment",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "unsigned-pod",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "unsigned-sidecar",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "unsigned-init",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "unsigned-chart-deployment",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "unmatched-repository",
+      "expected": "no-policy-denied",
+      "observed": "no-policy-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "signed-ephemeral",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "unsigned-ephemeral",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "wrong-workflow",
+      "expected": "identity-denied",
+      "observed": "identity-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "wrong-issuer",
+      "expected": "identity-denied",
+      "observed": "identity-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "trust-restored",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "outside-enrolled-namespace",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "verifier-unavailable-fail-closed",
+      "expected": "unavailable",
+      "observed": "unavailable",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "outside-scope-during-outage",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "verifier-restored",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 2
+    }
+  ],
+  "transitions": [
+    {
+      "name": "verifier-restored",
+      "expected": "allowed",
+      "observed": "unavailable",
+      "exitCode": 1,
+      "attempt": 1,
+      "reason": "Webhook connection refused while the restored verifier became reachable."
+    }
+  ],
+  "controllerImage": "ghcr.io/sigstore/policy-controller/policy-controller@sha256:0492bb264fb1d9bdc8e3f343ef542cc85b7dd7c7fd8d9524b453c2bd31a1d128",
+  "signedImage": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22",
+  "unsignedImage": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c",
+  "nodes": [
+    {
+      "architecture": "amd64",
+      "kernelVersionCore": "6.17.0",
+      "kernelReleaseSHA256": "e08fe509d52ca6e8c7af3d1e79ad3c5b478d6aa28f9da931c3d80de49b9b22f7",
+      "kubeletVersion": "v1.34.0",
+      "containerRuntimeVersion": "containerd://2.1.3"
+    }
+  ],
+  "rawEvidenceSHA256": "c659b7c779c01067a2f4e76348d934ed29a6ac504f0c16805c5783608f0443a3",
+  "testedSourceSHA256": {
+    "integration/admission_test.go": "87d2ee3ab8be5677386b35de1a951c11ba3c877cb15b07e202b4d34ac0e94f6f",
+    "integration/admission_classification_test.go": "bb505fab66d3c0c45f4d145242522c2ce885f6467cbadc75eca8b87ec509db6d",
+    "integration/admission/inputs.lock.json": "10e7837c5646a95bb20a41443d6999b50849ad6bd66efe96a52d6dbece114f8b",
+    "integration/admission/controller-values.json": "830210a30c4f7bcd01ccebab4c9b273641906fbb7ab569f1e26ad8ac33cdc103",
+    "integration/admission/release-policy.json": "c77b00cc8c6cf7ed483ac49a2d6fab32414cd9f485037c5222e1a325e4bb83cb",
+    "scripts/admission.sh": "43ceefa5a0a7b0361c6d49f85179333459c02fc25fae71d26bb34da1d3eae340",
+    "scripts/install-admission.sh": "a2e2fadc0d6b2b8f65bdbe4a233f25b27d0566900664dc9d9ab6c8b8207193d1",
+    "charts/supply-demo/templates/deployment.yaml": "51f44f0d4f0c38ae345b011fa9da69944aa0be67bfc1f852fc5852633f3e81c3",
+    "charts/supply-demo/values.schema.json": "278a95ed58c97d709659d60e02791eb527e581b0d66dde1ce4095c60f2b6e7ff"
+  },
+  "scope": "Actual API-server admission decisions in explicitly enrolled namespaces. One Pod is persisted with a scheduling gate; other requests use server-side dry run. Image execution and admission attestation enforcement are not claimed."
+}
