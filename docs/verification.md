@@ -65,7 +65,7 @@ The [first quality run](https://github.com/jayekwere/hardened-container-supply-c
 
 ## Runtime network-policy verification
 
-The follow-up two-node run passed all 80 observed probes with zero expectation mismatches. Same-namespace ingress and unselected-peer controls remained reachable; cross-namespace ingress and workload HTTP/DNS egress timed out under policy. Removing the policy restored all 10 flows; reapplying it reproduced the results over three consecutive rounds. See [exact matrix and reproducible commands](network-policy.md) and [local evidence](evidence/network-policy-local.json). Hosted verification of this addition is pending in this source snapshot.
+The follow-up two-node run passed all 80 observed probes with zero expectation mismatches. Same-namespace ingress and unselected-peer controls remained reachable; cross-namespace ingress and workload HTTP/DNS egress timed out under policy. Removing the policy restored all 10 flows; reapplying it reproduced the results over three consecutive rounds. See [exact matrix and reproducible commands](network-policy.md) and [local evidence](evidence/network-policy-local.json). The [hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40248892351) independently passed the same 80-probe matrix on two Linux amd64 nodes, also with zero mismatches; [hosted evidence](evidence/network-policy-hosted.json) records its exact counts and artifact hashes. Both environments retain the original application image digests.
 
 ## Operational limitations
 

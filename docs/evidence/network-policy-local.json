@@ -126,6 +126,10 @@
     "integration/network-policy/kind.yaml": "793622fd7cd8d6e3dec9be15cc33178b0b41704d9150a01d9f6e79cb0e7b546e",
     "charts/supply-demo/templates/networkpolicy.yaml": "8a5dfddec65894e934f85cfe02ead5f6c418443ae7ad9864b8d4fd9bd8b8a76e"
   },
-  "hostedVerification": "pending",
+  "hostedVerification": {
+    "outcome": "passed",
+    "workflowRunURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40248892351",
+    "evidence": "network-policy-hosted.json"
+  },
   "scope": "IPv4 TCP 8080 and UDP DNS 53 on two nodes using kindnet and the pinned policy agent. No claim about every CNI, protocol, port, or kernel."
 }

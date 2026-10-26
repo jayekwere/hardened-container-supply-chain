@@ -25,7 +25,7 @@ make check
 make cluster
 ```
 
-`make check` runs formatting and dependency checks, vet, race-enabled Go tests, chart lint and both policy examples, two uncached image builds, Go container integration tests, a fresh vulnerability scan, and CycloneDX SBOM generation. `make cluster` creates its own cluster and private kubeconfig, installs the real chart by digest, runs Go integration tests, and deletes that cluster. It never selects an existing cluster. It now uses two nodes and a digest-pinned policy agent alongside kindnet, and verifies 10 real traffic flows with policy absent, present, removed, and reapplied. See [runtime network-policy evidence](docs/network-policy.md).
+`make check` runs formatting and dependency checks, vet, race-enabled Go tests, chart lint and both policy examples, two uncached image builds, Go container integration tests, a fresh vulnerability scan, and CycloneDX SBOM generation. `make cluster` creates its own cluster and private kubeconfig, installs the real chart by digest, runs Go integration tests, and deletes that cluster. It never selects an existing cluster. It now uses two nodes and a digest-pinned policy agent alongside kindnet, and verifies 10 real traffic flows with policy absent, present, removed, and reapplied. Local and hosted runs each passed all 80 probes with zero mismatches. See [runtime network-policy evidence](docs/network-policy.md).
 
 | Command | Result required |
 | --- | --- |

@@ -1,6 +1,6 @@
 # Runtime network-policy verification
 
-The two-node local run on 2026-10-25 (America/Vancouver) passed **80 real traffic probes with zero mismatches**. Policy application blocked the five prohibited flows; policy removal restored them; reapplication reproduced the denials. This extends the earlier release's static checks with runtime evidence.
+The two-node local and hosted runs on 2026-10-25 (America/Vancouver) each passed **80 real traffic probes with zero mismatches**: **160 total**, including 60 expected timeouts and 100 successful connections/queries. Policy application blocked the five prohibited flows; policy removal restored them; reapplication reproduced the denials. This extends the earlier release's static checks with runtime evidence.
 
 ## Reproduce
 
@@ -38,7 +38,7 @@ restored {'reachable': 10}
 reapplied {'reachable': 15, 'timeout': 15}
 ```
 
-The [committed local summary](evidence/network-policy-local.json) includes timestamps, kernel/runtime versions, source-file hashes and the SHA-256 of the full raw observations. Hosted execution of this addition is pending in this source snapshot.
+The [committed local summary](evidence/network-policy-local.json) includes timestamps, kernel/runtime versions, source-file hashes and the SHA-256 of the full raw observations. The [hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40248892351) also passed all gates. Its [committed summary](evidence/network-policy-hosted.json) records the artifact ID/digest and exact source revision. Both environments produced the same per-phase counts shown above.
 
 ## Traffic matrix
 
@@ -57,7 +57,7 @@ All HTTP probes request `/healthz` over TCP 8080 and require status 200 with the
 | Unselected same-namespace peer → DNS | Reachable | Reachable | Reachable | Reachable |
 | Unselected other-namespace peer → local peer | Reachable | Reachable | Reachable | Reachable |
 
-Baseline and restoration each require one successful round across all ten flows. Enforcement and reapplication each require **three consecutive** rounds, giving 10 + 30 + 10 + 30 = 80 observations in the recorded run. The harness allows bounded policy convergence and records every attempt; extra convergence attempts would increase the observation count and remain visible in raw evidence. No extra attempts were needed in this local run.
+Baseline and restoration each require one successful round across all ten flows. Enforcement and reapplication each require **three consecutive** rounds, giving 10 + 30 + 10 + 30 = 80 observations in the recorded run. The harness allows bounded policy convergence and records every attempt; extra convergence attempts would increase the observation count and remain visible in raw evidence. No extra attempts were needed in either recorded run.
 
 ## Why the negative results are meaningful
 
@@ -77,7 +77,7 @@ The test keeps kindnet for connectivity and adds `kube-network-policies` v1.1.2 
 
 The node-level policy agent needs privileged networking access, NRI/network-namespace mounts, and list/watch access to pods, namespaces and NetworkPolicies. It runs only in the disposable test cluster's system namespace. It is not an application chart resource, and no extra workflow token permissions are granted. Runtime instrumentation likewise requires administrator access to those disposable nodes; it does not grant those capabilities to the workload.
 
-The local run used two Linux arm64 nodes, Kubernetes v1.34.0, containerd 2.1.3 and kernel 6.12.76-linuxkit. The workload image remained `sha256:a1fe6ec5772948818f8e52ddbfcb198865bb49fd4d68b36c1607a2feaaf88330`.
+The local run used two Linux arm64 nodes, Kubernetes v1.34.0, containerd 2.1.3 and kernel 6.12.76-linuxkit. The hosted run used two Linux amd64 nodes, the same Kubernetes/runtime versions and kernel core version 6.17.0; its summary stores a hash of the complete kernel release identifier. Local workload digest: `sha256:a1fe6ec5772948818f8e52ddbfcb198865bb49fd4d68b36c1607a2feaaf88330`. Hosted workload digest: `sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22`, matching the published application image.
 
 Reference setup: [upstream kind quick start](https://kube-network-policies.sigs.k8s.io/docs/quick-start/). The project uses a committed, digest-pinned fixture rather than applying the mutable upstream branch.
 
