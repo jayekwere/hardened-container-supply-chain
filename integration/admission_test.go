@@ -309,26 +309,28 @@ func TestAdmissionSignatures(t *testing.T) {
 	run("fixture-requirements-restored", "allowed", pod("fixture-requirements-restored", "signature-demo", inputs.SignedImage), create...)
 	applyAttestations(nil)
 	run("release-requirements-restored", "allowed", pod("release-requirements-restored", "signature-demo", inputs.SignedImage), create...)
-	runningVerifiers := func() []string {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		out, err := exec.CommandContext(ctx, "docker", "exec", name+"-control-plane", "crictl", "ps", "-o", "json").Output()
-		if err != nil {
-			t.Fatalf("cannot inspect verifier runtime: %v", err)
-		}
-		var runtime struct {
-			Containers []struct {
-				ID     string
-				Labels map[string]string
+	runningVerifiers := func() map[string]string {
+		ids := map[string]string{}
+		for _, node := range admissionControlPlanes(t) {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			out, err := exec.CommandContext(ctx, "docker", "exec", node, "crictl", "ps", "-o", "json").Output()
+			if err != nil {
+				t.Fatalf("cannot inspect verifier runtime: %v", err)
 			}
-		}
-		if err := json.Unmarshal(out, &runtime); err != nil {
-			t.Fatal(err)
-		}
-		var ids []string
-		for _, container := range runtime.Containers {
-			if container.Labels["io.kubernetes.pod.namespace"] == "image-policy-system" {
-				ids = append(ids, container.ID)
+			var runtime struct {
+				Containers []struct {
+					ID     string
+					Labels map[string]string
+				}
+			}
+			if err := json.Unmarshal(out, &runtime); err != nil {
+				t.Fatal(err)
+			}
+			for _, container := range runtime.Containers {
+				if container.Labels["io.kubernetes.pod.namespace"] == "image-policy-system" {
+					ids[container.ID] = node
+				}
 			}
 		}
 		return ids
@@ -356,9 +358,9 @@ func TestAdmissionSignatures(t *testing.T) {
 		}
 		// The controller has a long drain period. Terminate only its test
 		// runtime task so no existing admission connection can survive.
-		for _, id := range runningVerifiers() {
+		for id, node := range runningVerifiers() {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			out, err := exec.CommandContext(ctx, "docker", "exec", name+"-control-plane", "ctr", "--namespace=k8s.io", "tasks", "kill", "--signal", "SIGKILL", id).CombinedOutput()
+			out, err := exec.CommandContext(ctx, "docker", "exec", node, "ctr", "--namespace=k8s.io", "tasks", "kill", "--signal", "SIGKILL", id).CombinedOutput()
 			cancel()
 			if err != nil && len(runningVerifiers()) != 0 {
 				t.Fatalf("cannot stop verifier test task: %v %s", err, out)
@@ -415,7 +417,7 @@ func classifyAdmission(exit int, out string) string {
 	if strings.Contains(text, `admission webhook "policy.sigstore.dev" denied the request`) && strings.Contains(text, "validation failed: trust-freshness:") {
 		return "freshness-denied"
 	}
-	if strings.Contains(text, "failed calling webhook") && strings.Contains(text, "policy.sigstore.dev") && (strings.Contains(text, "no endpoints available") || strings.Contains(text, "connection refused") || strings.Contains(text, "context deadline exceeded") || strings.Contains(text, "i/o timeout")) {
+	if strings.Contains(text, "failed calling webhook") && strings.Contains(text, "policy.sigstore.dev") && (strings.Contains(text, "no endpoints available") || strings.Contains(text, "connection refused") || strings.Contains(text, "context deadline exceeded") || strings.Contains(text, "i/o timeout") || strings.Contains(text, "tls handshake timeout")) {
 		return "unavailable"
 	}
 	for _, failure := range []string{"i/o timeout", "context deadline exceeded", "too many requests", "connection reset", "tls handshake", "unexpected eof"} {

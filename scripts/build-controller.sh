@@ -14,13 +14,24 @@ docker run --rm \
   -w /src -e GOTOOLCHAIN=local -e GOPROXY=https://proxy.golang.org \
   -e GOSUMDB=sum.golang.org -e GOMODCACHE=/gomod -e GOCACHE=/gocache \
   -e CGO_ENABLED=0 -e GOMAXPROCS=2 -e GOFLAGS=-p=2 -e TARGETARCH="$target" \
+  -e REPRODUCE="${CONTROLLER_REPRODUCE:-0}" \
   "$sdk" sh -eu -c '
     test "$(go env GOVERSION)" = go1.27.3
     test -z "$(gofmt -l pkg/webhook/freshness.go pkg/webhook/freshness_test.go)"
     go test -mod=readonly -count=1 -v ./pkg/webhook -run "^TestPolicyFreshness" > /out/unit-tests.txt 2>&1
     go mod verify > /out/modules.txt
+    GOOS=linux GOARCH="$TARGETARCH" go list -mod=readonly -deps -f "{{.ImportPath}}" ./cmd/webhook > /tmp/packages.txt
+    sort /tmp/packages.txt > /out/packages.txt
     GOOS=linux GOARCH="$TARGETARCH" go build -mod=readonly -trimpath -buildvcs=false -ldflags="-s -w -buildid=" -o /out/webhook ./cmd/webhook
+    if [ "$REPRODUCE" = 1 ]; then
+      GOOS=linux GOARCH="$TARGETARCH" go build -a -mod=readonly -trimpath -buildvcs=false -ldflags="-s -w -buildid=" -o /tmp/webhook-second ./cmd/webhook
+      cmp /out/webhook /tmp/webhook-second
+      printf "PASS independently recompiled verifier binary is byte-identical\n" > /out/reproducibility.txt
+    else
+      printf "SKIP independent verifier recompilation; enabled for release\n" > /out/reproducibility.txt
+    fi
     cp LICENSE /out/LICENSE
+    cp go.mod go.sum /out/
   '
 builder="hsc-controller-build-$$"
 trap 'docker buildx rm --force "$builder" >/dev/null 2>&1 || true' EXIT
@@ -41,6 +52,10 @@ assert i['Config']['User']=='1000:1000' and i['Config']['Entrypoint']==['/webhoo
 lock=json.loads(Path('integration/admission/inputs.lock.json').read_text())['controller']
 record={'sourceCommit':lock['sourceCommit'],'sourceArchiveSHA256':lock['sourceArchive']['sha256'],
         'patchSHA256':hashlib.sha256(Path('patches/policy-controller-freshness.patch').read_bytes()).hexdigest(),
+        'dependencyPatchSHA256':hashlib.sha256(Path('patches/policy-controller-dependencies.patch').read_bytes()).hexdigest(),
+        'goModSHA256':hashlib.sha256((a/'go.mod').read_bytes()).hexdigest(),
+        'goSumSHA256':hashlib.sha256((a/'go.sum').read_bytes()).hexdigest(),
+        'packageClosureSHA256':hashlib.sha256((a/'packages.txt').read_bytes()).hexdigest(),
         'binarySHA256':hashlib.sha256((a/'webhook').read_bytes()).hexdigest(),
         'buildImage':lock['buildImage'],'architecture':i['Architecture'],
         'manifestDigest':json.loads((a/'build-metadata.json').read_text())['containerimage.digest']}

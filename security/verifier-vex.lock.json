@@ -1,0 +1,8 @@
+{
+  "id": "GO-2026-5932",
+  "url": "https://vuln.go.dev/ID/GO-2026-5932.json",
+  "sha256": "f277b0400996200a7d5034c676661cd8cf18adeab1fdc5d0dc369e456ddf1fad",
+  "module": "golang.org/x/crypto",
+  "packagePrefix": "golang.org/x/crypto/openpgp",
+  "justification": "vulnerable_code_not_present"
+}

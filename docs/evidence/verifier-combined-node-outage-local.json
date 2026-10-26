@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-26",
+  "timezone": "America/Vancouver",
+  "codeRevision": "1a124ef536cdc6d1a0edabf8751982d631927ac4",
+  "outcome": "failed",
+  "scope": "Initial combined API/etcd and verifier-node pause; distinct from the isolated API outage matrix",
+  "decisionCounts": {
+    "allowed": 3,
+    "signature-denied": 3,
+    "unavailable": 1,
+    "other": 1
+  },
+  "observations": [
+    {
+      "phase": "all-apis-ready",
+      "endpoint": "hsc-admission-10203-control-plane",
+      "startedAtUTC": "2026-10-26T13:18:07.35561Z",
+      "expected": "allowed",
+      "observed": "allowed",
+      "output": "{\n    \"apiVersion\": \"v1\",\n    \"kind\": \"Pod\",\n    \"metadata\": {\n        \"creationTimestamp\": \"2026-10-26T13:18:07Z\",\n        \"generation\": 1,\n        \"name\": \"multi-control-plane-probe\",\n        \"namespace\": \"signature-demo\",\n        \"uid\": \"de414260-177e-4523-8f1e-0af240fb9327\"\n    },\n    \"spec\": {\n        \"automountServiceAccountToken\": false,\n        \"containers\": [\n            {\n                \"image\": \"ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22\",\n                \"imagePullPolicy\": \"IfNotPresent\",\n                \"name\": \"service\",\n                \"resources\": {},\n                \"securityContext\": {\n                    \"allowPrivilegeEscalation\": false,\n                    \"capabilities\": {\n                        \"drop\": [\n                            \"ALL\"\n                        ]\n                    },\n                    \"readOnlyRootFilesystem\": true\n                },\n                \"terminationMessagePath\": \"/dev/termination-log\",\n                \"terminationMessagePolicy\": \"File\"\n            }\n        ],\n        \"dnsPolicy\": \"ClusterFirst\",\n        \"enableServiceLinks\": true,\n        \"preemptionPolicy\": \"PreemptLowerPriority\",\n        \"priority\": 0,\n        \"restartPolicy\": \"Always\",\n        \"schedulerName\": \"default-scheduler\",\n        \"schedulingGates\": [\n            {\n                \"name\": \"hsc.test/admission-only\"\n            }\n        ],\n        \"securityContext\": {\n            \"runAsNonRoot\": true,\n            \"runAsUser\": 65532,\n            \"seccompProfile\": {\n                \"type\": \"RuntimeDefault\"\n            }\n        },\n        \"serviceAccount\": \"default\",\n        \"serviceAccountName\": \"default\",\n        \"terminationGracePeriodSeconds\": 30,\n        \"tolerations\": [\n            {\n                \"effect\": \"NoExecute\",\n                \"key\": \"node.kubernetes.io/not-ready\",\n                \"operator\": \"Exists\",\n                \"tolerationSeconds\": 300\n            },\n            {\n                \"effect\": \"NoExecute\",\n                \"key\": \"node.kubernetes.io/unreachable\",\n                \"operator\": \"Exists\",\n                \"tolerationSeconds\": 300\n            }\n        ]\n    },\n    \"status\": {\n        \"conditions\": [\n            {\n                \"lastProbeTime\": null,\n                \"lastTransitionTime\": \"2026-10-26T13:18:07Z\",\n                \"message\": \"Scheduling is blocked due to non-empty scheduling gates\",\n                \"reason\": \"SchedulingGated\",\n                \"status\": \"False\",\n                \"type\": \"PodScheduled\"\n            }\n        ],\n        \"phase\": \"Pending\",\n        \"qosClass\": \"BestEffort\"\n    }\n}\n"
+    },
+    {
+      "phase": "all-apis-ready",
+      "endpoint": "hsc-admission-10203-control-plane",
+      "startedAtUTC": "2026-10-26T13:18:07.990217Z",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "output": "Error from server (BadRequest): error when creating \"STDIN\": admission webhook \"policy.sigstore.dev\" denied the request: validation failed: failed policy: release-attestations: spec.containers[0].image\nghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c attestation keyless validation failed for authority release-workflow for ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c: no matching attestations: \nfailed policy: release-signer: spec.containers[0].image\nghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c signature keyless validation failed for authority release-workflow for ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c: no signatures found\n"
+    },
+    {
+      "phase": "all-apis-ready",
+      "endpoint": "hsc-admission-10203-control-plane2",
+      "startedAtUTC": "2026-10-26T13:18:08.679928Z",
+      "expected": "allowed",
+      "observed": "allowed",
+      "output": "{\n    \"apiVersion\": \"v1\",\n    \"kind\": \"Pod\",\n    \"metadata\": {\n        \"creationTimestamp\": \"2026-10-26T13:18:08Z\",\n        \"generation\": 1,\n        \"name\": \"multi-control-plane-probe\",\n        \"namespace\": \"signature-demo\",\n        \"uid\": \"72c06a77-ba8d-4acd-85c1-29adc0f8248b\"\n    },\n    \"spec\": {\n        \"automountServiceAccountToken\": false,\n        \"containers\": [\n            {\n                \"image\": \"ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22\",\n                \"imagePullPolicy\": \"IfNotPresent\",\n                \"name\": \"service\",\n                \"resources\": {},\n                \"securityContext\": {\n                    \"allowPrivilegeEscalation\": false,\n                    \"capabilities\": {\n                        \"drop\": [\n                            \"ALL\"\n                        ]\n                    },\n                    \"readOnlyRootFilesystem\": true\n                },\n                \"terminationMessagePath\": \"/dev/termination-log\",\n                \"terminationMessagePolicy\": \"File\"\n            }\n        ],\n        \"dnsPolicy\": \"ClusterFirst\",\n        \"enableServiceLinks\": true,\n        \"preemptionPolicy\": \"PreemptLowerPriority\",\n        \"priority\": 0,\n        \"restartPolicy\": \"Always\",\n        \"schedulerName\": \"default-scheduler\",\n        \"schedulingGates\": [\n            {\n                \"name\": \"hsc.test/admission-only\"\n            }\n        ],\n        \"securityContext\": {\n            \"runAsNonRoot\": true,\n            \"runAsUser\": 65532,\n            \"seccompProfile\": {\n                \"type\": \"RuntimeDefault\"\n            }\n        },\n        \"serviceAccount\": \"default\",\n        \"serviceAccountName\": \"default\",\n        \"terminationGracePeriodSeconds\": 30,\n        \"tolerations\": [\n            {\n                \"effect\": \"NoExecute\",\n                \"key\": \"node.kubernetes.io/not-ready\",\n                \"operator\": \"Exists\",\n                \"tolerationSeconds\": 300\n            },\n            {\n                \"effect\": \"NoExecute\",\n                \"key\": \"node.kubernetes.io/unreachable\",\n                \"operator\": \"Exists\",\n                \"tolerationSeconds\": 300\n            }\n        ]\n    },\n    \"status\": {\n        \"conditions\": [\n            {\n                \"lastProbeTime\": null,\n                \"lastTransitionTime\": \"2026-10-26T13:18:08Z\",\n                \"message\": \"Scheduling is blocked due to non-empty scheduling gates\",\n                \"reason\": \"SchedulingGated\",\n                \"status\": \"False\",\n                \"type\": \"PodScheduled\"\n            }\n        ],\n        \"phase\": \"Pending\",\n        \"qosClass\": \"BestEffort\"\n    }\n}\n"
+    },
+    {
+      "phase": "all-apis-ready",
+      "endpoint": "hsc-admission-10203-control-plane2",
+      "startedAtUTC": "2026-10-26T13:18:09.361581Z",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "output": "Error from server (BadRequest): error when creating \"STDIN\": admission webhook \"policy.sigstore.dev\" denied the request: validation failed: failed policy: release-attestations: spec.containers[0].image\nghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c attestation keyless validation failed for authority release-workflow for ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c: no matching attestations: \nfailed policy: release-signer: spec.containers[0].image\nghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c signature keyless validation failed for authority release-workflow for ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c: no signatures found\n"
+    },
+    {
+      "phase": "all-apis-ready",
+      "endpoint": "hsc-admission-10203-control-plane3",
+      "startedAtUTC": "2026-10-26T13:18:09.93845Z",
+      "expected": "allowed",
+      "observed": "allowed",
+      "output": "{\n    \"apiVersion\": \"v1\",\n    \"kind\": \"Pod\",\n    \"metadata\": {\n        \"creationTimestamp\": \"2026-10-26T13:18:10Z\",\n        \"generation\": 1,\n        \"name\": \"multi-control-plane-probe\",\n        \"namespace\": \"signature-demo\",\n        \"uid\": \"f321e8f0-f91e-4391-9b5b-8c304f8d7fbf\"\n    },\n    \"spec\": {\n        \"automountServiceAccountToken\": false,\n        \"containers\": [\n            {\n                \"image\": \"ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22\",\n                \"imagePullPolicy\": \"IfNotPresent\",\n                \"name\": \"service\",\n                \"resources\": {},\n                \"securityContext\": {\n                    \"allowPrivilegeEscalation\": false,\n                    \"capabilities\": {\n                        \"drop\": [\n                            \"ALL\"\n                        ]\n                    },\n                    \"readOnlyRootFilesystem\": true\n                },\n                \"terminationMessagePath\": \"/dev/termination-log\",\n                \"terminationMessagePolicy\": \"File\"\n            }\n        ],\n        \"dnsPolicy\": \"ClusterFirst\",\n        \"enableServiceLinks\": true,\n        \"preemptionPolicy\": \"PreemptLowerPriority\",\n        \"priority\": 0,\n        \"restartPolicy\": \"Always\",\n        \"schedulerName\": \"default-scheduler\",\n        \"schedulingGates\": [\n            {\n                \"name\": \"hsc.test/admission-only\"\n            }\n        ],\n        \"securityContext\": {\n            \"runAsNonRoot\": true,\n            \"runAsUser\": 65532,\n            \"seccompProfile\": {\n                \"type\": \"RuntimeDefault\"\n            }\n        },\n        \"serviceAccount\": \"default\",\n        \"serviceAccountName\": \"default\",\n        \"terminationGracePeriodSeconds\": 30,\n        \"tolerations\": [\n            {\n                \"effect\": \"NoExecute\",\n                \"key\": \"node.kubernetes.io/not-ready\",\n                \"operator\": \"Exists\",\n                \"tolerationSeconds\": 300\n            },\n            {\n                \"effect\": \"NoExecute\",\n                \"key\": \"node.kubernetes.io/unreachable\",\n                \"operator\": \"Exists\",\n                \"tolerationSeconds\": 300\n            }\n        ]\n    },\n    \"status\": {\n        \"conditions\": [\n            {\n                \"lastProbeTime\": null,\n                \"lastTransitionTime\": \"2026-10-26T13:18:10Z\",\n                \"message\": \"Scheduling is blocked due to non-empty scheduling gates\",\n                \"reason\": \"SchedulingGated\",\n                \"status\": \"False\",\n                \"type\": \"PodScheduled\"\n            }\n        ],\n        \"phase\": \"Pending\",\n        \"qosClass\": \"BestEffort\"\n    }\n}\n"
+    },
+    {
+      "phase": "all-apis-ready",
+      "endpoint": "hsc-admission-10203-control-plane3",
+      "startedAtUTC": "2026-10-26T13:18:10.540822Z",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "output": "Error from server (BadRequest): error when creating \"STDIN\": admission webhook \"policy.sigstore.dev\" denied the request: validation failed: failed policy: release-attestations: spec.containers[0].image\nghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c attestation keyless validation failed for authority release-workflow for ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c: no matching attestations: \nfailed policy: release-signer: spec.containers[0].image\nghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c signature keyless validation failed for authority release-workflow for ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c: no signatures found\n"
+    },
+    {
+      "phase": "one-control-plane-paused",
+      "endpoint": "hsc-admission-10203-control-plane",
+      "startedAtUTC": "2026-10-26T13:18:10.977164Z",
+      "expected": "allowed",
+      "observed": "unavailable",
+      "output": "Error from server (InternalError): error when creating \"STDIN\": Internal error occurred: failed calling webhook \"policy.sigstore.dev\": failed to call webhook: Post \"https://webhook.image-policy-system.svc:443/mutations?timeout=20s\": context deadline exceeded\n"
+    },
+    {
+      "phase": "one-control-plane-paused",
+      "endpoint": "hsc-admission-10203-control-plane",
+      "startedAtUTC": "2026-10-26T13:18:32.110036Z",
+      "expected": "allowed",
+      "observed": "other",
+      "output": "Error from server (InternalError): error when creating \"STDIN\": Internal error occurred: failed calling webhook \"policy.sigstore.dev\": failed to call webhook: Post \"https://webhook.image-policy-system.svc:443/mutations?timeout=20s\": net/http: TLS handshake timeout\n"
+    }
+  ],
+  "limitation": "The co-located verifier became unavailable. Requests failed closed; this does not establish admission availability when the verifier node is suspended. The following trust-restoration cleanup also exceeded its original wait bound; the run is not counted as passing."
+}
