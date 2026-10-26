@@ -1,5 +1,7 @@
 # Admission requirements for signed SBOM and evidence
 
+The current installer requires a built patched verifier image in `CONTROLLER_IMAGE`; see [build, installation and upgrade instructions](trust-updates.md). The earlier execution records below describe the previous verifier and remain historical evidence.
+
 Enrolled namespaces require **all three** controls: the image signature, a signed CycloneDX SBOM, and signed release evidence. The [signature policy](../integration/admission/release-policy.json) remains independent of the [attestation policy](../integration/admission/attestations-policy.json). Matching ClusterImagePolicies are combined with AND; the attestation authority requires both named predicate types. Adding attestations to the signature authority alone would replace its signature-verification path, so that approach is not used.
 
 Both production policies use the exact v0.1.1 release workflow subject, expected OIDC issuer and normal certificate/transparency verification. There is no wildcard identity, test key, alternate source registry or static-pass authority in the installed production policies. The controller/chart pins, namespace enrollment and fail-closed webhooks are unchanged. The existing signed release is the public positive control; it is not rebuilt or republished by these tests.
@@ -59,10 +61,10 @@ An authenticated envelope of the wrong type cannot satisfy another requirement. 
 For a fresh controller installation:
 
 ```sh
-./scripts/install-admission.sh /absolute/path/to/kubeconfig
+./scripts/install-admission.sh /absolute/path/to/kubeconfig "$CONTROLLER_IMAGE"
 ```
 
-For the previously installed pinned controller, apply both policies explicitly:
+First replace every old verifier process using the [patched image upgrade procedure](trust-updates.md#install-the-patched-verifier-explicitly). Applying policy JSON without replacing the verifier does not deploy the fix. Then apply both policies explicitly:
 
 ```sh
 kubectl --kubeconfig /absolute/path/to/kubeconfig apply \
@@ -83,7 +85,7 @@ Request counts cover the recorded workload-admission attempts; setup, policy-man
 
 [Local structured evidence](evidence/admission-attestations-local.json) records every final case decision, timestamps, versions and tested-source/raw-evidence/fixture-inventory hashes. The [hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40255328012) independently passed the same **30 final case decisions and 18 classification regressions** on Linux amd64, in **35 recorded admission requests**. Its Go integration package completed in 58.346 seconds. It also passed all existing quality gates and all 80 runtime network-policy probes. The [hosted evidence](evidence/admission-attestations-hosted.json) includes exact decisions, every transition, versions, timestamps, source/raw/fixture hashes and the retained artifact identity/digest. The earlier 16-case signature-only results remain historical evidence in the [signature guide](admission-signatures.md).
 
-**Observed policy-update limit:** the hosted `wrong-workflow` case recorded **five admissions using the previous allowed decision** after the intentional signer-policy change; attempt 6 returned the expected identity denial. These are five transition attempts, not five immediate rejections. All new attestation-specific cases reached their expected decision on attempt 1. An acknowledged policy update does not atomically change all verifier state and cannot promise immediate revocation. Establish and verify the intended rules before enrolling/deploying workloads; protect updates and plan for their propagation. The suite records bounded convergence rather than concealing these requests.
+**Historical policy-update limit, before the request-time fix:** the hosted `wrong-workflow` case recorded **five admissions using the previous allowed decision** after the intentional signer-policy change; attempt 6 returned the expected identity denial. These are five transition attempts, not five immediate rejections. All new attestation-specific cases reached their expected decision on attempt 1. An acknowledged policy update does not atomically change all verifier state and cannot promise immediate revocation. Establish and verify the intended rules before enrolling/deploying workloads; protect updates and plan for their propagation. The suite records bounded convergence rather than concealing these requests.
 
 Selected actual local output:
 

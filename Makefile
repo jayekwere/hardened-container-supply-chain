@@ -6,7 +6,7 @@ export GOSUMDB := off
 export GOCACHE := $(CURDIR)/.cache/go-build
 export PATH := $(CURDIR)/.tools/bin:$(PATH)
 
-.PHONY: tools test chart image reproduce integration scan check cluster admission
+.PHONY: tools test chart image reproduce integration scan check cluster admission controller-image
 tools:
 	python3 scripts/bootstrap.py
 test:
@@ -37,3 +37,6 @@ cluster:
 
 admission:
 	./scripts/admission.sh
+
+controller-image:
+	./scripts/build-controller.sh

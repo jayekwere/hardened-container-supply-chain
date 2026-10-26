@@ -1,8 +1,8 @@
 {
   "webhook": {
     "image": {
-      "repository": "ghcr.io/sigstore/policy-controller/policy-controller",
-      "version": "sha256:0492bb264fb1d9bdc8e3f343ef542cc85b7dd7c7fd8d9524b453c2bd31a1d128"
+      "repository": "invalid.invalid/controller-build-required",
+      "version": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
     },
     "failurePolicy": "Fail",
     "configData": {

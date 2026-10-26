@@ -44,6 +44,10 @@ func TestAdmissionSignatures(t *testing.T) {
 		t.Fatal("explicit disposable admission cluster required")
 	}
 	var inputs admissionInputs
+	controllerImage := os.Getenv("TEST_ADMISSION_CONTROLLER_IMAGE")
+	if !strings.Contains(controllerImage, "@sha256:") {
+		t.Fatal("explicit built controller digest required")
+	}
 	raw, err := os.ReadFile("../integration/admission/inputs.lock.json")
 	if err != nil {
 		t.Fatal(err)
@@ -51,7 +55,7 @@ func TestAdmissionSignatures(t *testing.T) {
 	if err := json.Unmarshal(raw, &inputs); err != nil {
 		t.Fatal(err)
 	}
-	evidence := admissionEvidence{SchemaVersion: 1, StartedAt: time.Now().UTC().Format(time.RFC3339), Outcome: "failed", SignedImage: inputs.SignedImage, UnsignedImage: inputs.UnsignedImage, ControllerImage: inputs.Controller.Image}
+	evidence := admissionEvidence{SchemaVersion: 1, StartedAt: time.Now().UTC().Format(time.RFC3339), Outcome: "failed", SignedImage: inputs.SignedImage, UnsignedImage: inputs.UnsignedImage, ControllerImage: controllerImage}
 	t.Cleanup(func() {
 		evidence.FinishedAt = time.Now().UTC().Format(time.RFC3339)
 		raw, _ := json.MarshalIndent(evidence, "", "  ")
@@ -118,7 +122,7 @@ func TestAdmissionSignatures(t *testing.T) {
 	if err := json.Unmarshal(must(nil, "-n", "image-policy-system", "get", "deployment", "policy-controller-webhook", "-o", "json"), &deployment); err != nil {
 		t.Fatal(err)
 	}
-	if len(deployment.Spec.Template.Spec.Containers) != 1 || deployment.Spec.Template.Spec.Containers[0].Image != inputs.Controller.Image {
+	if len(deployment.Spec.Template.Spec.Containers) != 1 || deployment.Spec.Template.Spec.Containers[0].Image != controllerImage {
 		t.Fatal("controller image does not match lock")
 	}
 	security := map[string]any{"allowPrivilegeEscalation": false, "readOnlyRootFilesystem": true, "capabilities": map[string]any{"drop": []string{"ALL"}}}
@@ -148,6 +152,9 @@ func TestAdmissionSignatures(t *testing.T) {
 			if observed == expected {
 				t.Logf("%s: %s (exit %d, attempt %d)", caseName, observed, code, attempt)
 				return
+			}
+			if observed == "allowed" && expected != "allowed" {
+				t.Fatalf("stale admission during %s: %s", caseName, out)
 			}
 			if observed == "other" || (observed == "unavailable" && caseName != "verifier-restored") || time.Now().After(deadline) {
 				t.Fatalf("%s expected %s, got %s (exit %d): %s", caseName, expected, observed, code, out)
@@ -405,6 +412,9 @@ func classifyAdmission(exit int, out string) string {
 		return "other"
 	}
 	text := strings.ToLower(out)
+	if strings.Contains(text, `admission webhook "policy.sigstore.dev" denied the request`) && strings.Contains(text, "validation failed: trust-freshness:") {
+		return "freshness-denied"
+	}
 	if strings.Contains(text, "failed calling webhook") && strings.Contains(text, "policy.sigstore.dev") && (strings.Contains(text, "no endpoints available") || strings.Contains(text, "connection refused") || strings.Contains(text, "context deadline exceeded") || strings.Contains(text, "i/o timeout")) {
 		return "unavailable"
 	}

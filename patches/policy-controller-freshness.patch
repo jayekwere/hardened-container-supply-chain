@@ -1,0 +1,488 @@
+--- a/pkg/webhook/validator.go
++++ b/pkg/webhook/validator.go
+@@ -153,7 +153,7 @@
+ 	}
+ 
+ 	// If we are being scaled down don't block it.
+-	if ps.IsScalingDown(ctx) {
++	if ps.IsScalingDown(ctx) && scaleDownOnly(ctx) {
+ 		logging.FromContext(ctx).Debugf("Skipping validations due to scale down request %s/%s", &ps.Name, &ps.Namespace)
+ 		return nil
+ 	}
+@@ -257,6 +257,15 @@
+ }
+ 
+ func (v *Validator) validatePodSpec(ctx context.Context, namespace, kind, apiVersion string, labels map[string]string, ps *corev1.PodSpec, opt k8schain.Options) (errs *apis.FieldError) {
++	ctx, finish, err := freshPolicyContext(ctx)
++	if err != nil {
++		return freshnessError(err)
++	}
++	defer func() {
++		if errs == nil {
++			errs = finish()
++		}
++	}()
+ 	kc, err := registryauth.NewK8sKeychain(ctx, kubeclient.Get(ctx), opt)
+ 	if err != nil {
+ 		logging.FromContext(ctx).Warnf("Unable to build k8schain: %v", err)
+@@ -977,7 +986,7 @@
+ 		return
+ 	}
+ 
+-	if ps.IsScalingDown(ctx) {
++	if ps.IsScalingDown(ctx) && scaleDownOnly(ctx) {
+ 		logging.FromContext(ctx).Debugf("Skipping validations due to scale down request %s/%s", &ps.Name, &ps.Namespace)
+ 		return
+ 	}
+@@ -1183,7 +1192,9 @@
+ 		}
+ 		// Container matched no policies, so return based on the configured
+ 		// NoMatchPolicy.
+-		return setNoMatchingPoliciesError(ctx, containerImage, field, index)
++		errorField := apis.ErrGeneric("no matching policies", "image").ViaFieldIndex(field, index)
++		errorField.Details = containerImage
++		return errorField
+ 	}
+ 	return nil
+ }
+--- a/cmd/webhook/main.go
++++ b/cmd/webhook/main.go
+@@ -235,6 +235,7 @@
+ 	}
+ 	ctx = webhook.WithOptions(ctx, *woptions)
+ 
++	authoritativeClientContext := ctx
+ 	kc := kubeclient.Get(ctx)
+ 	validator := cwebhook.NewValidator(ctx)
+ 
+@@ -251,6 +252,7 @@
+ 		// A function that infuses the context passed to Validate/SetDefaults with custom metadata.
+ 		func(ctx context.Context) context.Context {
+ 			ctx = context.WithValue(ctx, kubeclient.Key{}, kc)
++			ctx = cwebhook.WithAuthoritativePolicyClient(ctx, authoritativeClientContext)
+ 			ctx = store.ToContext(ctx)
+ 			ctx = policyControllerConfigStore.ToContext(ctx)
+ 			ctx = policyduckv1beta1.WithPodScalableValidator(ctx, validator.ValidatePodScalable)
+--- /dev/null
++++ b/pkg/webhook/freshness.go
+@@ -0,0 +1,179 @@
++package webhook
++
++import (
++	"bytes"
++	"context"
++	"crypto/sha256"
++	"encoding/hex"
++	"encoding/json"
++	"fmt"
++	"io"
++	"reflect"
++	"sort"
++	"time"
++
++	"github.com/sigstore/policy-controller/pkg/apis/config"
++	policyapi "github.com/sigstore/policy-controller/pkg/apis/policy/v1alpha1"
++	policyclient "github.com/sigstore/policy-controller/pkg/client/injection/client"
++	webhookcip "github.com/sigstore/policy-controller/pkg/webhook/clusterimagepolicy"
++	admissionv1 "k8s.io/api/admission/v1"
++	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
++	"knative.dev/pkg/apis"
++)
++
++// freshPolicyContext bypasses the reconciled ConfigMap and process watcher.
++// MostRecent reads deliberately leave ResourceVersion, selectors and limits unset.
++// This dedicated build supports inline trust material and always denies no-match.
++func freshPolicyContext(ctx context.Context) (context.Context, func() *apis.FieldError, error) {
++	policies, token, err := readLivePolicies(ctx)
++	if err != nil {
++		return ctx, nil, err
++	}
++	previous := config.FromContextOrDefaults(ctx)
++	ctx = config.ToContext(ctx, &config.Config{ImagePolicyConfig: policies, SigstoreKeysConfig: previous.SigstoreKeysConfig})
++	finish := func() *apis.FieldError {
++		_, after, err := readLivePolicies(ctx)
++		if err != nil {
++			return freshnessError(err)
++		}
++		if after != token {
++			return freshnessError(fmt.Errorf("policy state changed during verification"))
++		}
++		return nil
++	}
++	return ctx, finish, nil
++}
++
++func freshnessError(err error) *apis.FieldError {
++	return apis.ErrGeneric("TRUST-FRESHNESS: "+err.Error(), apis.CurrentField)
++}
++
++func readLivePolicies(ctx context.Context) (*config.ImagePolicyConfig, string, error) {
++	readCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
++	defer cancel()
++	list, err := policyclient.Get(ctx).PolicyV1alpha1().ClusterImagePolicies().List(readCtx, metav1.ListOptions{})
++	if err != nil {
++		return nil, "", fmt.Errorf("authoritative policy read failed: %w", err)
++	}
++	sort.Slice(list.Items, func(i, j int) bool { return list.Items[i].Name < list.Items[j].Name })
++	data := make(map[string]string, len(list.Items))
++	type state struct {
++		Name, UID  string
++		Generation int64
++		Spec       policyapi.ClusterImagePolicySpec
++	}
++	states := make([]state, 0, len(list.Items))
++	for _, p := range list.Items {
++		if p.UID == "" || p.DeletionTimestamp != nil {
++			return nil, "", fmt.Errorf("policy %s missing identity or being deleted", p.Name)
++		}
++		if p.Spec.Mode != "" && p.Spec.Mode != "enforce" {
++			return nil, "", fmt.Errorf("policy %s must enforce", p.Name)
++		}
++		raw, err := json.Marshal(p.Spec)
++		if err != nil {
++			return nil, "", err
++		}
++		var spec any
++		if err := json.Unmarshal(raw, &spec); err != nil {
++			return nil, "", err
++		}
++		if field := externalPolicyReference(spec); field != "" {
++			return nil, "", fmt.Errorf("policy %s has unsupported external reference %s", p.Name, field)
++		}
++		converted := webhookcip.ConvertClusterImagePolicyV1alpha1ToWebhook(&p)
++		raw, err = json.Marshal(converted)
++		if err != nil {
++			return nil, "", err
++		}
++		data[p.Name] = string(raw)
++		states = append(states, state{Name: p.Name, UID: string(p.UID), Generation: p.Generation, Spec: p.Spec})
++	}
++	for _, required := range []string{"release-signer", "release-attestations"} {
++		if _, ok := data[required]; !ok {
++			return nil, "", fmt.Errorf("mandatory policy %s is absent", required)
++		}
++	}
++	policies, err := config.NewImagePoliciesConfigFromMap(data)
++	if err != nil {
++		return nil, "", fmt.Errorf("live policy conversion failed: %w", err)
++	}
++	raw, err := json.Marshal(states)
++	if err != nil {
++		return nil, "", err
++	}
++	sum := sha256.Sum256(raw)
++	return policies, hex.EncodeToString(sum[:]), nil
++}
++
++// References would reintroduce mutable copies outside the authoritative CIP read.
++// Reject them explicitly instead of silently dropping or using cached material.
++func externalPolicyReference(value any) string {
++	switch value := value.(type) {
++	case map[string]any:
++		for key, child := range value {
++			switch key {
++			case "secretRef", "kms", "configMapRef", "remote", "trustRootRef", "rfc3161timestamp":
++				if child != nil && child != "" {
++					return key
++				}
++			}
++			if found := externalPolicyReference(child); found != "" {
++				return found
++			}
++		}
++	case []any:
++		for _, child := range value {
++			if found := externalPolicyReference(child); found != "" {
++				return found
++			}
++		}
++	}
++	return ""
++}
++
++// WithAuthoritativePolicyClient carries the server's client into an independent
++// HTTP admission context without trusting a client already attached by a caller.
++func WithAuthoritativePolicyClient(request, server context.Context) context.Context {
++	return context.WithValue(request, policyclient.Key{}, policyclient.Get(server))
++}
++
++func scaleDownOnly(ctx context.Context) bool {
++	r := apis.GetHTTPRequest(ctx)
++	if r == nil || r.Body == nil {
++		return false
++	}
++	raw, err := io.ReadAll(r.Body)
++	r.Body = io.NopCloser(bytes.NewReader(raw))
++	if err != nil {
++		return false
++	}
++	var review admissionv1.AdmissionReview
++	if json.Unmarshal(raw, &review) != nil || review.Request == nil {
++		return false
++	}
++	return onlyReplicasChanged(review.Request.OldObject.Raw, review.Request.Object.Raw)
++}
++
++func onlyReplicasChanged(before, after []byte) bool {
++	var old, next map[string]any
++	if json.Unmarshal(before, &old) != nil || json.Unmarshal(after, &next) != nil {
++		return false
++	}
++	for _, object := range []map[string]any{old, next} {
++		spec, ok := object["spec"].(map[string]any)
++		if !ok {
++			return false
++		}
++		delete(spec, "replicas")
++		metadata, ok := object["metadata"].(map[string]any)
++		if !ok {
++			return false
++		}
++		for _, key := range []string{"generation", "resourceVersion", "managedFields"} {
++			delete(metadata, key)
++		}
++		delete(object, "status")
++	}
++	return reflect.DeepEqual(old, next)
++}
+--- /dev/null
++++ b/pkg/webhook/freshness_test.go
+@@ -0,0 +1,238 @@
++package webhook
++
++import (
++	"context"
++	"encoding/json"
++	"errors"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"testing"
++
++	"github.com/sigstore/policy-controller/pkg/apis/config"
++	policyapi "github.com/sigstore/policy-controller/pkg/apis/policy/v1alpha1"
++	clientset "github.com/sigstore/policy-controller/pkg/client/clientset/versioned"
++	policyclient "github.com/sigstore/policy-controller/pkg/client/injection/client"
++	fakeclient "github.com/sigstore/policy-controller/pkg/client/injection/client/fake"
++	webhookcip "github.com/sigstore/policy-controller/pkg/webhook/clusterimagepolicy"
++	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
++	"k8s.io/apimachinery/pkg/runtime"
++	"k8s.io/apimachinery/pkg/types"
++	"k8s.io/client-go/rest"
++	ktesting "k8s.io/client-go/testing"
++)
++
++func testLivePolicy(name string) *policyapi.ClusterImagePolicy {
++	p := &policyapi.ClusterImagePolicy{}
++	raw := `{"spec":{"images":[{"glob":"example.invalid/project@sha256:*"}],"authorities":[{"name":"deny","static":{"action":"fail"}}]}}`
++	if err := json.Unmarshal([]byte(raw), p); err != nil {
++		panic(err)
++	}
++	p.Name, p.UID, p.ResourceVersion = name, types.UID(name+"-uid"), "1"
++	return p
++}
++
++func TestPolicyFreshnessSnapshot(t *testing.T) {
++	a, b := testLivePolicy("release-signer"), testLivePolicy("release-attestations")
++	t.Run("replaces-poisoned-watcher", func(t *testing.T) {
++		ctx, _ := fakeclient.With(context.Background(), a, b)
++		poison := config.FromContextOrDefaults(ctx)
++		poison.ImagePolicyConfig.Policies["release-signer"] = webhookcip.ClusterImagePolicy{ResourceVersion: "old"}
++		ctx = config.ToContext(ctx, poison)
++		fresh, finish, err := freshPolicyContext(ctx)
++		if err != nil {
++			t.Fatal(err)
++		}
++		if config.FromContext(fresh).ImagePolicyConfig.Policies["release-signer"].ResourceVersion != "1" {
++			t.Fatal("used stale watcher")
++		}
++		if poison.ImagePolicyConfig.Policies["release-signer"].ResourceVersion != "old" {
++			t.Fatal("mutated shared snapshot")
++		}
++		if err := finish(); err != nil {
++			t.Fatal(err)
++		}
++	})
++	for _, name := range []string{"release-signer", "release-attestations"} {
++		t.Run("missing-"+name, func(t *testing.T) {
++			other := a
++			if name == a.Name {
++				other = b
++			}
++			ctx, _ := fakeclient.With(context.Background(), other)
++			if _, _, err := freshPolicyContext(ctx); err == nil {
++				t.Fatal("missing mandatory policy accepted")
++			}
++		})
++	}
++	t.Run("api-error-before", func(t *testing.T) {
++		ctx, cs := fakeclient.With(context.Background(), a, b)
++		cs.PrependReactor("list", "clusterimagepolicies", func(ktesting.Action) (bool, runtime.Object, error) { return true, nil, errors.New("unavailable") })
++		if _, _, err := freshPolicyContext(ctx); err == nil {
++			t.Fatal("read error accepted")
++		}
++	})
++	t.Run("most-recent-unfiltered-list", func(t *testing.T) {
++		count := 0
++		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
++			count++
++			if r.URL.RawQuery != "" {
++				t.Errorf("unsafe consistency/filter parameters: %s", r.URL.RawQuery)
++			}
++			if r.URL.Path != "/apis/policy.sigstore.dev/v1alpha1/clusterimagepolicies" {
++				t.Errorf("path %s", r.URL.Path)
++			}
++			w.Header().Set("Content-Type", "application/json")
++			_ = json.NewEncoder(w).Encode(&policyapi.ClusterImagePolicyList{TypeMeta: metav1.TypeMeta{APIVersion: "policy.sigstore.dev/v1alpha1", Kind: "ClusterImagePolicyList"}, Items: []policyapi.ClusterImagePolicy{*a, *b}})
++		}))
++		defer server.Close()
++		cs, err := clientset.NewForConfig(&rest.Config{Host: server.URL})
++		if err != nil {
++			t.Fatal(err)
++		}
++		ctx := context.WithValue(context.Background(), policyclient.Key{}, cs)
++		_, finish, err := freshPolicyContext(ctx)
++		if err != nil {
++			t.Fatal(err)
++		}
++		if err := finish(); err != nil {
++			t.Fatal(err)
++		}
++		if count != 2 {
++			t.Fatalf("want before+after reads, got %d", count)
++		}
++	})
++	for _, change := range []string{"spec", "create", "delete-recreate", "delete", "api-error", "spec-aba", "status-only"} {
++		t.Run("during-verification-"+change, func(t *testing.T) {
++			ctx, cs := fakeclient.With(context.Background(), a, b)
++			_, finish, err := freshPolicyContext(ctx)
++			if err != nil {
++				t.Fatal(err)
++			}
++			next := a.DeepCopy()
++			switch change {
++			case "spec":
++				next.Spec.Authorities[0].Static.Action = "pass"
++				_, err = cs.PolicyV1alpha1().ClusterImagePolicies().Update(ctx, next, metav1.UpdateOptions{})
++			case "create":
++				_, err = cs.PolicyV1alpha1().ClusterImagePolicies().Create(ctx, testLivePolicy("extra"), metav1.CreateOptions{})
++			case "delete-recreate":
++				err = cs.PolicyV1alpha1().ClusterImagePolicies().Delete(ctx, a.Name, metav1.DeleteOptions{})
++				next.UID = "new-uid"
++				_, err = cs.PolicyV1alpha1().ClusterImagePolicies().Create(ctx, next, metav1.CreateOptions{})
++			case "delete":
++				err = cs.PolicyV1alpha1().ClusterImagePolicies().Delete(ctx, a.Name, metav1.DeleteOptions{})
++			case "api-error":
++				cs.PrependReactor("list", "clusterimagepolicies", func(ktesting.Action) (bool, runtime.Object, error) { return true, nil, errors.New("unavailable") })
++			case "spec-aba":
++				next.Generation += 2
++				_, err = cs.PolicyV1alpha1().ClusterImagePolicies().Update(ctx, next, metav1.UpdateOptions{})
++			case "status-only":
++				next.ResourceVersion = "2"
++				_, err = cs.PolicyV1alpha1().ClusterImagePolicies().Update(ctx, next, metav1.UpdateOptions{})
++			}
++			if err != nil {
++				t.Fatal(err)
++			}
++			result := finish()
++			if change == "status-only" {
++				if result != nil {
++					t.Fatal(result)
++				}
++				return
++			}
++			if result == nil || !strings.Contains(result.Error(), "TRUST-FRESHNESS") {
++				t.Fatalf("unsafe finish: %v", result)
++			}
++		})
++	}
++	for _, change := range []string{"deleting", "missing-uid", "warn", "secretRef", "kms", "configMapRef", "remote", "trustRootRef", "rfc3161timestamp"} {
++		t.Run("reject-"+change, func(t *testing.T) {
++			next := a.DeepCopy()
++			switch change {
++			case "deleting":
++				now := metav1.Now()
++				next.DeletionTimestamp = &now
++			case "missing-uid":
++				next.UID = ""
++			case "warn":
++				next.Spec.Mode = "warn"
++			default:
++				var data map[string]any
++				raw, _ := json.Marshal(next)
++				_ = json.Unmarshal(raw, &data)
++				spec := data["spec"].(map[string]any)
++				switch change {
++				case "secretRef":
++					spec["authorities"] = []any{map[string]any{"key": map[string]any{"secretRef": map[string]any{"name": "key"}}}}
++				case "kms":
++					spec["authorities"] = []any{map[string]any{"key": map[string]any{"kms": "test://key"}}}
++				case "configMapRef":
++					spec["policy"] = map[string]any{"configMapRef": map[string]any{"name": "rules"}}
++				case "remote":
++					spec["policy"] = map[string]any{"remote": map[string]any{"url": "https://example.invalid/rules", "sha256": strings.Repeat("0", 64)}}
++				case "trustRootRef":
++					spec["authorities"] = []any{map[string]any{"keyless": map[string]any{"trustRootRef": "custom"}}}
++				case "rfc3161timestamp":
++					spec["authorities"] = []any{map[string]any{"rfc3161timestamp": map[string]any{"trustRootRef": "custom"}}}
++				}
++				raw, _ = json.Marshal(data)
++				if err := json.Unmarshal(raw, next); err != nil {
++					t.Fatal(err)
++				}
++			}
++			ctx, _ := fakeclient.With(context.Background(), next, b)
++			if _, _, err := freshPolicyContext(ctx); err == nil {
++				t.Fatal("unsupported state accepted")
++			}
++		})
++	}
++}
++
++func TestPolicyFreshnessHTTPContext(t *testing.T) {
++	root, _ := fakeclient.With(context.Background(), testLivePolicy("release-signer"), testLivePolicy("release-attestations"))
++	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
++		ctx := WithAuthoritativePolicyClient(r.Context(), root)
++		_, finish, err := freshPolicyContext(ctx)
++		if err != nil {
++			http.Error(w, err.Error(), 500)
++			return
++		}
++		if err := finish(); err != nil {
++			http.Error(w, err.Error(), 500)
++			return
++		}
++		w.WriteHeader(204)
++	}))
++	defer server.Close()
++	response, err := http.Get(server.URL)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer response.Body.Close()
++	if response.StatusCode != 204 {
++		t.Fatalf("independent HTTP context failed: %d", response.StatusCode)
++	}
++}
++
++func TestPolicyFreshnessScaleDown(t *testing.T) {
++	before := []byte(`{"kind":"Deployment","metadata":{"name":"demo","generation":1,"resourceVersion":"3","labels":{"scope":"a"}},"spec":{"replicas":2,"template":{"spec":{"containers":[{"name":"service","image":"trusted"}]}}}}`)
++	for _, tc := range []struct {
++		name, after string
++		safe        bool
++	}{
++		{"replicas-only", `{"kind":"Deployment","metadata":{"name":"demo","generation":2,"resourceVersion":"4","labels":{"scope":"a"}},"spec":{"replicas":1,"template":{"spec":{"containers":[{"name":"service","image":"trusted"}]}}}}`, true},
++		{"image-change", `{"kind":"Deployment","metadata":{"name":"demo","generation":2,"resourceVersion":"4","labels":{"scope":"a"}},"spec":{"replicas":1,"template":{"spec":{"containers":[{"name":"service","image":"untrusted"}]}}}}`, false},
++		{"label-change", `{"kind":"Deployment","metadata":{"name":"demo","generation":2,"resourceVersion":"4","labels":{"scope":"b"}},"spec":{"replicas":1,"template":{"spec":{"containers":[{"name":"service","image":"trusted"}]}}}}`, false},
++		{"annotation-change", `{"kind":"Deployment","metadata":{"name":"demo","labels":{"scope":"a"},"annotations":{"bypass":"true"}},"spec":{"replicas":1,"template":{"spec":{"containers":[{"name":"service","image":"trusted"}]}}}}`, false},
++		{"other-spec-change", `{"kind":"Deployment","metadata":{"name":"demo","labels":{"scope":"a"}},"spec":{"replicas":1,"strategy":{"type":"Recreate"},"template":{"spec":{"containers":[{"name":"service","image":"trusted"}]}}}}`, false},
++		{"malformed", `{`, false},
++		{"missing-spec", `{"metadata":{"name":"demo"}}`, false},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			if got := onlyReplicasChanged(before, []byte(tc.after)); got != tc.safe {
++				t.Fatalf("safe=%v want %v", got, tc.safe)
++			}
++		})
++	}
++}
