@@ -29,6 +29,9 @@ kind create cluster --name "$name" --kubeconfig "$kubeconfig" --config integrati
 for node in $(kubectl --kubeconfig "$kubeconfig" get nodes -o jsonpath='{.items[*].metadata.name}'); do
   kubectl --kubeconfig "$kubeconfig" patch node "$node" --type=merge -p '{"spec":{"taints":[]}}'
 done
+# Reserve the paused API/etcd node so that this case isolates control-plane loss.
+# Verifier process loss has its own fail-closed test.
+kubectl --kubeconfig "$kubeconfig" taint node "$name-control-plane3" hsc.test/control-plane-only=true:NoSchedule
 if [ -z "${TEST_RELEASE_CONTROLLER_IMAGE:-}" ]; then
   kind load docker-image supply-policy-controller:local --name "$name"
   controller_digest=$(docker exec "$name-control-plane" ctr --namespace=k8s.io images ls | awk '$1=="docker.io/library/supply-policy-controller:local" {print $3}')

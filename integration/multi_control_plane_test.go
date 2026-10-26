@@ -63,9 +63,10 @@ func TestMultiControlPlane(t *testing.T) {
 		t.Fatal(err)
 	}
 	observations := []trustObservation{}
+	verifierNodes := []string{}
 	outcome := "failed"
 	t.Cleanup(func() {
-		b, _ := json.MarshalIndent(map[string]any{"schemaVersion": 1, "outcome": outcome, "nodes": nodes, "observations": observations}, "", "  ")
+		b, _ := json.MarshalIndent(map[string]any{"schemaVersion": 1, "outcome": outcome, "nodes": nodes, "verifierNodes": verifierNodes, "observations": observations}, "", "  ")
 		if err := os.WriteFile("../artifacts/admission/multi-control-plane.json", append(b, '\n'), 0600); err != nil {
 			t.Error(err)
 		}
@@ -99,6 +100,21 @@ func TestMultiControlPlane(t *testing.T) {
 	// Suspend a complete control-plane node, including its API and etcd member.
 	// The remaining two members retain quorum. Cleanup always resumes this node.
 	paused := nodes[2]
+	out, code := controlPlaneCommand(t, nodes[0], nil, "-n", "image-policy-system", "get", "pods", "-l", "app.kubernetes.io/instance=policy-controller", "-o", "json")
+	var pods struct {
+		Items []struct{ Spec struct{ NodeName string } }
+	}
+	if code != 0 || json.Unmarshal(out, &pods) != nil || len(pods.Items) == 0 {
+		t.Fatalf("missing verifier placement control: %s", out)
+	}
+	for _, pod := range pods.Items {
+		if pod.Spec.NodeName == paused {
+			t.Fatal("paused node must isolate API/etcd loss from verifier loss")
+		}
+		if pod.Spec.NodeName != "" {
+			verifierNodes = append(verifierNodes, pod.Spec.NodeName)
+		}
+	}
 	docker := func(action string) {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()

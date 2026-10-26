@@ -185,6 +185,25 @@ func TestTrustUpdates(t *testing.T) {
 		}
 	}
 	awaitForbidden := func(verb, resource string) { awaitAuthorization(verb, resource, "no") }
+	awaitPolicyDeleted := func(name string) {
+		deadline := time.Now().Add(90 * time.Second)
+		for {
+			out, code := command(nil, "get", "clusterimagepolicy", name, "-o", "json")
+			if code != 0 && strings.Contains(string(out), "NotFound") {
+				return
+			}
+			if code != 0 || time.Now().After(deadline) {
+				t.Fatalf("policy deletion did not recover: %s", out)
+			}
+			// The deliberately denied compiler writes cause reconciliation backoff.
+			// A metadata event requeues cleanup after permissions are restored.
+			out, code = command(nil, "annotate", "clusterimagepolicy", name, "hsc.test/recovery-trigger="+time.Now().UTC().Format(time.RFC3339Nano), "--overwrite")
+			if code != 0 && !strings.Contains(string(out), "NotFound") {
+				t.Fatalf("cannot requeue restored finalizer: %s", out)
+			}
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
 	freezeWrites := func() {
 		restrict("role", roleRules, "configmaps", map[string]bool{"create": true, "update": true, "patch": true, "delete": true})
 		awaitForbidden("patch", "configmap/config-image-policies")
@@ -422,7 +441,8 @@ func TestTrustUpdates(t *testing.T) {
 		}
 	}
 	restoreWrites()
-	must(nil, "wait", "--for=delete", "clusterimagepolicy/release-attestations", "--timeout=60s")
+	awaitAuthorization("patch", "configmap/config-image-policies", "yes")
+	awaitPolicyDeleted("release-attestations")
 	apply("../integration/admission/attestations-policy.json", nil, "mandatory-policy-recreated")
 	apiProbe("mandatory-policy-recreated", "allowed", "signature-demo", inputs.SignedImage)
 	freezeWrites()
@@ -436,7 +456,9 @@ func TestTrustUpdates(t *testing.T) {
 		}
 	}
 	restoreWrites()
-	must(nil, "delete", "clusterimagepolicy", "trust-update-extra", "--wait=true", "--timeout=60s")
+	awaitAuthorization("patch", "configmap/config-image-policies", "yes")
+	must(nil, "delete", "clusterimagepolicy", "trust-update-extra", "--wait=false")
+	awaitPolicyDeleted("trust-update-extra")
 	for i := 0; i < 5; i++ {
 		apiProbe("production-restored", "allowed", "signature-demo", inputs.SignedImage)
 	}

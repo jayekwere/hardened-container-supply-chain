@@ -417,7 +417,7 @@ func classifyAdmission(exit int, out string) string {
 	if strings.Contains(text, `admission webhook "policy.sigstore.dev" denied the request`) && strings.Contains(text, "validation failed: trust-freshness:") {
 		return "freshness-denied"
 	}
-	if strings.Contains(text, "failed calling webhook") && strings.Contains(text, "policy.sigstore.dev") && (strings.Contains(text, "no endpoints available") || strings.Contains(text, "connection refused") || strings.Contains(text, "context deadline exceeded") || strings.Contains(text, "i/o timeout")) {
+	if strings.Contains(text, "failed calling webhook") && strings.Contains(text, "policy.sigstore.dev") && (strings.Contains(text, "no endpoints available") || strings.Contains(text, "connection refused") || strings.Contains(text, "context deadline exceeded") || strings.Contains(text, "i/o timeout") || strings.Contains(text, "tls handshake timeout")) {
 		return "unavailable"
 	}
 	for _, failure := range []string{"i/o timeout", "context deadline exceeded", "too many requests", "connection reset", "tls handshake", "unexpected eof"} {
