@@ -359,7 +359,7 @@ func TestTrustUpdates(t *testing.T) {
 	}
 	must(nil, "-n", "image-policy-system", "scale", "deployment/policy-controller-webhook", "--replicas=2")
 	t.Cleanup(func() {
-		_, _ = command(nil, "-n", "image-policy-system", "scale", "deployment/policy-controller-webhook", "--replicas=1")
+		_, _ = command(nil, "-n", "image-policy-system", "scale", "deployment/policy-controller-webhook", "--replicas=2")
 	})
 	names := readyPods()
 	endpoints := []*endpoint{connect(names[0]), connect(names[1])}
@@ -415,6 +415,10 @@ func TestTrustUpdates(t *testing.T) {
 	}
 	must(nil, "-n", "image-policy-system", "delete", "pod", endpoints[0].name, "--wait=false")
 	endpoints[0].draining = true
+	// Exercise a real revision replacement while the warmed process drains.
+	// Revision-scoped anti-affinity permits the replacement to start without
+	// changing the retiring Pod's identity, scheduling rules or Service labels.
+	patch("deployment", "policy-controller-webhook", map[string]any{"spec": map[string]any{"template": map[string]any{"metadata": map[string]any{"annotations": map[string]string{"hsc.test/replacement": time.Now().UTC().Format(time.RFC3339Nano)}}}}})
 	apply("../integration/admission/release-policy.json", wrongSubject, "signer-tightened")
 	for _, variant := range []string{"replicas-only", "image-change", "label-change"} {
 		var object map[string]any

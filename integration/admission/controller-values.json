@@ -38,6 +38,38 @@
         "cpu": "500m",
         "memory": "512Mi"
       }
+    },
+    "replicaCount": 2,
+    "strategy": {
+      "type": "RollingUpdate",
+      "rollingUpdate": {
+        "maxUnavailable": 1,
+        "maxSurge": 0
+      }
+    },
+    "affinity": {
+      "podAntiAffinity": {
+        "requiredDuringSchedulingIgnoredDuringExecution": [
+          {
+            "labelSelector": {
+              "matchLabels": {
+                "supply-chain.example.invalid/placement": "verifier"
+              }
+            },
+            "topologyKey": "kubernetes.io/hostname",
+            "matchLabelKeys": [
+              "pod-template-hash"
+            ]
+          }
+        ]
+      }
+    },
+    "podDisruptionBudget": {
+      "enabled": true,
+      "minAvailable": 1
+    },
+    "customLabels": {
+      "supply-chain.example.invalid/placement": "verifier"
     }
   },
   "cosign": {

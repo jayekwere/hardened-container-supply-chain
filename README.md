@@ -16,6 +16,8 @@ Admission requires the image signature and both signed SBOM/evidence predicates.
 
 The separate [verifier release and three-control-plane tests](docs/verifier-release.md) cover its dependency remediation, scan/signing gates, evidence verification and direct requests to each API server.
 
+The [maintenance and failure controls](docs/operations.md) add an API-enforced workload pause for multi-step trust changes, two replicas with required placement separation, and explicit verifier-node, elected-leader and quorum-loss tests. Existing approvals and running Pods remain outside retroactive enforcement.
+
 See [verification evidence](docs/verification.md) for dated local results and hosted workflow results. The initial live scan found vulnerable standard-library code; [remediation evidence](docs/remediation.md) records the compiler upgrade and rescan. Synthetic negative fixtures are clearly marked and are never presented as real findings. There are no active risk-acceptance exceptions. The application has no VEX assertion; the separate verifier uses one [bounded, package-absence VEX case](docs/verifier-release.md#bounded-vex-evidence), retaining the original scanner finding.
 
 ## Run the complete checks
@@ -43,7 +45,7 @@ make admission
 | `make scan` | Versioned standard-library inventory, matching config digest, fresh database, no blocking findings |
 | `./scripts/sign-local.sh` | Ephemeral-key SBOM signature verifies; changed bytes fail |
 | `make cluster` | Service/runtime/admission checks pass; allowed ingress remains reachable; cross-namespace ingress and workload HTTP/DNS egress time out; removing the policy restores traffic |
-| `make admission` | Build the patched verifier; exercise three API servers; require signatures and both predicates; reject stale trust and failed policy reads; test a control-plane outage and restoration |
+| `make admission` | Build the patched verifier; exercise three API servers; require signatures and both predicates; reject stale trust and failed policy reads; test maintenance, verifier-node loss, elected-leader failover, quorum loss and restoration |
 
 `make admission` separately provisions a disposable API-server verifier and runs passing/failing admission requests. It requires the exact release identity for the image signature and both attestations, with content checks for the SBOM and release evidence. See [attestation requirements, negative fixtures and exact results](docs/admission-attestations.md), plus the [signature and availability controls](docs/admission-signatures.md).
 

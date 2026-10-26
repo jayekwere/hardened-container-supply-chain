@@ -61,7 +61,7 @@ python3 scripts/fetch-admission-chart.py
   --kubeconfig /absolute/path/to/kubeconfig --namespace image-policy-system \
   --values integration/admission/controller-values.json \
   --set "webhook.image.repository=${CONTROLLER_IMAGE%@*}" \
-  --set "webhook.image.version=${CONTROLLER_IMAGE##*@}" --wait --timeout 180s --no-hooks
+  --set "webhook.image.version=${CONTROLLER_IMAGE##*@}" --wait --timeout 600s --no-hooks
 python3 scripts/apply-bootstrap-policy.py /absolute/path/to/kubeconfig integration/admission/release-policy.json
 python3 scripts/apply-bootstrap-policy.py /absolute/path/to/kubeconfig integration/admission/attestations-policy.json
 ```
@@ -71,7 +71,7 @@ Drain and retire **every** older unpatched verifier instance before relying on t
 ## Scope and remaining limitations
 
 - A request whose first validation read occurs after an acknowledged policy write uses that current policy state or is rejected. A policy change detected during verification also rejects the request. This is not a transaction with the API server's eventual object write: a request already approved before the final read/write boundary can finish afterward. Existing Pods are not evicted.
-- Multiple policy writes are not an atomic bundle. Each request checks the actual complete policy set it reads. Plan updates so intermediate states are acceptable, or stop new workloads during a larger migration.
+- Multiple policy writes are not an atomic bundle. Each request checks the actual complete policy set it reads. Use the [API-enforced maintenance gate](operations.md) and confirm rejection on every API before multi-step transitions; drain outstanding requests and keep the namespace locked on any error. This mitigates intermediate states without claiming a storage transaction.
 - This dedicated build requires `release-signer` and `release-attestations`, enforce mode and inline trust/policy material. Secret-backed trust keys/CAs, KMS, ConfigMap policy data, remote policies, custom TrustRoot and timestamp references are rejected rather than served from another cache. An unsupported policy anywhere in the controller's cluster-wide set blocks enrolled admissions, even if intended for a different image. Use the dedicated, image-bound policy profile in this repository; this is not a claim of compatibility with every upstream policy feature.
 - Authoritative reads add API load and an availability dependency, with a five-second timeout per read. Failure rejects enrolled admissions even when a signature result is cached. No throughput or high-availability performance guarantee is claimed.
 - Namespace enrollment, administrator access, the API's consistency contract, node/runtime integrity and distribution of the patched verifier remain trusted boundaries. Enrollment and webhook-routing changes are not made atomic by this patch. Outside-scope namespaces and supported cleanup/status operations retain their prior behavior. The original runs below used one API server; the expanded suite and its separate results are documented in the verifier release guide. No production performance guarantee is claimed.

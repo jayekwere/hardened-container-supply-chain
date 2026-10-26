@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-26",
+  "timezone": "America/Vancouver",
+  "scope": "Initial candidate; full integration invocation failed, and is not presented as a passing full suite.",
+  "baseRevision": "8a7c992de452e371ea9790e822348a0edc57dc01",
+  "outcome": "failed",
+  "goIntegrationPackageSeconds": 512.396,
+  "controllerBuild": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "b682351682fb3025644e66fb489777c013121e5fe6f8501e6fcb5a9588e2ed2f",
+    "dependencyPatchSHA256": "a5764716eadb3bccc7368525298491149195d0ff70decccd0b921de9f5f19ff9",
+    "goModSHA256": "471fe854daa9885743e103b431c4959f9d4f2b8f62868164d1bf25a110bb38ad",
+    "goSumSHA256": "dfb42b3aee4911f9e4bd8b374e54003b9af4dda46b50e0a5ab1fd772ac668d7f",
+    "packageClosureSHA256": "7281f82cd59eaf5d61cba9889740ece30d7d257ab308f46f5116251d726cd987",
+    "binarySHA256": "3b064866aecdc0d5bca35e4092db4dda79a9d4835cc759da92be169665b98eb8",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "arm64",
+    "manifestDigest": "sha256:b1d41fd9788b66b6d1c248c24495b310c20143235ad8fceb55d36b5a071cd441"
+  },
+  "availability": {
+    "outcome": "passed",
+    "logicalControls": 34,
+    "requests": 44,
+    "decisionCounts": {
+      "allowed": 16,
+      "signature-denied": 16,
+      "unavailable": 10,
+      "storage-unavailable": 2
+    },
+    "phaseDecisionCounts": {
+      "baseline": {
+        "allowed": 3,
+        "signature-denied": 3
+      },
+      "elected-leader-paused": {
+        "unavailable": 6,
+        "allowed": 2,
+        "signature-denied": 2
+      },
+      "leader-restored": {
+        "allowed": 3,
+        "signature-denied": 3
+      },
+      "quorum-lost-admission": {
+        "storage-unavailable": 1
+      },
+      "quorum-lost-storage": {
+        "storage-unavailable": 1
+      },
+      "quorum-restored": {
+        "allowed": 3,
+        "signature-denied": 3
+      },
+      "verifier-node-paused": {
+        "unavailable": 4,
+        "allowed": 2,
+        "signature-denied": 2
+      },
+      "verifier-node-restored": {
+        "allowed": 3,
+        "signature-denied": 3
+      }
+    },
+    "etcdMembers": {
+      "after-leader-loss": [
+        {
+          "node": "hsc-admission-31738-control-plane",
+          "memberID": 2583549131277751082,
+          "leaderID": 2583549131277751082,
+          "term": 4
+        },
+        {
+          "node": "hsc-admission-31738-control-plane3",
+          "memberID": 17035341871479341803,
+          "leaderID": 2583549131277751082,
+          "term": 4
+        }
+      ],
+      "before-leader-loss": [
+        {
+          "node": "hsc-admission-31738-control-plane",
+          "memberID": 2583549131277751082,
+          "leaderID": 7318488050529798917,
+          "term": 3
+        },
+        {
+          "node": "hsc-admission-31738-control-plane2",
+          "memberID": 7318488050529798917,
+          "leaderID": 7318488050529798917,
+          "term": 3
+        },
+        {
+          "node": "hsc-admission-31738-control-plane3",
+          "memberID": 17035341871479341803,
+          "leaderID": 7318488050529798917,
+          "term": 3
+        }
+      ],
+      "restored": [
+        {
+          "node": "hsc-admission-31738-control-plane",
+          "memberID": 2583549131277751082,
+          "leaderID": 2583549131277751082,
+          "term": 4
+        },
+        {
+          "node": "hsc-admission-31738-control-plane2",
+          "memberID": 7318488050529798917,
+          "leaderID": 2583549131277751082,
+          "term": 4
+        },
+        {
+          "node": "hsc-admission-31738-control-plane3",
+          "memberID": 17035341871479341803,
+          "leaderID": 2583549131277751082,
+          "term": 4
+        }
+      ]
+    },
+    "verifierPlacement": {
+      "policy-controller-webhook-564bb488fc-5jlgw": "hsc-admission-31738-control-plane2",
+      "policy-controller-webhook-564bb488fc-n8clr": "hsc-admission-31738-control-plane"
+    },
+    "transientFailures": 10,
+    "unexpectedAdmissions": 0,
+    "seconds": 222.25
+  },
+  "maintenance": {
+    "outcome": "failed",
+    "requestsBeforeFailure": 25,
+    "decisionCounts": {
+      "allowed": 9,
+      "maintenance-denied": 15,
+      "other": 1
+    },
+    "cause": "The dry-run delete cleanup probe requested -o json; this command supports only -o name. The command did not reach admission.",
+    "correction": "Use the supported name output for delete only.",
+    "unexpectedAdmissions": 0
+  },
+  "trustUpdates": {
+    "outcome": "failed",
+    "requestsBeforeFailure": 58,
+    "decisionCounts": {
+      "allowed": 6,
+      "signature-denied": 26,
+      "identity-denied": 26
+    },
+    "cause": "Same-revision replacement was blocked by required anti-affinity while the older process drained. Two replacement verifiers did not become ready within the test deadline.",
+    "correction": "Start an actual new Deployment revision; retain revision-scoped anti-affinity and the draining process identity/TLS connection.",
+    "unexpectedAdmissions": 0
+  },
+  "standardAdmission": {
+    "outcome": "passed",
+    "requests": 31,
+    "cases": 30,
+    "decisionCounts": {
+      "allowed": 11,
+      "signature-denied": 5,
+      "no-policy-denied": 1,
+      "identity-denied": 4,
+      "attestation-denied": 8,
+      "unavailable": 2
+    }
+  },
+  "isolatedControlPlane": {
+    "outcome": "passed",
+    "requests": 20,
+    "decisionCounts": {
+      "allowed": 8,
+      "signature-denied": 8,
+      "unavailable": 1,
+      "freshness-denied": 3
+    }
+  },
+  "rawEvidenceSHA256": {
+    "availability.json": "c20c8c64bd4f0caba1fdb1317d62b43dc251ff054d7c7923e7ec2f1adb7fe079",
+    "maintenance.json": "ac66ffb528e781a93512e1069258382c3e1a6aa798bb1484d86a901d93be64dc",
+    "trust-updates.json": "3032eb6a2abd47b09bebb7c30dc574edaf8a9a1fc7d4bdc1ed6bd0d55f8b437e",
+    "decisions.json": "91a1a845ecf861f412765da0c836d068742033174e2bd6e61fa2c01e48d15515",
+    "multi-control-plane.json": "52dfd87420369a9be5cad991e8d6edc4ef4e30df6464c1689e65ac3cee269a6b",
+    "tests.txt": "c8821d36c8a8e5fdc5658a71bf5c3e5d46fc1abc7f6948c5c670c80940df3761"
+  },
+  "testedAvailabilitySourcesSHA256": {
+    "integration/availability_test.go": "3319087789fe823963a4ce512517180c2edd5d137d1b6ff75211f74a244b41a9",
+    "integration/admission/controller-values.json": "4f6d564f0f03a081ac8d46c1026e84612348e77e80589bc83a463068fe89ea9a",
+    "integration/admission/maintenance-policy.json": "af3bc14246249e578741ed7ccca36a34416c73e69418c62e1fd66c6d0ea347bd"
+  }
+}

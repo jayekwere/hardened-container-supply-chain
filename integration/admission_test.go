@@ -116,6 +116,7 @@ func TestAdmissionSignatures(t *testing.T) {
 	}
 	var deployment struct {
 		Spec struct {
+			Replicas int
 			Template struct {
 				Spec struct{ Containers []struct{ Image string } }
 			}
@@ -124,7 +125,7 @@ func TestAdmissionSignatures(t *testing.T) {
 	if err := json.Unmarshal(must(nil, "-n", "image-policy-system", "get", "deployment", "policy-controller-webhook", "-o", "json"), &deployment); err != nil {
 		t.Fatal(err)
 	}
-	if len(deployment.Spec.Template.Spec.Containers) != 1 || deployment.Spec.Template.Spec.Containers[0].Image != controllerImage {
+	if deployment.Spec.Replicas != 2 || len(deployment.Spec.Template.Spec.Containers) != 1 || deployment.Spec.Template.Spec.Containers[0].Image != controllerImage {
 		t.Fatal("controller image does not match lock")
 	}
 	security := map[string]any{"allowPrivilegeEscalation": false, "readOnlyRootFilesystem": true, "capabilities": map[string]any{"drop": []string{"ALL"}}}
@@ -344,7 +345,7 @@ func TestAdmissionSignatures(t *testing.T) {
 	// does not interrupt an already-established API-server HTTP connection.
 	must(nil, "-n", "image-policy-system", "scale", "deployment/policy-controller-webhook", "--replicas=0")
 	t.Cleanup(func() {
-		_, _ = command(nil, "-n", "image-policy-system", "scale", "deployment/policy-controller-webhook", "--replicas=1")
+		_, _ = command(nil, "-n", "image-policy-system", "scale", "deployment/policy-controller-webhook", "--replicas=2")
 	})
 	// Forced deletion is confined to this disposable cluster and test namespace.
 	must(nil, "-n", "image-policy-system", "delete", "pods", "-l", "app.kubernetes.io/instance=policy-controller", "--grace-period=0", "--force", "--wait=true")
@@ -386,7 +387,7 @@ func TestAdmissionSignatures(t *testing.T) {
 	}
 	run("verifier-unavailable-fail-closed", "unavailable", pod("verifier-unavailable", "signature-demo", inputs.SignedImage), create...)
 	run("outside-scope-during-outage", "allowed", pod("outside-outage", "signature-outside", inputs.UnsignedImage), create...)
-	must(nil, "-n", "image-policy-system", "scale", "deployment/policy-controller-webhook", "--replicas=1")
+	must(nil, "-n", "image-policy-system", "scale", "deployment/policy-controller-webhook", "--replicas=2")
 	deadline = time.Now().Add(120 * time.Second)
 	for {
 		var restored struct {
@@ -395,7 +396,7 @@ func TestAdmissionSignatures(t *testing.T) {
 		if err := json.Unmarshal(must(nil, "-n", "image-policy-system", "get", "deployment", "policy-controller-webhook", "-o", "json"), &restored); err != nil {
 			t.Fatal(err)
 		}
-		if restored.Status.AvailableReplicas == 1 {
+		if restored.Status.AvailableReplicas == 2 {
 			break
 		}
 		if time.Now().After(deadline) {
