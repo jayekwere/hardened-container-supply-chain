@@ -14,6 +14,7 @@ test:
 	python3 scripts/test_image_gate.py
 	python3 scripts/test_controller_predicates.py
 	python3 scripts/test_controller_vex.py
+	python3 scripts/test_bootstrap_policy.py
 	test "$$($(GO) env GOVERSION)" = go1.27.3
 	test -z "$$($(GO) list -mod=readonly -m all | tail -n +2)"
 	test -z "$$(.tools/go/bin/gofmt -l cmd internal integration)"

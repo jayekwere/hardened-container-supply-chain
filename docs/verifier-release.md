@@ -64,3 +64,39 @@ References: [authoritative advisory](https://vuln.go.dev/ID/GO-2026-5932.json), 
 The verifier itself is installed by a trusted administrator; it cannot establish its own initial admission trust. Verify its release before installation. Existing unpatched verifier processes must all terminate during migration. Application admission still requires its independent signature and both application attestations.
 
 Two authoritative reads are not a transaction with eventual object persistence. Existing approvals and running Pods are not recalled; multi-policy writes are not atomic. Mutable trust references and unsupported modes remain intentionally rejected. API availability, administrator-controlled enrollment/routing and node integrity remain trusted. A scan is a database snapshot and module inventory, not a proof that every possible defect is absent. The focused verifier tests do not claim execution of the complete upstream suite.
+
+## Executed local results
+
+The final local run on 2026-10-26 used Linux arm64 nodes and the dependency-patched verifier. `make admission` and the subsequent verifier scan exited 0. The Go integration package completed in **185.062 seconds**. [Structured local evidence](evidence/verifier-multi-local.json) records image/binary identity, all phase counts, source/raw-output hashes, policy-write acknowledgements and normalized platform details.
+
+| Local check | Exact outcome |
+| --- | --- |
+| Trust updates | 183 probes: 31 intended admissions, 152 required denials, zero unexpected admissions |
+| API coverage | 38 individually addressed probes per API server, plus 3 Deployment-update probes through the load balancer: 117 API requests total |
+| Direct verifier coverage | 66 CA-verified TLS probes across 3 distinct Pods during replacement |
+| Frozen/poisoned compiled copy | 25 unsigned-image signature denials |
+| Signer tightened after acknowledged write | 25 identity denials |
+| Attestation trust tightened after acknowledged write | 25 identity denials |
+| Authoritative-list permission removed | 25 freshness denials; all 3 outside-scope controls admitted |
+| Mandatory attestation policy deleted | 25 freshness denials; recreation restored admission |
+| Restrictive policy added | 25 explicit policy denials; removal restored admission |
+| Replica reduction variants | Unchanged object admitted; changed image and changed label each denied |
+| Isolated API/etcd node pause | 16 controls: 8 valid admissions and 8 signature denials; no transient retries |
+| Existing signature/attestation matrix | 30 cases in 31 requests; recovery first failed closed, then admitted on attempt 2 |
+| Focused verifier tests | 29 leaf cases passed; complete upstream suite not claimed |
+| Admission classification | 24 cases passed |
+| Claim validation | Valid claim set accepted; 15 changed sets and missing reports rejected |
+| VEX validation | Valid bounded case accepted, unrelated UNKNOWN retained, 8 unsafe mutations rejected |
+| Prepared source cache | Changed source rejected; original bytes restored and accepted |
+| Scan/SBOM | 0 HIGH, 0 CRITICAL, 1 retained raw UNKNOWN; bounded VEX passed; 2,048 compiled packages; 276 SBOM components |
+| Root unit/race checks, actionlint and workflow guard | Exit 0 |
+
+The local imported image was `docker.io/library/supply-policy-controller@sha256:b1d41fd9788b66b6d1c248c24495b310c20143235ad8fceb55d36b5a071cd441`; the running container reported that same manifest. This local reference is distinct from the Linux amd64 registry release. Its independent-recompilation step was explicitly skipped locally and is a release-only gate. The disposable cluster and fixture registry were removed.
+
+The paused etcd member's leadership was not selected, so these controls do not constitute a forced etcd-leader failover test. No arbitrary partition, quorum-loss, sustained-load or independent-host availability result is claimed.
+
+## Bootstrap readiness
+
+The initial `controller-v0.1.0` workflow failed closed before publication: the policy webhook briefly refused a connection after chart readiness. Both publish and release-record jobs were skipped; that tag has no supported image release. [Failure evidence](evidence/verifier-bootstrap-failure.json) preserves the exact cause and run.
+
+The installer now retries only an unavailable ClusterImagePolicy webhook during initial policy installation. Attempts are recorded in `artifacts/admission/bootstrap-*.json`, limited to ten attempts and a 60-second retry window with bounded individual requests. A real policy denial, foreign webhook or process error stops immediately. The workload admission tests retain immediate failure for any unexpected admission. Six regressions cover refusal/recovery, genuine denial, denial quoting a network error, foreign webhook, persistent outage and execution timeout.
