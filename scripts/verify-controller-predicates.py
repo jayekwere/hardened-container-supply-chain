@@ -30,6 +30,7 @@ def validate(sbom, evidence, image, revision, directory=None):
     assert all(re.fullmatch('[a-f0-9]{64}',v) for v in e['checksums'].values())
     assert e['upstream']['goModSHA256']==e['checksums']['go.mod']
     assert e['upstream']['goSumSHA256']==e['checksums']['go.sum']
+    assert e['upstream']['packageClosureSHA256']==e['checksums']['packages.txt']
     if directory:
         for name,expected in e['checksums'].items():
             assert hashlib.sha256((Path(directory)/name).read_bytes()).hexdigest()==expected, name

@@ -13,7 +13,7 @@ class VEXTests(unittest.TestCase):
         finding={'VulnerabilityID':lock['id'],'PkgName':lock['module'],'InstalledVersion':'v0.57.0','Severity':'UNKNOWN'}
         other={'VulnerabilityID':'UNEXPECTED','PkgName':lock['module'],'InstalledVersion':'v0.57.0','Severity':'UNKNOWN'}
         report={'Metadata':{'ImageID':'sha256:'+'a'*64},'Results':[{'Type':'gobinary','Packages':[{'Name':lock['module'],'Version':'v0.57.0'}],'Vulnerabilities':[finding,other]}]}
-        source={'architecture':'amd64'}
+        source={'architecture':'amd64','packageClosureSHA256':hashlib.sha256(('\n'.join(package_list)+'\n').encode()).hexdigest()}
         filtered,_=vex.evaluate(report,raw,package_list,source,lock)
         self.assertEqual(filtered['Results'][0]['Vulnerabilities'],[other])
         self.assertEqual(len(report['Results'][0]['Vulnerabilities']),2)
@@ -29,6 +29,7 @@ class VEXTests(unittest.TestCase):
                 elif mutation=='duplicate-finding':r['Results'][0]['Vulnerabilities'].append(finding)
                 elif mutation=='wrong-module':r['Results'][0]['Vulnerabilities'][0]['PkgName']='invalid'
                 elif mutation=='wrong-architecture':s['architecture']='invalid'
+                if mutation in ['affected-package','affected-subpackage']:s['packageClosureSHA256']=hashlib.sha256(('\n'.join(p)+'\n').encode()).hexdigest()
                 with self.assertRaises(AssertionError):vex.evaluate(r,b,p,s,l)
         print('PASS bounded VEX; unrelated UNKNOWN retained; 8 unsafe mutations rejected')
 

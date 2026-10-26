@@ -55,6 +55,7 @@ record={'sourceCommit':lock['sourceCommit'],'sourceArchiveSHA256':lock['sourceAr
         'dependencyPatchSHA256':hashlib.sha256(Path('patches/policy-controller-dependencies.patch').read_bytes()).hexdigest(),
         'goModSHA256':hashlib.sha256((a/'go.mod').read_bytes()).hexdigest(),
         'goSumSHA256':hashlib.sha256((a/'go.sum').read_bytes()).hexdigest(),
+        'packageClosureSHA256':hashlib.sha256((a/'packages.txt').read_bytes()).hexdigest(),
         'binarySHA256':hashlib.sha256((a/'webhook').read_bytes()).hexdigest(),
         'buildImage':lock['buildImage'],'architecture':i['Architecture'],
         'manifestDigest':json.loads((a/'build-metadata.json').read_text())['containerimage.digest']}

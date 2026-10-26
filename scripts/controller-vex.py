@@ -18,6 +18,7 @@ def evaluate(report, advisory_bytes, packages, source, lock):
     prefix = lock['packagePrefix']
     assert paths and all(p == prefix or p.startswith(prefix + '/') for p in paths)
     assert len(packages) > 100 and len(packages) == len(set(packages))
+    assert hashlib.sha256(('\n'.join(packages)+'\n').encode()).hexdigest() == source['packageClosureSHA256'], 'package closure differs from binary build record'
     assert 'github.com/sigstore/policy-controller/cmd/webhook' in packages
     assert any(p.startswith(lock['module'] + '/') for p in packages)
     assert not any(p == prefix or p.startswith(prefix + '/') for p in packages), 'affected package is compiled'
@@ -55,14 +56,14 @@ if __name__ == '__main__':
     assert report['Metadata']['ImageID'] == manifest['containerimage.config.digest']
     product = 'urn:sha256:' + subject.removeprefix('sha256:')
     vex = {'@context': 'https://openvex.dev/ns/v0.2.0',
-           '@id': 'urn:sha256:' + hashlib.sha256((product+lock['id']).encode()).hexdigest(),
-           'author': 'hardened-container-supply-chain maintainers',
+           'author': 'https://github.com/jayekwere',
            'role': 'DocumentCreator', 'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat(),
            'version': 1,
            'statements': [{'vulnerability': {'@id': lock['url'], 'name': lock['id']},
                            'products': [{'@id': product}], 'status': 'not_affected',
                            'justification': 'vulnerable_code_not_present',
                            'impact_statement': 'The advisory affects only the OpenPGP package family. The complete target-specific Go package closure for this statically built verifier excludes that family. The module remains in the raw inventory; no other finding is suppressed.'}]}
+    vex['@id'] = 'urn:sha256:' + hashlib.sha256(json.dumps(vex,sort_keys=True).encode()).hexdigest()
     (a/'vex.json').write_text(json.dumps(vex, indent=2)+'\n')
     (a/'scan-policy-input.json').write_text(json.dumps(filtered, indent=2)+'\n')
     (a/'vex-evidence.json').write_text(json.dumps({'schemaVersion': 1, 'manifestDigest': subject,
