@@ -2,6 +2,8 @@
 
 The API server now has a reproducible signature-verifying admission installation and Go integration suite. The trust rule accepts this repository's exact release workflow identity and OIDC issuer, with normal certificate and transparency-log verification. The controller image and installation chart are pinned; no signing secret or private certificate is committed.
 
+The current installation also requires signed SBOM and evidence attestations through a separate mandatory policy. See [attestation requirements and the expanded suite](admission-attestations.md). The 16-case execution records below describe the original signature-only implementation; the current `make admission` runs the expanded suite.
+
 ## Reproduce the complete test
 
 ```sh
@@ -16,7 +18,7 @@ Raw decisions and errors are written to `artifacts/admission/decisions.json`; te
 
 ## Install into an explicitly selected cluster
 
-The reusable installer requires an explicit kubeconfig. It creates `image-policy-system` and installs the pinned controller and `release-signer` policy. The selected cluster must permit the controller's installation RBAC and have public registry/trust-service connectivity. Use a fresh namespace for the replay examples:
+The reusable installer requires an explicit kubeconfig. It creates `image-policy-system` and installs the pinned controller, `release-signer` policy and `release-attestations` policy. The selected cluster must permit the controller's installation RBAC and have public registry/trust-service connectivity. Use a fresh namespace for the replay examples:
 
 ```sh
 ./scripts/install-admission.sh /absolute/path/to/kubeconfig
@@ -79,7 +81,7 @@ Changing signer trust after a successful verification also exercises policy-cach
 
 The harness records every attempt during bounded policy propagation or verifier recovery. Only explicit denials from `policy.sigstore.dev` with the expected reason count as signature/policy failures. Schema failures, Pod Security errors, unrelated webhooks, registry timeouts and client failures do not count as passing signature tests. Separate unit regressions cover those classifications.
 
-## Results
+## Original signature-only results
 
 The final local run on 2026-10-25 (America/Vancouver) passed **16 cases in 16 API requests**, with **zero transition attempts**: 7 admissions, 5 missing-signature denials, 2 identity denials, 1 no-policy denial, and 1 fail-closed webhook-unavailable rejection. The verifier-unavailable request returned exit 1 after its configured 20-second webhook timeout; after restoration the trusted image returned exit 0. All 13 classification regressions passed. The disposable cluster was removed.
 
@@ -101,7 +103,7 @@ The unsigned-image denial included `admission webhook "policy.sigstore.dev" deni
 ## Scope and operational limits
 
 - Enforcement applies to namespaces labeled `policy.sigstore.dev/include=true`. The out-of-scope controls intentionally demonstrate that boundary. Administrators can change labels, trust policies, webhook configuration or the verifier; production RBAC must protect those controls.
-- This policy verifies image signatures. It does not require the SBOM or evidence attestations at admission; the existing release verification helper checks those separately. A valid signature establishes expected signer identity and artifact integrity, not absence of vulnerabilities.
+- The signature policy verifies image signatures; the separately installed attestation policy now requires both signed SBOM and evidence predicates. A valid signature establishes expected signer identity and artifact integrity, not absence of vulnerabilities. See the [attestation content checks and limits](admission-attestations.md).
 - Admission checks new/updated resources; it does not retroactively evict existing Pods when trust changes. The recorded resource coverage is Pod creation, the actual Helm Deployment template, init containers, sidecars and ephemeral-container updates.
 - The demo uses one verifier replica. Fail-closed behavior intentionally blocks enrolled admissions when it is unavailable. A production operator should configure appropriate availability and test recovery there.
 - Public registry and trust-root availability are operational dependencies. Cached verifications may avoid some remote lookups; the tests do not claim to simulate every external-service failure.

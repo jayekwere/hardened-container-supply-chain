@@ -15,5 +15,12 @@
   "unsignedImage": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c",
   "issuer": "https://token.actions.githubusercontent.com",
   "subject": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/release.yml@refs/tags/v0.1.1",
-  "notes": "Chart 0.10.8 advertises controller 0.13.1; the deployed image is explicitly overridden to pinned 0.15.1. The unsigned fixture is the existing repacked manifest from the unsupported v0.1.0 upload; its manifest existence is checked separately."
+  "notes": "Chart 0.10.8 advertises controller 0.13.1; the deployed image is explicitly overridden to pinned 0.15.1. The unsigned fixture is the existing repacked manifest from the unsupported v0.1.0 upload; its manifest existence is checked separately.",
+  "fixtureRegistryImage": "docker.io/library/registry:3.0.0@sha256:6c5666b861f3505b116bb9aa9b25175e71210414bd010d92035ff64018f9457e",
+  "attestationProfile": {
+    "sourceRevision": "fbd97e985473537e99f47e8e987b6ade222e3bc6",
+    "stdlibVersion": "v1.27.3",
+    "sbomSpecVersion": "1.7",
+    "platform": "linux/amd64"
+  }
 }

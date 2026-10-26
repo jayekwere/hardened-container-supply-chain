@@ -18,4 +18,6 @@ The package token is passed through standard input for registry login and never 
 
 Publication is not transactional. A push followed by a scan, signing, or verification failure may leave an unsigned image or a partial set of attestations. The final release record is withheld unless all required verifications succeed. Consumers must always verify the exact digest and both expected attestations. A mutable tag alone is insufficient evidence.
 
+The explicit admission installation now requires the image signature and both SBOM/evidence attestations from the exact release identity. It also checks the published content profile, including the reviewed source revision, standard-library version and evidence image claim. Missing or invalid attestations reject enrolled admissions even when the image signature passes. See [the live tests, exact results and limits](admission-attestations.md). Admission does not download/recompute the report hashes or perform a fresh vulnerability scan.
+
 Official command references: [identity verification](https://docs.sigstore.dev/cosign/verifying/verify/), [CycloneDX inventory](https://trivy.dev/docs/latest/guide/supply-chain/sbom/), [Go release inputs](https://go.dev/dl/). These describe tool behavior; this project's executed results are recorded separately.

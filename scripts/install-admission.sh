@@ -17,3 +17,4 @@ kubectl --kubeconfig "$kubeconfig" create namespace image-policy-system
 kubectl --kubeconfig "$kubeconfig" label namespace image-policy-system pod-security.kubernetes.io/enforce=restricted pod-security.kubernetes.io/enforce-version=v1.34
 helm install policy-controller .tools/charts/policy-controller-0.10.8.tgz --kubeconfig "$kubeconfig" --namespace image-policy-system --values integration/admission/controller-values.json --wait --timeout 180s --no-hooks
 kubectl --kubeconfig "$kubeconfig" apply -f integration/admission/release-policy.json
+kubectl --kubeconfig "$kubeconfig" apply -f integration/admission/attestations-policy.json

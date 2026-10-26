@@ -1,0 +1,49 @@
+{
+  "apiVersion": "policy.sigstore.dev/v1beta1",
+  "kind": "ClusterImagePolicy",
+  "metadata": {
+    "name": "release-attestations"
+  },
+  "spec": {
+    "images": [
+      {
+        "glob": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:*"
+      }
+    ],
+    "authorities": [
+      {
+        "name": "release-workflow",
+        "keyless": {
+          "identities": [
+            {
+              "issuer": "https://token.actions.githubusercontent.com",
+              "subject": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/release.yml@refs/tags/v0.1.1"
+            }
+          ]
+        },
+        "ctlog": {
+          "url": "https://rekor.sigstore.dev"
+        },
+        "signatureFormat": "legacy",
+        "attestations": [
+          {
+            "name": "release-sbom",
+            "predicateType": "https://cyclonedx.org/bom",
+            "policy": {
+              "type": "cue",
+              "data": "import \"list\"\npredicateType: \"https://cyclonedx.org/bom\"\npredicate: {\n    bomFormat: \"CycloneDX\"\n    specVersion: \"1.7\"\n    version: int & >=1\n    components: list.MatchN(1, {name: \"stdlib\"})\n    components: list.MatchN(1, {name: \"stdlib\", type: \"library\", version: \"v1.27.3\", purl: \"pkg:golang/stdlib@v1.27.3\"})\n}\n"
+            }
+          },
+          {
+            "name": "release-evidence",
+            "predicateType": "https://github.com/jayekwere/hardened-container-supply-chain/evidence/v1",
+            "policy": {
+              "type": "cue",
+              "data": "predicateType: \"https://github.com/jayekwere/hardened-container-supply-chain/evidence/v1\"\nsubject: [{digest: {sha256: =~\"^[a-f0-9]{64}$\"}}, ...]\npredicate: {\n    schemaVersion: 1\n    sourceRevision: \"fbd97e985473537e99f47e8e987b6ade222e3bc6\"\n    image: \"ghcr.io/jayekwere/hardened-container-supply-chain@sha256:\" + subject[0].digest.sha256\n    builder: \"release.yml\"\n    platform: \"linux/amd64\"\n    generatedAt: =~\"^[0-9]{4}-[0-9]{2}-[0-9]{2}T.+(Z|[+]00:00)$\"\n    checksums: {\n        \"scan.json\": =~\"^[a-f0-9]{64}$\"\n        \"sbom.cdx.json\": =~\"^[a-f0-9]{64}$\"\n        \"db-metadata.json\": =~\"^[a-f0-9]{64}$\"\n        \"scanner-version.txt\": =~\"^[a-f0-9]{64}$\"\n    }\n    exceptions: {schemaVersion: 1, entries: []}\n}\n"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

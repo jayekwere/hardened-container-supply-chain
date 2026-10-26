@@ -14,7 +14,7 @@ See [verification evidence](docs/verification.md) for dated local results and ho
 
 ## Run the complete checks
 
-Requirements: a Unix shell, Make, Python 3.12+, a C compiler for Go's race detector, and a running OCI-compatible local engine with `docker buildx` and support for its container builder driver. The build script creates and removes a disposable BuildKit 0.30.0 builder pinned by image digest. Internet access is required for locked tool downloads, the pinned builder image, and a vulnerability database updated within 24 hours. Linux amd64 and macOS arm64 tool installations are locked in `tools.lock.json`.
+Requirements: a Unix shell, Make, Python 3.12+, OpenSSL for disposable admission fixtures, a C compiler for Go's race detector, and a running OCI-compatible local engine with `docker buildx` and support for its container builder driver. The build script creates and removes a disposable BuildKit 0.30.0 builder pinned by image digest. Internet access is required for locked tool downloads, pinned images, public release verification and a vulnerability database updated within 24 hours. Linux amd64 and macOS arm64 tool installations are locked in `tools.lock.json`.
 
 ```sh
 git clone https://github.com/jayekwere/hardened-container-supply-chain.git
@@ -37,9 +37,9 @@ make admission
 | `make scan` | Versioned standard-library inventory, matching config digest, fresh database, no blocking findings |
 | `./scripts/sign-local.sh` | Ephemeral-key SBOM signature verifies; changed bytes fail |
 | `make cluster` | Service/runtime/admission checks pass; allowed ingress remains reachable; cross-namespace ingress and workload HTTP/DNS egress time out; removing the policy restores traffic |
-| `make admission` | Exact release signer admitted; unsigned and wrong-identity images denied across container fields; verifier outage fails closed and recovery restores admission |
+| `make admission` | Image signature and both signed SBOM/evidence predicates required; missing, altered and untrusted attestations denied; verifier outage fails closed and recovery restores admission |
 
-`make admission` separately provisions a disposable signature-verifying API-server webhook and runs passing/failing admission requests. See [the trust policy, replay examples and exact results](docs/admission-signatures.md).
+`make admission` separately provisions a disposable API-server verifier and runs passing/failing admission requests. It requires the exact release identity for the image signature and both attestations, with content checks for the SBOM and release evidence. See [attestation requirements, negative fixtures and exact results](docs/admission-attestations.md), plus the [signature and availability controls](docs/admission-signatures.md).
 
 Individual commands reuse `artifacts/` from prior commands. Run `make tools` first, and build before running image-dependent checks. The local signature exercise deliberately disables transparency-log use; the release workflow requires identity certificates and normal transparency verification.
 
@@ -108,7 +108,7 @@ kubectl -n supply-demo port-forward service/demo 8080:8080
 
 These deployment commands target your selected cluster and assume Kubernetes 1.34, Linux amd64 workload nodes for the published image, pull access to the image, and a network plugin that enforces NetworkPolicy. The chart supports Kubernetes 1.30+; the pinned integration environment tests 1.34. The network policy permits only namespace-local ingress to TCP 8080 and denies all pod egress, including DNS. The service needs neither DNS nor external connectivity.
 
-The explicit installer enables API-server signature enforcement for the enrolled namespace; the application chart itself does not install cluster-wide verification infrastructure. The admission policy pins the exact v0.1.1 workflow identity and rejects unmatched images. The CLI helper additionally verifies SBOM and evidence attestations, which the admission policy does not require. For a future release or rollback, review the corresponding exact signer identity in the admission policy, verify the selected digest, then run `helm upgrade` with that digest.
+The explicit installer enables API-server enforcement of the image signature and both SBOM/evidence attestations in the enrolled namespace; the application chart itself does not install cluster-wide verification infrastructure. The two admission policies pin the exact v0.1.1 workflow identity, check the released SBOM/evidence profile, and reject unmatched images. For a future release or rollback, review the exact signer identity and content profile in both policies, verify the selected digest, then run `helm upgrade` with that digest. Admission does not fetch the referenced scan reports or perform a new vulnerability scan.
 
 ## Evidence and design
 

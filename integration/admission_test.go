@@ -235,6 +235,73 @@ func TestAdmissionSignatures(t *testing.T) {
 	applyTrust(inputs.Issuer, inputs.Subject)
 	run("trust-restored", "allowed", pod("trust-restored", "signature-demo", inputs.SignedImage), create...)
 	run("outside-enrolled-namespace", "allowed", pod("outside", "signature-outside", inputs.UnsignedImage), create...)
+	// Keep the real image-signature policy active while independently exercising
+	// attestation trust and both required predicates. No fixture policy is installed
+	// by the reusable installer.
+	attestationRaw, err := os.ReadFile("../integration/admission/attestations-policy.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	applyAttestations := func(change func(map[string]any)) {
+		var p map[string]any
+		if err := json.Unmarshal(attestationRaw, &p); err != nil {
+			t.Fatal(err)
+		}
+		authority := p["spec"].(map[string]any)["authorities"].([]any)[0].(map[string]any)
+		if change != nil {
+			change(authority)
+		}
+		must(request(p), "apply", "-f", "-")
+	}
+	for _, tc := range []struct{ name, issuer, subject string }{
+		{"attestation-wrong-workflow", inputs.Issuer, strings.Replace(inputs.Subject, "release.yml", "unexpected.yml", 1)},
+		{"attestation-wrong-issuer", "https://invalid.invalid", inputs.Subject},
+	} {
+		applyAttestations(func(a map[string]any) {
+			a["keyless"] = map[string]any{"identities": []any{map[string]string{"issuer": tc.issuer, "subject": tc.subject}}}
+		})
+		run(tc.name, "identity-denied", pod(tc.name, "signature-demo", inputs.SignedImage), create...)
+	}
+	applyAttestations(nil)
+	run("attestation-trust-restored", "allowed", pod("attestation-trust-restored", "signature-demo", inputs.SignedImage), create...)
+	var fixtures struct {
+		Image, PublicKey string
+		Fixtures         map[string]struct{ Source string }
+	}
+	fixtureRaw, err := os.ReadFile(os.Getenv("TEST_ADMISSION_FIXTURES"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(fixtureRaw, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	if fixtures.Image != inputs.SignedImage || !strings.Contains(fixtures.PublicKey, "BEGIN PUBLIC KEY") || len(fixtures.Fixtures) != 9 {
+		t.Fatal("invalid disposable fixture inventory")
+	}
+	useFixture := func(name string) {
+		source := fixtures.Fixtures[name].Source
+		if !strings.HasPrefix(source, "attestation-registry.test:5000/fixtures/") {
+			t.Fatal("fixture source must be the disposable TLS registry")
+		}
+		applyAttestations(func(a map[string]any) {
+			delete(a, "keyless")
+			delete(a, "ctlog")
+			a["key"] = map[string]string{"data": fixtures.PublicKey}
+			a["source"] = []any{map[string]string{"oci": source}}
+		})
+	}
+	for _, name := range []string{"complete", "missing-sbom", "missing-evidence", "invalid-sbom", "evidence-image-mismatch", "evidence-revision-mismatch", "untrusted-sbom", "tampered-evidence", "wrong-subject-evidence"} {
+		useFixture(name)
+		expected := "attestation-denied"
+		if name == "complete" {
+			expected = "allowed"
+		}
+		run("attestation-"+name, expected, pod("attestation-"+name, "signature-demo", inputs.SignedImage), create...)
+	}
+	useFixture("complete")
+	run("fixture-requirements-restored", "allowed", pod("fixture-requirements-restored", "signature-demo", inputs.SignedImage), create...)
+	applyAttestations(nil)
+	run("release-requirements-restored", "allowed", pod("release-requirements-restored", "signature-demo", inputs.SignedImage), create...)
 	runningVerifiers := func() []string {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
@@ -357,6 +424,10 @@ func classifyAdmission(exit int, out string) string {
 	}
 	if strings.Contains(text, "no signatures found") || strings.Contains(text, "no matching signatures") {
 		return "signature-denied"
+	}
+	if strings.Contains(text, "failed policy: release-attestations") && (strings.Contains(text, "no matching attestations") ||
+		(strings.Contains(text, "failed evaluating cue policy for release-") && strings.Contains(text, "failed to evaluate the policy with error:"))) {
+		return "attestation-denied"
 	}
 	return "other"
 }
