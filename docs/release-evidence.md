@@ -6,7 +6,7 @@ The CycloneDX predicate is generated from the same raw JSON inventory that the v
 
 `release-evidence.json` has schemaVersion 1, sourceRevision, image (full digest reference), generatedAt, checksums (SHA-256 of scan, SBOM, database metadata and scanner version text), the exact exception ledger, builder workflow name and target platform. Cosign binds the predicate to the image manifest subject. The workflow checks the pushed manifest equals the locally gated manifest. The helper verifies signatures and expected predicate types; a consumer can decode the verified evidence to compare source revision, inventory and report hashes with downloaded assets.
 
-Release assets include image-reference.txt, SBOM, scan report, database metadata, evidence predicate, verification output, checksums, and the packaged chart. `sha256sum -c checksums.txt` checks the principal report/chart assets. Checksums by themselves are not signatures; authenticate their values against the verified signed evidence when reviewing scan/SBOM data.
+Release assets include image-reference.txt, SBOM, scan report, database metadata, evidence predicate, verification output, checksums, and the packaged chart. `sha256sum -c checksums.txt` (or `shasum -a 256 -c checksums.txt`) checks the principal report/chart assets. Checksums by themselves are not signatures; authenticate their values against the verified signed evidence when reviewing scan/SBOM data.
 
 | Job | Token permissions | Reason |
 | --- | --- | --- |

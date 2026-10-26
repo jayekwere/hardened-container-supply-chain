@@ -1,6 +1,6 @@
 # Verification record
 
-Observed on 2026-10-25. Results below were executed, not inferred from configuration. Local environment: macOS arm64, Linux arm64 engine, BuildKit 0.30.0, Go 1.27.3. Published-image tests target Linux amd64; the disposable cluster tests a native Linux arm64 build.
+Observed on 2026-10-25 (America/Vancouver). Results below were executed, not inferred from configuration. Local environment: macOS arm64, Linux arm64 engine, BuildKit 0.30.0, Go 1.27.3. Published-image tests target Linux amd64; the disposable cluster tests a native Linux arm64 build.
 
 | Check | Exact local outcome |
 | --- | --- |
@@ -42,9 +42,26 @@ PASS local signature valid; tampered content rejected; ephemeral private key del
 
 ## Hosted execution
 
-The [corrected hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40246098784) passed every step for source commit `908eb2e2a2ad00667d8778cbf53cc3b083b9766a`: unit/archive/chart gates, both uncached builds, all container tests, fresh scan/SBOM, local signature/tamper test, and disposable Kubernetes integration. The hosted Linux amd64 builds also produced the same manifest and config digests observed locally.
+The [final code quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40246809253) and [v0.1.1 release run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40246810683) both completed successfully for source commit `fbd97e985473537e99f47e8e987b6ade222e3bc6`. The release run's quality, publish and record jobs all passed. The hosted Linux amd64 builds also produced the same manifest and config digests observed locally.
 
-The [first run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40245866237) stopped at an exporter unsupported by the runner's default builder. The digest-pinned disposable builder corrected that portability issue. The [initial tagged publishing attempt](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40246350655) correctly stopped when the engine recompressed a layer during upload and changed the manifest digest. It created no supported release. Publication now copies the original OCI archive without conversion, and a local transfer regression checks digest preservation. A corrected version tag is being verified separately.
+[Release v0.1.1](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) includes the packaged chart, raw scan, CycloneDX SBOM, database metadata, signed evidence predicate, checksums and verification output. Its published image is `ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22`.
+
+Additional consumer checks were executed after publication:
+
+| Check | Outcome |
+| --- | --- |
+| `scripts/verify-release.sh IMAGE v0.1.1` | Exit 0; image, SBOM and evidence attestations validate with exact workflow identity, expected issuer and normal transparency checks |
+| Wrong expected workflow identity | Cosign exit 12; explicit identity mismatch, not a network failure |
+| Published asset checksums | All 4 entries match; all 4 signed evidence report hashes match downloaded assets |
+| Signed evidence comparison | Verified attestation predicate equals downloaded release-evidence.json; subject matches the exact image digest |
+| Published scan | 0 findings; no exceptions |
+| Published image pull and Go runtime suite | Pull succeeds; all 3 top-level container tests and 3 unsafe-setting subtests pass |
+| Packaged chart | Released 0.1.1 chart renders and passes manifest policy (exit 0) |
+| Anonymous access | Registry manifest and signature/attestation reads succeed without package credentials |
+
+See [structured release verification](evidence/release-verification.json).
+
+The [first quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40245866237) stopped at an exporter unsupported by the runner's default builder. The digest-pinned disposable builder corrected that portability issue. The [v0.1.0 publishing attempt](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40246350655) then correctly stopped when an engine upload recompressed a layer and changed the manifest digest. It created no supported release. The successful path uses an OCI copy that preserves original compressed bytes, with a transfer regression and registry digest comparison. Use the completed v0.1.1 release; the earlier staged tag is not a verified deployment input.
 
 ## Operational limitations
 
@@ -56,5 +73,5 @@ The [first run](https://github.com/jayekwere/hardened-container-supply-chain/act
 - The chart has one replica, fixed small resources and no ingress, TLS, authentication or availability guarantees. CPU or memory pressure can make probes fail. Its diagnostics are for a small functional demonstration.
 - Image verification is explicit; there is no installed signature-verifying admission controller. An administrator can bypass the CLI or alter workloads. Additional network policies can broaden effective access.
 - Release publication can leave unsigned staged images if a later step fails. Only a completed release with successful signature and both attestation verifications is a supported deployment input.
-- The registry may initially require authentication. Public source does not automatically grant anonymous package pulls. The release record and verification command still identify the exact digest.
+- Anonymous pulls and verification were tested for this published release. Private forks and mirrors may require credentials; public source alone does not establish package visibility.
 - Hosted artifact retention is finite; final release assets preserve the principal evidence. Scheduled scanning depends on the hosted scheduler, repository activity and service availability; it is not a continuous runtime monitor.

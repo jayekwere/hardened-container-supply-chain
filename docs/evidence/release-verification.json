@@ -1,0 +1,48 @@
+{
+  "observedDate": "2026-10-25",
+  "timezone": "America/Vancouver",
+  "sourceRevision": "fbd97e985473537e99f47e8e987b6ade222e3bc6",
+  "release": "v0.1.1",
+  "releaseURL": "https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1",
+  "image": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22",
+  "imageConfigDigest": "sha256:85d73d03e3d4fc8c92e9b143c753dd22fb699dfcda9c403b6c458beeb56ae4ce",
+  "qualityRun": {
+    "url": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40246809253",
+    "conclusion": "success"
+  },
+  "releaseRun": {
+    "url": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40246810683",
+    "conclusion": "success",
+    "jobs": {
+      "quality / checks": "success",
+      "publish": "success",
+      "record": "success"
+    }
+  },
+  "consumerVerification": {
+    "expectedIdentity": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/release.yml@refs/tags/v0.1.1",
+    "expectedIssuer": "https://token.actions.githubusercontent.com",
+    "imageAndAttestationVerificationExit": 0,
+    "wrongIdentityExit": 12,
+    "assetChecksumEntriesVerified": 4,
+    "signedReportHashesVerified": 4,
+    "publishedEvidenceEqualsSignedPredicate": true,
+    "publishedFindingCount": 0,
+    "activeExceptions": 0,
+    "publishedContainerTopLevelTestsPassed": 3,
+    "unsafeRuntimeSubtestsRejected": 3,
+    "releasedChartPolicyExit": 0,
+    "anonymousRegistryAccess": true
+  },
+  "signedReportHashes": {
+    "scan.json": "2cf61b5ad33a8048b0c4eccc28ec3e1d9ff061f7f4bc4cf54cc8c3d60a67c534",
+    "sbom.cdx.json": "67f5d6fc42379c908dcf5a98dd8d28a30863624d00eb5a3d4f38ed91c753c162",
+    "db-metadata.json": "51a4519af68de32c4dc134f10f1d57be7f79a41428f669ac39b074e8c6fa6089",
+    "scanner-version.txt": "d6ba09a5538c0b2f281b92d2f34a3a8725a24900fd48908c70b0959398854dea"
+  },
+  "limitations": [
+    "No runtime NetworkPolicy traffic-denial result is claimed.",
+    "No VEX assertion is emitted.",
+    "No signature-verifying admission controller is installed."
+  ]
+}

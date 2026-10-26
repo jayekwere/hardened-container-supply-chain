@@ -8,6 +8,8 @@ The application is intentionally small so the controls can be inspected end to e
 
 ## Verified status
 
+[Release v0.1.1](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) completed all hosted gates. Anonymous signature verification and runtime tests against the published digest also passed.
+
 See [verification evidence](docs/verification.md) for dated local results and hosted workflow results. The initial live scan found vulnerable standard-library code; [remediation evidence](docs/remediation.md) records the compiler upgrade and rescan. Synthetic negative fixtures are clearly marked and are never presented as real findings. There are no active exceptions and no VEX assertions.
 
 ## Run the complete checks
@@ -83,7 +85,7 @@ Release tags must have the form `vMAJOR.MINOR.PATCH` and point to a commit reach
 Take the exact reference from the release's `image-reference.txt` asset. Do not substitute a mutable tag or the local image config digest.
 
 ```sh
-export IMAGE='ghcr.io/jayekwere/hardened-container-supply-chain@sha256:REPLACE_WITH_RELEASE_DIGEST'
+export IMAGE='ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22'
 export TAG='v0.1.1'
 ./scripts/verify-release.sh "$IMAGE" "$TAG"
 
