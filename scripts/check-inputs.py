@@ -62,3 +62,11 @@ assert profile['sbomSpecVersion'] in requirements[0]['policy']['data']
 assert profile['sourceRevision'] in requirements[1]['policy']['data']
 assert profile['platform'] in requirements[1]['policy']['data']
 print('PASS both admission attestations require exact release trust and checked content')
+
+released = json.loads(Path('integration/admission/verifier-release.lock.json').read_text())
+assert re.fullmatch(r'controller-v\d+\.\d+\.\d+', released['tag'])
+assert re.fullmatch(r'ghcr\.io/jayekwere/hardened-container-supply-chain@sha256:[a-f0-9]{64}', released['image'])
+assert re.fullmatch('[a-f0-9]{40}', released['sourceRevision'])
+assert released['platform'] == 'linux/amd64' and released['issuer'] == admission['issuer']
+assert released['identity'] == 'https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/controller-release.yml@refs/tags/' + released['tag']
+print('PASS published verifier digest and exact identity lock')

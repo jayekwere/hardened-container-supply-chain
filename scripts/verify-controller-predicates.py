@@ -50,4 +50,4 @@ if __name__=='__main__':
             except (AssertionError,KeyError,ValueError): continue
             valid=True
     assert valid, 'DENY no matching signed SBOM/evidence claims or report hashes'
-    print('PASS signed verifier claims and supplied evidence hashes')
+    print('PASS signed verifier claims' + (' and downloaded report hashes' if len(sys.argv)>3 and sys.argv[3] else ''))
