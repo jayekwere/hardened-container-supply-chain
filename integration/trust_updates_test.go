@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -47,8 +48,11 @@ func TestTrustUpdates(t *testing.T) {
 	acknowledgements := map[string]string{}
 	var endpointPods []string
 	policyWrites := []policyWriteAttempt{}
+	authorizationChecks := []map[string]any{}
+	compiledChecks := []map[string]string{}
+	compiledInputs := map[string]map[string]string{}
 	t.Cleanup(func() {
-		d := map[string]any{"schemaVersion": 1, "startedAtUTC": started, "finishedAtUTC": time.Now().UTC().Format(time.RFC3339Nano), "outcome": outcome, "signedImage": inputs.SignedImage, "policyWriteAcknowledgements": acknowledgements, "policyWriteAttempts": policyWrites, "endpointPods": endpointPods, "observations": observations}
+		d := map[string]any{"schemaVersion": 1, "startedAtUTC": started, "finishedAtUTC": time.Now().UTC().Format(time.RFC3339Nano), "outcome": outcome, "signedImage": inputs.SignedImage, "policyWriteAcknowledgements": acknowledgements, "policyWriteAttempts": policyWrites, "authorizationChecks": authorizationChecks, "compiledSnapshotInputs": compiledInputs, "compiledSnapshotChecks": compiledChecks, "endpointPods": endpointPods, "observations": observations}
 		b, _ := json.MarshalIndent(d, "", "  ")
 		if err := os.WriteFile("../artifacts/admission/trust-updates.json", append(b, '\n'), 0600); err != nil {
 			t.Error(err)
@@ -173,17 +177,25 @@ func TestTrustUpdates(t *testing.T) {
 		patch(kind, "policy-controller-webhook", map[string]any{"rules": rules})
 	}
 	awaitAuthorization := func(verb, resource, want string) {
-		deadline := time.Now().Add(20 * time.Second)
-		for {
-			out, code := command(nil, "auth", "can-i", verb, resource, "-n", "image-policy-system", "--as", account)
-			words := strings.Fields(string(out))
-			if len(words) > 0 && words[len(words)-1] == want && ((want == "no" && code == 1) || (want == "yes" && code == 0)) {
-				return
+		for _, node := range admissionControlPlanes(t) {
+			deadline := time.Now().Add(20 * time.Second)
+			for {
+				at := time.Now().UTC().Format(time.RFC3339Nano)
+				out, code := controlPlaneCommand(t, node, nil, "auth", "can-i", verb, resource, "-n", "image-policy-system", "--as", account)
+				words := strings.Fields(string(out))
+				observed := "error"
+				if len(words) > 0 {
+					observed = words[len(words)-1]
+				}
+				authorizationChecks = append(authorizationChecks, map[string]any{"endpoint": node, "startedAtUTC": at, "verb": verb, "resource": resource, "expected": want, "observed": observed, "exitCode": code, "output": string(out)})
+				if observed == want && ((want == "no" && code == 1) || (want == "yes" && code == 0)) {
+					break
+				}
+				if time.Now().After(deadline) {
+					t.Fatalf("permission positive control failed on %s: %d %s", node, code, out)
+				}
+				time.Sleep(100 * time.Millisecond)
 			}
-			if time.Now().After(deadline) {
-				t.Fatalf("permission positive control failed: %d %s", code, out)
-			}
-			time.Sleep(100 * time.Millisecond)
 		}
 	}
 	awaitForbidden := func(verb, resource string) { awaitAuthorization(verb, resource, "no") }
@@ -209,6 +221,21 @@ func TestTrustUpdates(t *testing.T) {
 	freezeWrites := func() {
 		restrict("role", roleRules, "configmaps", map[string]bool{"create": true, "update": true, "patch": true, "delete": true})
 		awaitForbidden("patch", "configmap/config-image-policies")
+	}
+	readCompiled := func() map[string]string {
+		var value struct{ Data map[string]string }
+		if err := json.Unmarshal(must(nil, "-n", "image-policy-system", "get", "configmap", "config-image-policies", "-o", "json"), &value); err != nil {
+			t.Fatal(err)
+		}
+		return value.Data
+	}
+	checkCompiled := func(phase, input string) {
+		expected := fmt.Sprintf("%x", sha256.Sum256(encode(compiledInputs[input])))
+		observed := fmt.Sprintf("%x", sha256.Sum256(encode(readCompiled())))
+		compiledChecks = append(compiledChecks, map[string]string{"phase": phase, "input": input, "checkedAtUTC": time.Now().UTC().Format(time.RFC3339Nano), "expectedSHA256": expected, "observedSHA256": observed})
+		if expected != observed {
+			t.Fatalf("compiled policy copy changed during frozen phase %s", phase)
+		}
 	}
 	var hooks struct {
 		Webhooks []struct{ ClientConfig struct{ CABundle []byte } }
@@ -359,12 +386,15 @@ func TestTrustUpdates(t *testing.T) {
 		cm.Data[name] = string(encode(p))
 	}
 	patch("configmap", "config-image-policies", map[string]any{"data": cm.Data})
+	compiledInputs["poisoned-copy"] = cm.Data
+	checkCompiled("poisoned-before-probes", "poisoned-copy")
 	for i := 0; i < 5; i++ {
 		apiProbe("poisoned-compiled-copy", "signature-denied", "signature-demo", inputs.UnsignedImage)
 		for _, e := range endpoints {
 			directProbe(e, "poisoned-compiled-copy", "signature-denied", inputs.UnsignedImage)
 		}
 	}
+	checkCompiled("poisoned-after-unsigned-probes", "poisoned-copy")
 	apply := func(file string, change func(map[string]any), phase string) {
 		b, err := os.ReadFile(file)
 		if err != nil {
@@ -409,6 +439,7 @@ func TestTrustUpdates(t *testing.T) {
 			directProbe(e, "signer-tightened", "deny", inputs.SignedImage)
 		}
 	}
+	checkCompiled("signer-tightened", "poisoned-copy")
 	apply("../integration/admission/release-policy.json", nil, "signer-restored")
 	apply("../integration/admission/attestations-policy.json", wrongSubject, "attestation-tightened")
 	names = readyPods()
@@ -419,6 +450,7 @@ func TestTrustUpdates(t *testing.T) {
 			directProbe(e, "attestation-tightened", "deny", inputs.SignedImage)
 		}
 	}
+	checkCompiled("attestation-tightened", "poisoned-copy")
 	restrict("clusterrole", clusterRules, "clusterimagepolicies", map[string]bool{"list": true})
 	awaitForbidden("list", "clusterimagepolicies.policy.sigstore.dev")
 	for i := 0; i < 5; i++ {
@@ -427,6 +459,7 @@ func TestTrustUpdates(t *testing.T) {
 			directProbe(e, "authoritative-read-unavailable", "freshness-denied", inputs.SignedImage)
 		}
 	}
+	checkCompiled("authoritative-read-unavailable", "poisoned-copy")
 	apiProbe("outside-scope-read-outage", "allowed", "signature-outside", inputs.UnsignedImage)
 	restoreReads()
 	awaitAuthorization("list", "clusterimagepolicies.policy.sigstore.dev", "yes")
@@ -434,6 +467,7 @@ func TestTrustUpdates(t *testing.T) {
 	for _, e := range endpoints {
 		directProbe(e, "restored-with-poisoned-copy", "allowed", inputs.SignedImage)
 	}
+	checkCompiled("restored-with-poisoned-copy", "poisoned-copy")
 	must(nil, "delete", "clusterimagepolicy", "release-attestations", "--wait=false")
 	acknowledgements["mandatory-policy-deleted"] = time.Now().UTC().Format(time.RFC3339Nano)
 	for i := 0; i < 5; i++ {
@@ -442,12 +476,14 @@ func TestTrustUpdates(t *testing.T) {
 			directProbe(e, "mandatory-policy-deleted", "freshness-denied", inputs.SignedImage)
 		}
 	}
+	checkCompiled("mandatory-policy-deleted", "poisoned-copy")
 	restoreWrites()
 	awaitAuthorization("patch", "configmap/config-image-policies", "yes")
 	awaitPolicyDeleted("release-attestations")
 	apply("../integration/admission/attestations-policy.json", nil, "mandatory-policy-recreated")
 	apiProbe("mandatory-policy-recreated", "allowed", "signature-demo", inputs.SignedImage)
 	freezeWrites()
+	compiledInputs["before-extra-policy"] = readCompiled()
 	extra := map[string]any{"apiVersion": "policy.sigstore.dev/v1beta1", "kind": "ClusterImagePolicy", "metadata": map[string]any{"name": "trust-update-extra"}, "spec": map[string]any{"images": []any{map[string]any{"glob": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:*"}}, "authorities": []any{map[string]any{"name": "deny", "static": map[string]string{"action": "fail", "message": "TRUST-UPDATE-EXTRA-DENY"}}}}}
 	must(encode(extra), "apply", "-f", "-")
 	acknowledgements["extra-policy-created"] = time.Now().UTC().Format(time.RFC3339Nano)
@@ -457,6 +493,7 @@ func TestTrustUpdates(t *testing.T) {
 			directProbe(e, "extra-policy-created", "deny", inputs.SignedImage)
 		}
 	}
+	checkCompiled("extra-policy-created", "before-extra-policy")
 	restoreWrites()
 	awaitAuthorization("patch", "configmap/config-image-policies", "yes")
 	must(nil, "delete", "clusterimagepolicy", "trust-update-extra", "--wait=false")
