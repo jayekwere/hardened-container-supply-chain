@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "tag": "controller-v0.1.1",
+  "image": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:59964fb24d115ce431a71a8d7c907788fea29a6ac855d306726a958c10c31f91",
+  "platform": "linux/amd64",
+  "sourceRevision": "02fcc679cf485c7f6231c94a399df6a97ed70699",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "identity": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/controller-release.yml@refs/tags/controller-v0.1.1",
+  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40342659964"
+}

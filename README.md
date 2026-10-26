@@ -8,7 +8,9 @@ The application is intentionally small so the controls can be inspected end to e
 
 ## Verified status
 
-[Release v0.1.1](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) completed all hosted gates. Anonymous signature verification and runtime tests against the published digest also passed.
+[Application release v0.1.1](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) completed all hosted gates. Anonymous signature verification and runtime tests against the published digest also passed.
+
+[Verifier release controller-v0.1.1](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/controller-v0.1.1) is scanned, signed and carries SBOM/build-evidence attestations. Its exact registry digest passed **183 trust-update probes** with **152 required rejections and zero unexpected admissions**, plus **16 control-plane outage controls** and the **30-case admission matrix**. The outage controls used 18 requests, including two fail-closed timeouts; standard recovery used 31 requests, including one fail-closed rejection. [Exact publication results and limitations](docs/verifier-release.md#published-release-results) distinguish those transitions from policy denials.
 
 Admission requires the image signature and both signed SBOM/evidence predicates. A downstream verifier patch now reads authoritative policies around each validation rather than trusting the older watched snapshot. See [the trust-update fix, build/upgrade commands, results and limits](docs/trust-updates.md). The earlier five stale admissions remain preserved as historical evidence.
 
@@ -98,8 +100,10 @@ export TAG='v0.1.1'
 ./scripts/verify-release.sh "$IMAGE" "$TAG"
 
 export KUBECONFIG='/absolute/path/to/your/kubeconfig'
-# Set CONTROLLER_IMAGE to the built/copied digest from docs/trust-updates.md.
-: "${CONTROLLER_IMAGE:?explicit patched verifier digest required}"
+git fetch origin --tags
+export CONTROLLER_IMAGE=$(python3 -c 'import json;print(json.load(open("integration/admission/verifier-release.lock.json"))["image"])')
+export CONTROLLER_TAG=$(python3 -c 'import json;print(json.load(open("integration/admission/verifier-release.lock.json"))["tag"])')
+./scripts/verify-controller-release.sh "$CONTROLLER_IMAGE" "$CONTROLLER_TAG"
 ./scripts/install-admission.sh "$KUBECONFIG" "$CONTROLLER_IMAGE"
 export PATH="$PWD/.tools/bin:$PATH"
 DIGEST="${IMAGE##*@}"
@@ -114,7 +118,7 @@ kubectl -n supply-demo port-forward service/demo 8080:8080
 
 These deployment commands target your selected cluster and assume Kubernetes 1.34, Linux amd64 workload nodes for the published image, pull access to the image, and a network plugin that enforces NetworkPolicy. The chart supports Kubernetes 1.30+; the pinned integration environment tests 1.34. The network policy permits only namespace-local ingress to TCP 8080 and denies all pod egress, including DNS. The service needs neither DNS nor external connectivity.
 
-Build and distribute the patched verifier using [these commands](docs/trust-updates.md#install-the-patched-verifier-explicitly); the installer requires its explicit image digest and cannot fall back to the old verifier.
+The published verifier is Linux amd64. Native arm64 builds are exercised locally with `make admission`. For custom builds, use [these commands](docs/trust-updates.md#install-the-patched-verifier-explicitly); the installer requires its explicit image digest and cannot fall back to the old verifier.
 
 The explicit installer enables API-server enforcement of the image signature and both SBOM/evidence attestations in the enrolled namespace; the application chart itself does not install cluster-wide verification infrastructure. The two admission policies pin the exact v0.1.1 workflow identity, check the released SBOM/evidence profile, and reject unmatched images. For a future release or rollback, review the exact signer identity and content profile in both policies, verify the selected digest, then run `helm upgrade` with that digest. Admission does not fetch the referenced scan reports or perform a new vulnerability scan.
 

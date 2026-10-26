@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUTC": "2026-10-26T15:25:33.000209+00:00",
+  "tag": "controller-v0.1.1",
+  "image": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:59964fb24d115ce431a71a8d7c907788fea29a6ac855d306726a958c10c31f91",
+  "registryCredentials": "empty temporary configuration; token and alternate repository variables removed",
+  "signature": "verified",
+  "sbomAttestation": "verified",
+  "evidenceAttestation": "verified",
+  "downloadedReports": "all 15 authenticated checksums matched; SBOM/evidence content matched verified predicates",
+  "sourceRevision": "02fcc679cf485c7f6231c94a399df6a97ed70699",
+  "outputSHA256": "307bba3cc398df400e108addc37079bc71a1d19ecba7a95a41ee95825087d13e"
+}

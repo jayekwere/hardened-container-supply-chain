@@ -65,9 +65,9 @@ The verifier itself is installed by a trusted administrator; it cannot establish
 
 Two authoritative reads are not a transaction with eventual object persistence. Existing approvals and running Pods are not recalled; multi-policy writes are not atomic. Mutable trust references and unsupported modes remain intentionally rejected. API availability, administrator-controlled enrollment/routing and node integrity remain trusted. A scan is a database snapshot and module inventory, not a proof that every possible defect is absent. The focused verifier tests do not claim execution of the complete upstream suite.
 
-## Executed local results
+## Initial completed local replay
 
-The final local run on 2026-10-26 used Linux arm64 nodes and the dependency-patched verifier. `make admission` and the subsequent verifier scan exited 0. The Go integration package completed in **185.062 seconds**. [Structured local evidence](evidence/verifier-multi-local.json) records image/binary identity, all phase counts, source/raw-output hashes, policy-write acknowledgements and normalized platform details.
+The initial completed local run on 2026-10-26 used Linux arm64 nodes and the dependency-patched verifier. `make admission` and the subsequent verifier scan exited 0. The Go integration package completed in **185.062 seconds**. [Structured local evidence](evidence/verifier-multi-local.json) records image/binary identity, all phase counts, source/raw-output hashes, policy-write acknowledgements and normalized platform details.
 
 | Local check | Exact outcome |
 | --- | --- |
@@ -102,3 +102,61 @@ The initial `controller-v0.1.0` workflow failed closed before publication: the p
 The installer now retries only an unavailable ClusterImagePolicy webhook during initial policy installation. Attempts are recorded in `artifacts/admission/bootstrap-*.json`, limited to ten attempts and a 60-second retry window with bounded individual requests. A real policy denial, foreign webhook or process error stops immediately. The workload admission tests retain immediate failure for any unexpected admission. Eight policy-apply regressions cover refusal/recovery, conversion EOF/recovery, validation EOF/recovery, genuine denial, denial quoting a network error, foreign webhook, persistent outage and execution timeout. Twelve Go regressions cover conversion-error classification, recovery, retry exhaustion and the prohibition on workload retries.
 
 A parallel main-branch run also failed before acknowledging a policy update because a conversion-webhook connection closed while a verifier drained. Administrative policy applies now record and retry only transport failures from the known policy conversion, defaulting and validation endpoints, before declaring acknowledgement; all subsequent security probes still start after a confirmed write. `policyWriteAttempts` in the raw evidence retains every administrative attempt. Workload probes are unchanged and never retried after an unexpected admission. The policy-apply helper also handles this conversion error for operator commands.
+
+## Published release results
+
+[controller-v0.1.1](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/controller-v0.1.1) completed the [release workflow](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40342659964), including all prerequisite quality gates, publication, signing, both attestations, negative verification tests and runtime checks against the exact registry image. The source revision is `02fcc679cf485c7f6231c94a399df6a97ed70699`.
+
+```text
+ghcr.io/jayekwere/hardened-container-supply-chain@sha256:59964fb24d115ce431a71a8d7c907788fea29a6ac855d306726a958c10c31f91
+```
+
+The registry manifest, independently built archive and observed running Pod image IDs all matched that digest. The earlier independently built amd64 quality archive also had this digest; its engine-imported runtime reference was different and remains separately recorded. The release build's forced second compilation produced a byte-identical binary. Published runtime nodes were Linux amd64 with Kubernetes v1.34.0. The Go integration package completed in **172.129 seconds**.
+
+| Published-image check | Exact outcome |
+| --- | --- |
+| Trust updates | 183 probes: 117 API-server workload probes and 66 direct verified-TLS probes |
+| Decisions | 31 intended admissions; 26 signature, 51 identity, 50 freshness and 25 additional-policy denials; zero unexpected admissions |
+| Paused API/etcd node | All 16 logical controls passed in 18 requests: 8 valid admissions, 8 signature denials, 2 transient webhook-unavailable responses |
+| Standard matrix | 30 cases in 31 requests; verifier recovery first failed closed, then admitted on attempt 2 |
+| Policy administration | 17 standard-suite apply attempts; 6 trust-update writes used 7 attempts, including one conversion EOF before acknowledgement that recovered |
+| Focused verifier / admission classification / policy-write regressions | 29 / 24 / 12 cases passed |
+| Policy-apply / signed-claim / VEX regressions | 8 policy-apply cases passed; 15 claim mutations and missing reports rejected; 8 unsafe VEX mutations rejected |
+| Release verification | Correct signature and both predicates accepted; wrong workflow identity and changed SBOM report bytes rejected |
+| Anonymous consumer verification | Signature, both predicates, all 15 downloaded report checksums and decoded SBOM/evidence contents verified |
+| Scan inventory | 276 SBOM components; 2,050 compiled packages; no HIGH or CRITICAL findings; one unchanged raw UNKNOWN with bounded VEX |
+| Database | Updated 2026-10-26 14:38:04 UTC; downloaded 15:08:27 UTC before scanning |
+| Risk-acceptance ledger | Empty |
+| Application quality / real NetworkPolicy replay | All gates passed; 80 traffic probes, zero mismatches |
+
+The two paused-node timeouts and the recovery rejection are availability failures, not cryptographic policy denials. The final expected controls then succeeded. The administrative EOF occurred before the confirmed policy-write acknowledgement; every attempt is retained, and no unexpected workload admission was retried into a denial. Counts exclude administrative, permission-check and snapshot-read requests.
+
+[Published structured evidence](evidence/verifier-release-published.json) contains all phase counts, source/raw-output hashes, acknowledgement times, actual image IDs and artifact identity. [Independent anonymous verification](evidence/verifier-anonymous-verification.json) records the separate consumer check. Release assets preserve raw scan/SBOM/VEX files, module files, focused test output, authenticated build evidence, verification failures and individual runtime decisions. Later runtime results are separate assets; the earlier build-evidence attestation does not authenticate those later files.
+
+Use the checked [release lock](../integration/admission/verifier-release.lock.json). For full report-byte verification, download the release assets into a separate directory:
+
+```sh
+make tools
+git fetch origin --tags
+export CONTROLLER_IMAGE=$(python3 -c 'import json;print(json.load(open("integration/admission/verifier-release.lock.json"))["image"])')
+export CONTROLLER_TAG=$(python3 -c 'import json;print(json.load(open("integration/admission/verifier-release.lock.json"))["tag"])')
+./scripts/verify-controller-release.sh "$CONTROLLER_IMAGE" "$CONTROLLER_TAG"
+# The optional asset-download command requires gh.
+gh release download "$CONTROLLER_TAG" --repo jayekwere/hardened-container-supply-chain \
+  --dir artifacts/downloaded-controller
+./scripts/verify-controller-release.sh "$CONTROLLER_IMAGE" "$CONTROLLER_TAG" artifacts/downloaded-controller
+```
+
+Observed consumer output:
+
+```text
+PASS signed verifier claims and downloaded report hashes
+```
+
+Verification uses the checked-out source/patch profile. Use a checkout of the selected release tag when verifying an older release after those inputs change. Published-digest runtime replay requires an amd64 engine; native arm64 replay uses `make admission` to build the corresponding local image. The anonymous cryptographic verification above runs on either supported client platform.
+
+## Compiled-state evidence checks
+
+The latest local replay additionally confirmed each temporary permission state through every API server and compared hashes of the compiled policy data through eight frozen phases. **All 18 authorization confirmations and all 8 snapshot comparisons matched**, alongside the same **183 trust probes, 16 outage controls and 30 standard cases in 30 requests**, with zero unexpected admissions. The integration package completed in **195.574 seconds**. [Structured local proof](evidence/verifier-compiled-state-local.json) binds these checks to source `e28194c`, the native arm64 image and raw evidence hashes. These additional checks do not change the verifier binary or the published image.
+
+The [preceding readiness replay](evidence/verifier-readiness-hosted.json) passed the same trust/outage decision totals on the corrected source in 161.918 seconds, with no administrative retries and 30 standard requests. The [local readiness replay](evidence/verifier-readiness-local.json) passed in 209.618 seconds. Those dated records remain separate from the published-image run.

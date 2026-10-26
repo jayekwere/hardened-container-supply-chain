@@ -38,7 +38,7 @@ Focused patched-source tests cover independent HTTP request contexts, poisoned w
 
 ## Install the patched verifier explicitly
 
-Build for the architecture of the target nodes, copy the generated image to a registry you control, and verify the copied manifest digest. Registry publication below is an operator command, not a claim that a new public controller image was published by this repository update:
+Use the [published release and verification commands](verifier-release.md#published-release-results) for the scanned, signed verifier. The following commands build an operator-produced alternative for the target node architecture and copy its exact manifest to a selected registry:
 
 ```sh
 CONTROLLER_ARCH=amd64 make controller-image

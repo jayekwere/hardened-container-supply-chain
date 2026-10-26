@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-26",
+  "timezone": "America/Vancouver",
+  "codeRevision": "1f4cf7d4b36c9896c6db91dcc761a918e4c3233b",
+  "outcome": "passed",
+  "startedAtUTC": "2026-10-26T14:13:48.328544Z",
+  "finishedAtUTC": "2026-10-26T14:16:04.081651Z",
+  "controllerBuild": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "b682351682fb3025644e66fb489777c013121e5fe6f8501e6fcb5a9588e2ed2f",
+    "dependencyPatchSHA256": "a5764716eadb3bccc7368525298491149195d0ff70decccd0b921de9f5f19ff9",
+    "goModSHA256": "471fe854daa9885743e103b431c4959f9d4f2b8f62868164d1bf25a110bb38ad",
+    "goSumSHA256": "dfb42b3aee4911f9e4bd8b374e54003b9af4dda46b50e0a5ab1fd772ac668d7f",
+    "packageClosureSHA256": "7281f82cd59eaf5d61cba9889740ece30d7d257ab308f46f5116251d726cd987",
+    "binarySHA256": "3b064866aecdc0d5bca35e4092db4dda79a9d4835cc759da92be169665b98eb8",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "arm64",
+    "manifestDigest": "sha256:b1d41fd9788b66b6d1c248c24495b310c20143235ad8fceb55d36b5a071cd441"
+  },
+  "controllerRuntimeImage": "docker.io/library/supply-policy-controller@sha256:b1d41fd9788b66b6d1c248c24495b310c20143235ad8fceb55d36b5a071cd441",
+  "nodes": [
+    {
+      "name": "hsc-admission-18101-control-plane",
+      "architecture": "arm64",
+      "kernelVersionCore": "6.12.76",
+      "kernelReleaseSHA256": "e03cb8411480c03ca447ad16916583446ee98878e1be6ff8e9859020f8e6ceea",
+      "kubeletVersion": "v1.34.0",
+      "containerRuntimeVersion": "containerd://2.1.3"
+    },
+    {
+      "name": "hsc-admission-18101-control-plane2",
+      "architecture": "arm64",
+      "kernelVersionCore": "6.12.76",
+      "kernelReleaseSHA256": "e03cb8411480c03ca447ad16916583446ee98878e1be6ff8e9859020f8e6ceea",
+      "kubeletVersion": "v1.34.0",
+      "containerRuntimeVersion": "containerd://2.1.3"
+    },
+    {
+      "name": "hsc-admission-18101-control-plane3",
+      "architecture": "arm64",
+      "kernelVersionCore": "6.12.76",
+      "kernelReleaseSHA256": "e03cb8411480c03ca447ad16916583446ee98878e1be6ff8e9859020f8e6ceea",
+      "kubeletVersion": "v1.34.0",
+      "containerRuntimeVersion": "containerd://2.1.3"
+    }
+  ],
+  "trustUpdates": {
+    "probeCount": 183,
+    "apiServerProbeCount": 117,
+    "directTLSVerifierProbeCount": 66,
+    "uniqueVerifierPods": 3,
+    "decisionCounts": {
+      "allowed": 31,
+      "signature-denied": 26,
+      "identity-denied": 51,
+      "freshness-denied": 50,
+      "extra-policy-denied": 25
+    },
+    "phaseDecisionCounts": {
+      "attestation-tightened": {
+        "identity-denied": 25
+      },
+      "authoritative-read-unavailable": {
+        "freshness-denied": 25
+      },
+      "extra-policy-created": {
+        "extra-policy-denied": 25
+      },
+      "mandatory-policy-deleted": {
+        "freshness-denied": 25
+      },
+      "mandatory-policy-recreated": {
+        "allowed": 3
+      },
+      "outside-scope-read-outage": {
+        "allowed": 3
+      },
+      "poisoned-compiled-copy": {
+        "signature-denied": 25
+      },
+      "production-restored": {
+        "allowed": 17
+      },
+      "restored-with-poisoned-copy": {
+        "allowed": 2
+      },
+      "scale-down-image-change": {
+        "signature-denied": 1
+      },
+      "scale-down-label-change": {
+        "identity-denied": 1
+      },
+      "scale-down-replicas-only": {
+        "allowed": 1
+      },
+      "signer-tightened": {
+        "identity-denied": 25
+      },
+      "warm-cache": {
+        "allowed": 5
+      }
+    },
+    "perAPIEndpointCounts": {
+      "hsc-admission-18101-control-plane": 38,
+      "hsc-admission-18101-control-plane2": 38,
+      "hsc-admission-18101-control-plane3": 38,
+      "api-server": 3
+    },
+    "unexpectedAdmissionCount": 0,
+    "policyWriteAcknowledgements": {
+      "attestation-tightened": "2026-10-26T14:15:01.272981Z",
+      "attestations-restored": "2026-10-26T14:15:27.568107Z",
+      "extra-policy-created": "2026-10-26T14:15:34.90727Z",
+      "mandatory-policy-deleted": "2026-10-26T14:15:28.862887Z",
+      "mandatory-policy-recreated": "2026-10-26T14:15:32.507815Z",
+      "signer-restored": "2026-10-26T14:15:01.172069Z",
+      "signer-tightened": "2026-10-26T14:14:31.418143Z"
+    }
+  },
+  "isolatedControlPlaneOutage": {
+    "requestCount": 16,
+    "logicalControls": 16,
+    "decisionCounts": {
+      "allowed": 8,
+      "signature-denied": 8
+    },
+    "phaseCounts": {
+      "all-apis-ready": 6,
+      "one-control-plane-paused": 4,
+      "all-apis-restored": 6
+    },
+    "verifierNodes": [
+      "hsc-admission-18101-control-plane2"
+    ],
+    "unexpectedAdmissionCount": 0,
+    "transientFailClosedObservations": []
+  },
+  "standardAdmission": {
+    "cases": 30,
+    "requests": 30,
+    "decisionCounts": {
+      "allowed": 11,
+      "signature-denied": 5,
+      "no-policy-denied": 1,
+      "identity-denied": 4,
+      "attestation-denied": 8,
+      "unavailable": 1
+    },
+    "recoveryAttempts": [],
+    "unexpectedAdmissionCount": 0
+  },
+  "focusedVerifierCases": 29,
+  "classificationRegressionCases": 24,
+  "goIntegrationPackageSeconds": 209.618,
+  "scan": {
+    "rawSeverityCounts": {
+      "UNKNOWN": 1
+    },
+    "gate": "PASS scan",
+    "vexAdvisory": "GO-2026-5932",
+    "vexJustification": "vulnerable_code_not_present",
+    "compiledPackageCount": 2048,
+    "sbomComponents": 276,
+    "exceptionEntries": 0
+  },
+  "rawEvidenceSHA256": {
+    "admission/trust-updates.json": "dcc0ff47f0197d0f31e53f2f4aa0fa3aa72d406b0babda6855115caa6bdd730a",
+    "admission/multi-control-plane.json": "68816b1a26e2e7bac86c46e85215cc8e4e2400ec0799b397a251128408225450",
+    "admission/decisions.json": "de4239134cf7009ee09485eae87e361357070bff910d6bebd02803288b974131",
+    "admission/tests.txt": "58f35f47354586cfeac40c2a0b11affba818ac553292825ab781a602f5b9a2cb",
+    "admission/nodes.json": "9f89ddab543a22095f6dfd66ecdb582dec35a95c8668784194bdda35a388ce32",
+    "controller/source.json": "41aa982792d3da4abcfe18d7e7c3f6fce6d8f912e64083037873cd014c884a35",
+    "controller/unit-tests.txt": "1f8ea0696b751c7fd00cc0826054a5c78a1bba4256651b9880d9689f12786c89",
+    "controller/scan.json": "3fda306e8cd7fe8a474637e4114bf9b5f529698840d063c97f30810ff1bb2a18",
+    "controller/sbom.cdx.json": "ff6aa600f047113612c23b229a82dbceabdaa4aafc3d652d4d196512cfb890d0",
+    "controller/vex.json": "8efde0f2e69aadb211f1744f897cd61fdd06b827044359c40f573d9df17351e2",
+    "controller/vex-evidence.json": "dc9b26226627be59d79b6e67f4023490e19f7158dd105aa179c75c63659ebb3f",
+    "controller/packages.txt": "7281f82cd59eaf5d61cba9889740ece30d7d257ab308f46f5116251d726cd987",
+    "controller/scan-policy-input.json": "1c5c73b51b544c06a02c71633faa7d97bdf8715631007cacfa20dfaed19467f0",
+    "admission/controller-pods.json": "83034cc70a5333b7f687910cb59a275ac7a00da9ea379af4f3a6d5d58f18653e"
+  },
+  "testedSourceSHA256": {
+    "patches/policy-controller-freshness.patch": "b682351682fb3025644e66fb489777c013121e5fe6f8501e6fcb5a9588e2ed2f",
+    "patches/policy-controller-dependencies.patch": "a5764716eadb3bccc7368525298491149195d0ff70decccd0b921de9f5f19ff9",
+    "integration/admission_test.go": "7567640673d220169159d961f21b7f32fffc07bd47513371301c6775992b1c6b",
+    "integration/admission_classification_test.go": "502a8600e8dec70b463eb38bf335c3e394ab2314e27454eb7bd4be33cd2d9596",
+    "integration/trust_updates_test.go": "a10e769bb9b717f57503bc0c9269918ac17454179ed8687d95dcdd57d3cfe6a9",
+    "integration/multi_control_plane_test.go": "7dd52935c648e67d52fb83f7a51feea2f66a9e6f85d5f57267eeff376c89e4cf",
+    "integration/admission/kind-multi.yaml": "47b65b4ee20b3a5dd8b6e2a26b7bfa616fa07d8a94779afd95367df6c569848f",
+    "integration/admission/inputs.lock.json": "7897a1ade41d1e530f969ccd338b4bb9a7a46cdca6e737270935dc6256b84d52",
+    "integration/admission/controller-values.json": "b27cc3291d5b5e5ac830973442994e9f3902e8e87fb5fea9ff251c727bcc2554",
+    "integration/admission/release-policy.json": "c77b00cc8c6cf7ed483ac49a2d6fab32414cd9f485037c5222e1a325e4bb83cb",
+    "integration/admission/attestations-policy.json": "4d1a620fb28cf5e07965c65956fe499472a423f2363148dabaf8369e3e043443",
+    "integration/admission/Controller.Dockerfile": "59ae094c49d0bb078c89f290408cb08c85380669dea1d0afac22ee9ae84689ee",
+    "scripts/admission.sh": "74072a8603333bd6502536b0ee1fc0caa0e1a5d9251bdb594979372694f03b34",
+    "scripts/build-controller.sh": "710a1aca72180aa891cbb685eb203b4c05654acdf77860325ea197e9ce5517e6",
+    "scripts/prepare-controller.py": "c7645fa8ff07d1006c510310afbd367e08730497cf05b3918d37f4016bc858d2",
+    "scripts/scan-controller.sh": "e984b9a69e85eb0860b2d5fed50233d211cb47d19c4ed82c8cdd05b9a952f5fa",
+    "scripts/controller-vex.py": "e4cd4c18de6a622a28506ea4a26ec5537d53dc3f1058d605f4fd0adff9af2999",
+    "security/verifier-vex.lock.json": "cb5322d10d77e96ae83c19ab1e228071e82105d4b3838cb9895af88366d18163",
+    "integration/policy_writes_test.go": "f25838a0c2e0c5fa7717ca576373bb261d4d99c435e4da3c0ffb211ba8c11d01",
+    "scripts/install-admission.sh": "38df07f1ef2eb76a86e5227c6069bb44a1902d6694ed2a306df05bd3542abecf",
+    "scripts/apply-bootstrap-policy.py": "0becd67386cf81e1dffc58bcd1a878f550bb5f54fefb79bff4bf944c96323ccf",
+    "scripts/test_bootstrap_policy.py": "4209692ffa02d96432893e1bdd2a66b2fcd3bfe2975d69f0bcee6d062ec09420",
+    "Makefile": "9b43cf2d19eb71972ac05c6efa630c2ff9a941b4beecb58b09fc128ee38b53f3"
+  },
+  "policyWriteRegressionCases": 9,
+  "administrativePolicyAttempts": {
+    "standard": {
+      "attempts": 17,
+      "failedBeforeAcknowledgement": 0
+    },
+    "trust": {
+      "attempts": 6,
+      "failedBeforeAcknowledgement": 0
+    }
+  },
+  "bootstrapPolicyAttempts": {
+    "bootstrap-release-policy.json": {
+      "schemaVersion": 1,
+      "policy": "integration/admission/release-policy.json",
+      "outcome": "passed",
+      "attempts": [
+        {
+          "attempt": 1,
+          "outcome": "applied",
+          "exitCode": 0,
+          "output": "clusterimagepolicy.policy.sigstore.dev/release-signer created\n"
+        }
+      ]
+    },
+    "bootstrap-attestations-policy.json": {
+      "schemaVersion": 1,
+      "policy": "integration/admission/attestations-policy.json",
+      "outcome": "passed",
+      "attempts": [
+        {
+          "attempt": 1,
+          "outcome": "applied",
+          "exitCode": 0,
+          "output": "clusterimagepolicy.policy.sigstore.dev/release-attestations created\n"
+        }
+      ]
+    }
+  },
+  "independentRecompilation": "SKIP independent verifier recompilation; enabled for release",
+  "observedRuntimeImageIDs": [
+    "docker.io/library/supply-policy-controller@sha256:b1d41fd9788b66b6d1c248c24495b310c20143235ad8fceb55d36b5a071cd441"
+  ]
+}
