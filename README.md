@@ -10,6 +10,8 @@ The application is intentionally small so the controls can be inspected end to e
 
 [Release v0.1.1](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) completed all hosted gates. Anonymous signature verification and runtime tests against the published digest also passed.
 
+Admission now requires the image signature and both signed SBOM/evidence predicates. Local and hosted runs reached all 30 expected final decisions; the [exact results](docs/admission-attestations.md) disclose five temporary admissions during a hosted trust-policy update, so immediate policy revocation is not claimed.
+
 See [verification evidence](docs/verification.md) for dated local results and hosted workflow results. The initial live scan found vulnerable standard-library code; [remediation evidence](docs/remediation.md) records the compiler upgrade and rescan. Synthetic negative fixtures are clearly marked and are never presented as real findings. There are no active exceptions and no VEX assertions.
 
 ## Run the complete checks

@@ -75,7 +75,7 @@ The signed fixture is the actual public release. The unsigned fixture is the exi
 | Unsigned Pod outside scope during that outage | Admit: API-server liveness/scope control |
 | Verifier restored | Admit |
 
-The outage test scales the verifier to zero and force-deletes its Pod **only in the newly created disposable cluster**. It confirms the runtime can see the running verifier, terminates only that runtime task to end the controller's long drain period and existing connections, waits for both the runtime process and Service endpoints to disappear, then checks rejection without changing `failurePolicy`. It restores the verifier and requires successful admission afterward. Simply removing Service endpoints did not interrupt an already-established webhook connection, so that weaker fault injection is not used as outage evidence.
+The outage test scales the verifier to zero and force-deletes its Pods **only in the newly created disposable cluster**. It confirms the runtime can see a running verifier, terminates only verifier runtime tasks in that namespace to end their long drain period and existing connections, waits for both the runtime processes and Service endpoints to disappear, then checks rejection without changing `failurePolicy`. This includes an older draining instance after the attestation fixture CA reload. It restores the verifier and requires successful admission afterward. Simply removing Service endpoints did not interrupt an already-established webhook connection, so that weaker fault injection is not used as outage evidence.
 
 Changing signer trust after a successful verification also exercises policy-cache invalidation: the already-signed image must be rejected under the wrong subject/issuer and admitted again after restoration.
 

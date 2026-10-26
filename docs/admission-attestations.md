@@ -14,9 +14,11 @@ make admission
 
 The admission command requires OpenSSL in addition to the engine and prerequisites in the README. It creates a private kubeconfig and fresh kind cluster, installs both policies, and tests actual API-server decisions. It also starts a digest-pinned TLS fixture registry connected only to the disposable engine network, with a loopback-only host port. Its temporary certificate is trusted only by the test controller. All image requests still reference the real signed public image; only fixture attestation discovery is redirected to that local registry.
 
-Each fixture envelope is signed with a freshly generated test key. The fixture sets contain both valid predicates, only one predicate, signed invalid content, an untrusted signature, a modified signed payload, or a signed statement for a different image digest. They are synthetic test evidence, not release claims or real scan results. The original image-signature policy stays active throughout. The test swaps only the attestation policy's authority/source while preserving its exact production content checks, restores the complete fixture set, then restores the production keyless authority/source and requires admission again. Policy changes also exercise cache invalidation after a successful verification.
+Each fixture envelope is signed with a freshly generated test key. The fixture sets contain both valid predicates, only one predicate, signed invalid content, an untrusted signature, a modified signed payload, or a signed statement for a different image digest. The tampered payload keeps the same valid claims and changes only the signed bytes, so content checks alone would accept it. They are synthetic test evidence, not release claims or real scan results. The original image-signature policy stays active throughout. The test swaps only the attestation policy's authority/source while preserving its exact production content checks, restores the complete fixture set, then restores the production keyless authority/source and requires admission again. Policy changes also exercise cache invalidation after a successful verification.
 
 Private signing keys are deleted before the Go suite runs. Cleanup removes the registry, its temporary TLS key/certificate, the entire cluster and its kubeconfig on success or failure. No fixture or test signature is pushed to a public registry. Raw API decisions, public fixture inventory/envelope hashes, test output, deployed controller metadata and node details are retained in `artifacts/admission/` and the workflow evidence artifact.
+
+Loading the fixture registry CA rolls the controller. The outage fault therefore stops every remaining verifier runtime task in the disposable namespace, including an older draining instance, and requires both zero running verifier tasks and zero ready Service endpoints before checking fail-closed rejection. Restoring the verifier must restore successful production admission.
 
 ## What the content policies check
 
@@ -50,7 +52,7 @@ All earlier signature/container-field, namespace-scope, outage and recovery case
 | Complete fixture requirements restored | Admit |
 | Real release and production attestation policy restored | Admit |
 
-An authenticated envelope of the wrong type cannot satisfy another requirement. Invalid signatures or subjects can leave no verified envelope of the required type; those rejections are recorded as attestation denials, without claiming the controller always exposes the exact cryptographic failure in its API error. The harness requires the named `release-attestations` policy and a recognized denial reason. Registry timeouts, TLS errors, unrelated webhooks and schema/Pod Security failures cannot count as successful negative attestation tests. Every propagation/recovery request is recorded, including any temporary disagreement before the expected decision.
+An authenticated envelope of the wrong type cannot satisfy another requirement. Invalid signatures or subjects can leave no verified envelope of the required type; those rejections are recorded as attestation denials, without claiming the controller always exposes the exact cryptographic failure in its API error. The harness requires the named `release-attestations` policy and a recognized denial reason. Regression cases reject registry timeouts, unrelated webhooks, broken policy compilation and schema/Pod Security failures as evidence of an expected attestation denial. Every propagation/recovery request is recorded, including any temporary disagreement before the expected decision.
 
 ## Install or update an explicit cluster
 
@@ -75,6 +77,26 @@ The signed fixture should be admitted only after both policies are effective. Th
 
 ## Executed results
 
-Expanded local and hosted results will be recorded here after execution; configuration and these expected outcomes are not proof of a passing run. The earlier 16-case signature-only results remain historical evidence in the [signature guide](admission-signatures.md).
+The local run on 2026-10-25 (America/Vancouver) passed **30 cases in 30 API requests**, with **zero transition attempts**. The final decisions were 11 admissions, 5 missing-signature denials, 4 identity denials, 8 attestation denials, 1 no-policy denial and 1 fail-closed verifier-unavailable rejection. All **18 classification regressions** passed. The Go integration package completed in 66.335 seconds. The verifier recovered and admitted the trusted release again; the cluster, registry and fixture key directories were removed.
+
+Request counts cover the recorded workload-admission attempts; setup, policy-management and API-discovery calls are excluded.
+
+[Local structured evidence](evidence/admission-attestations-local.json) records every final case decision, timestamps, versions and tested-source/raw-evidence/fixture-inventory hashes. The [hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40255328012) independently passed the same **30 final case decisions and 18 classification regressions** on Linux amd64, in **35 recorded admission requests**. Its Go integration package completed in 58.346 seconds. It also passed all existing quality gates and all 80 runtime network-policy probes. The [hosted evidence](evidence/admission-attestations-hosted.json) includes exact decisions, every transition, versions, timestamps, source/raw/fixture hashes and the retained artifact identity/digest. The earlier 16-case signature-only results remain historical evidence in the [signature guide](admission-signatures.md).
+
+**Observed policy-update limit:** the hosted `wrong-workflow` case recorded **five admissions using the previous allowed decision** after the intentional signer-policy change; attempt 6 returned the expected identity denial. These are five transition attempts, not five immediate rejections. All new attestation-specific cases reached their expected decision on attempt 1. An acknowledged policy update does not atomically change all verifier state and cannot promise immediate revocation. Establish and verify the intended rules before enrolling/deploying workloads; protect updates and plan for their propagation. The suite records bounded convergence rather than concealing these requests.
+
+Selected actual local output:
+
+```text
+attestation-complete: allowed (exit 0, attempt 1)
+attestation-missing-sbom: attestation-denied (exit 1, attempt 1)
+attestation-missing-evidence: attestation-denied (exit 1, attempt 1)
+attestation-invalid-sbom: attestation-denied (exit 1, attempt 1)
+attestation-tampered-evidence: attestation-denied (exit 1, attempt 1)
+attestation-wrong-subject-evidence: attestation-denied (exit 1, attempt 1)
+release-requirements-restored: allowed (exit 0, attempt 1)
+```
+
+The missing-SBOM request explicitly reported `failed policy: release-attestations` and `no matching attestations with type https://cyclonedx.org/bom`, while identifying the evidence predicate as present. The missing-evidence request reported the reverse. The signed empty-component SBOM failed the `list.MatchN` content constraint. Those are verifier decisions, not missing-image or transport failures. Both production content rules also passed independent CLI verification against the actual public release with normal certificate/transparency checks. The final local replay also passed with `COSIGN_REPOSITORY=invalid.invalid/disallowed` set; fixture preparation clears that inherited override, confining its writes to the temporary registry.
 
 Reference: [upstream policy and attestation semantics](https://docs.sigstore.dev/policy-controller/overview/). The committed tests and structured execution records establish this project's results.
