@@ -73,7 +73,7 @@ The signed fixture is the actual public release. The unsigned fixture is the exi
 | Unsigned Pod outside scope during that outage | Admit: API-server liveness/scope control |
 | Verifier restored | Admit |
 
-The outage test scales the verifier to zero and force-deletes its Pod **only in the newly created disposable cluster**. It waits for the Service endpoints to disappear, checks rejection without changing `failurePolicy`, and then restores the verifier and checks successful admission. Simply removing Service endpoints did not interrupt an already-established webhook connection, so that weaker fault injection is not used as outage evidence.
+The outage test scales the verifier to zero and force-deletes its Pod **only in the newly created disposable cluster**. It confirms the runtime can see the running verifier, terminates only that runtime task to end the controller's long drain period and existing connections, waits for both the runtime process and Service endpoints to disappear, then checks rejection without changing `failurePolicy`. It restores the verifier and requires successful admission afterward. Simply removing Service endpoints did not interrupt an already-established webhook connection, so that weaker fault injection is not used as outage evidence.
 
 Changing signer trust after a successful verification also exercises policy-cache invalidation: the already-signed image must be rejected under the wrong subject/issuer and admitted again after restoration.
 
@@ -81,7 +81,22 @@ The harness records every attempt during bounded policy propagation or verifier 
 
 ## Results
 
-Local and hosted exact results will be recorded after the complete matrix, including outage and recovery, passes. Preliminary signature checks are not presented as a completed outage result.
+The final local run on 2026-10-25 (America/Vancouver) passed **16 cases in 16 API requests**, with **zero transition attempts**: 7 admissions, 5 missing-signature denials, 2 identity denials, 1 no-policy denial, and 1 fail-closed webhook-unavailable rejection. The verifier-unavailable request returned exit 1 after its configured 20-second webhook timeout; after restoration the trusted image returned exit 0. All 13 classification regressions passed. The disposable cluster was removed.
+
+[Local structured evidence](evidence/admission-local.json) records exact per-case outcomes, timestamps, versions and source/raw-evidence hashes. The [hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40252400191) independently passed the same **16 cases and 13 classification regressions** on Linux amd64. It issued **17 requests**, including **1 recovery transition**: the first request after restoring the verifier returned connection refused (exit 1), and the second was admitted (exit 0). All final decisions matched the matrix. The [hosted evidence](evidence/admission-hosted.json) preserves that transition, the final decisions, artifact identity/digest, versions, timestamps and source/raw-evidence hashes. The full quality run, including the 80-probe network-policy suite, passed.
+
+Selected actual test output from that hosted run:
+
+```text
+signed-pod-persisted: allowed (exit 0, attempt 1)
+unsigned-pod: signature-denied (exit 1, attempt 1)
+wrong-workflow: identity-denied (exit 1, attempt 1)
+verifier-unavailable-fail-closed: unavailable (exit 1, attempt 1)
+verifier-restored: allowed (exit 0, attempt 2)
+--- PASS: TestAdmissionSignatures (49.12s)
+```
+
+The unsigned-image denial included `admission webhook "policy.sigstore.dev" denied the request` and `no signatures found`. The outage rejection included `failed calling webhook "policy.sigstore.dev"` and `context deadline exceeded`. These are separate expected failure classes; neither is inferred from a generic nonzero exit code.
 
 ## Scope and operational limits
 
@@ -94,4 +109,4 @@ Local and hosted exact results will be recorded after the complete matrix, inclu
 - The checksum-locked chart and pinned controller image are a tested combination. The lock records their versions separately because the chart's app-version metadata predates the explicit image override.
 - The chart's post-delete cleanup helper is pinned but is not executed by the disposable test. That runner deletes the whole cluster. If removing the installation manually, use `helm uninstall policy-controller -n image-policy-system --no-hooks` with the explicit kubeconfig, and review remaining cluster-scoped policy resources separately.
 
-References: [controller installation](https://docs.sigstore.dev/policy-controller/installation/), [policy semantics](https://docs.sigstore.dev/policy-controller/overview/). Executed results are recorded independently below; tool documentation is not treated as proof of execution.
+References: [controller installation](https://docs.sigstore.dev/policy-controller/installation/), [policy semantics](https://docs.sigstore.dev/policy-controller/overview/). Executed results are recorded independently above; tool documentation is not treated as proof of execution.
