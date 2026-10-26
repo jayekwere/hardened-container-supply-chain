@@ -25,6 +25,7 @@ lock = json.loads(Path('integration/admission/inputs.lock.json').read_text())
 image = lock['signedImage']
 digest = image.split('@sha256:')[1]
 environment = dict(os.environ, COSIGN_PASSWORD=secrets.token_urlsafe(32))
+environment.pop('COSIGN_REPOSITORY', None)
 
 
 def run(*args, env=None):
