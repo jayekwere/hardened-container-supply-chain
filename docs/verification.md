@@ -77,7 +77,7 @@ The expanded installation requires both signed attestation types and checks thei
 
 ## Trust-update fix
 
-The downstream verifier patch and strict update regressions are described in [the trust-update record](trust-updates.md). Local/hosted execution results are pending until the complete gates finish. The earlier snapshots above remain unchanged historical results.
+The downstream verifier patch passed both local and hosted replays: each recorded **107 trust-update probes (41 API-server and 66 direct verified-TLS probes), zero unexpected admissions**, plus the **30-case existing suite**, **29 focused verifier cases** and **21 classification regressions**. All five post-write probes into each warmed, gracefully terminating verifier returned identity denial. Compilation was frozen and its unsafe static-pass copy deliberately retained during the identity tests. Legitimate restoration, outside-scope admission and pure replica reduction passed. The local standard suite used 30 requests; the hosted suite used 31 because recovery first failed closed and then succeeded. The [hosted run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40260523403) also passed all quality gates and all 80 network-policy probes with zero mismatches. See [the exact matrix and limits](trust-updates.md), [local evidence](evidence/trust-updates-local.json) and [hosted evidence](evidence/trust-updates-hosted.json). Earlier snapshots above remain unchanged historical results.
 
 ## Operational limitations
 

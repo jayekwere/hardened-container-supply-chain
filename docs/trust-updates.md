@@ -72,13 +72,37 @@ Drain and retire **every** older unpatched verifier instance before relying on t
 
 - A request whose first validation read occurs after an acknowledged policy write uses that current policy state or is rejected. A policy change detected during verification also rejects the request. This is not a transaction with the API server's eventual object write: a request already approved before the final read/write boundary can finish afterward. Existing Pods are not evicted.
 - Multiple policy writes are not an atomic bundle. Each request checks the actual complete policy set it reads. Plan updates so intermediate states are acceptable, or stop new workloads during a larger migration.
-- This dedicated build requires `release-signer` and `release-attestations`, enforce mode and inline trust/policy material. Secret, KMS, ConfigMap, remote-policy, custom TrustRoot and timestamp references are rejected rather than served from another cache. An unsupported policy anywhere in the controller's cluster-wide set blocks enrolled admissions, even if intended for a different image. Use a dedicated supported policy set.
+- This dedicated build requires `release-signer` and `release-attestations`, enforce mode and inline trust/policy material. Secret-backed trust keys/CAs, KMS, ConfigMap policy data, remote policies, custom TrustRoot and timestamp references are rejected rather than served from another cache. An unsupported policy anywhere in the controller's cluster-wide set blocks enrolled admissions, even if intended for a different image. Use the dedicated, image-bound policy profile in this repository; this is not a claim of compatibility with every upstream policy feature.
 - Authoritative reads add API load and an availability dependency, with a five-second timeout per read. Failure rejects enrolled admissions even when a signature result is cached. No throughput or high-availability performance guarantee is claimed.
-- Namespace enrollment, administrator access, the API's consistency contract, node/runtime integrity and distribution of the patched verifier remain trusted boundaries. Outside-scope namespaces and supported cleanup/status operations retain their prior behavior.
+- Namespace enrollment, administrator access, the API's consistency contract, node/runtime integrity and distribution of the patched verifier remain trusted boundaries. Enrollment and webhook-routing changes are not made atomic by this patch. Outside-scope namespaces and supported cleanup/status operations retain their prior behavior. The live test has one API server; multi-control-plane behavior and performance were not independently exercised.
 - The application image, signed release and application vulnerability evidence are unchanged. The downstream verifier inherits pinned upstream dependencies; the application's zero-finding scan is not a vulnerability audit or signed release record for this separate verifier image.
 
 ## Executed results
 
-Live results will be added after the complete local and hosted verification finishes. The earlier five admissions remain preserved in the historical evidence; expected outcomes and source inspection are not substituted for executed results.
+The final local run on 2026-10-25 (America/Vancouver) passed **107 trust-update probes with zero unexpected admissions**: **41 through the real API server** and **66 through CA-verified direct verifier connections**, covering three distinct Pods during a two-replica installation and replacement. Of these, 92 were required rejections and 15 were intentional admissions for valid requests, cleanup, scope and restoration controls.
+
+| Local check | Exact outcome |
+| --- | --- |
+| Tightened signer identity with compiled publication frozen | 15 identity denials; zero admissions |
+| Tightened attestation identity with compiled publication frozen | 15 identity denials; zero admissions |
+| Warmed verifier entering graceful termination | All 5 post-write signer probes returned identity denial; no transport-failure substitute was needed |
+| Deliberately static-pass compiled copy, unsigned image | 15 signature denials |
+| Authoritative-list permission removed | 15 freshness denials; outside-scope unsigned control admitted |
+| Mandatory attestation policy deleted | 15 freshness denials; recreated policy restored admission |
+| Additional restrictive policy created | 15 explicit policy denials while publication remained frozen |
+| Replica reduction | Unchanged template admitted; changed image and changed label each denied |
+| Existing signature/attestation suite | 30 cases in 30 requests; zero stale admissions |
+| Focused patched-source tests | 29 cases passed, including independent HTTP context and generation-change detection |
+| Classification regressions | 21 passed |
+| `make test`, workflow guards and actionlint | Exit 0 |
+| Local OCI archive transfer | Copied manifest equals the built digest |
+
+[Structured local evidence](evidence/trust-updates-local.json) records phase counts, exact policy-write acknowledgements, source and raw-output hashes, controller build identity, timestamps and normalized platform details. Raw output includes every individual probe. The disposable cluster and registry were removed; no fixture signing keys remain.
+
+The [hosted run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40260523403) independently passed the same **107 probes, identical decision counts and zero unexpected admissions** on Linux amd64, including all five identity denials on the warmed draining verifier. It passed **29 focused verifier tests**, **21 classification regressions**, all existing quality gates and **80 network-policy probes with zero mismatches**. Its original 30-case suite used **31 requests**: the verifier-recovery control first rejected with webhook unavailable, then admitted on attempt 2. No negative trust-update case was retried into success. [Hosted structured evidence](evidence/trust-updates-hosted.json) preserves that recovery transition, every phase count, tested-source/raw-output hashes and artifact identity/digest. The [earlier five stale admissions](evidence/admission-attestations-hosted.json) remain unchanged historical evidence.
+
+The hosted build archive digest was `sha256:d61ec58a974fa6d987e1c9234f9367ac466524e2231c1507d2f3e4fc869c1f4f`; the engine/import path reconstructed the manifest, and the live verifier used `docker.io/library/supply-policy-controller@sha256:345e9d2c5dd6cf665bae5eb868462275d49459c71a9e34ea33666f6dc54798da`. Both identities are recorded separately. The tests exercised the latter reference; there is no claim that these manifest digests match or that either was published to a registry. The local archive-copy check preserved its original native build digest; it is a separate transfer result.
+
+Counts include only recorded probes. Administrative operations and requests generated asynchronously by cluster controllers are excluded. Direct verifier probes are real TLS HTTP requests to selected Pods, while the 41 API-server probes exercise the complete admission path; these are reported separately rather than combining them into a claim that all 107 traversed the API server.
 
 References: [MostRecent API semantics](https://kubernetes.io/docs/reference/using-api/api-concepts/#semantics-for-get-and-list), [pinned verifier source](https://github.com/sigstore/policy-controller/tree/cc75baab1d34d3bae47bde7bd934bf79e5ca3afc).
