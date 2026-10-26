@@ -26,7 +26,7 @@ else
 fi
 kind create cluster --name "$name" --kubeconfig "$kubeconfig" --config integration/admission/kind-multi.yaml --image kindest/node:v1.34.0@sha256:7416a61b42b1662ca6ca89f02028ac133a309a2a30ba309614e8ec94d976dc5a --wait 180s
 # This disposable cluster schedules the verifier on its control-plane nodes.
-for node in $(kind get nodes --name "$name"); do
+for node in $(kubectl --kubeconfig "$kubeconfig" get nodes -o jsonpath='{.items[*].metadata.name}'); do
   kubectl --kubeconfig "$kubeconfig" patch node "$node" --type=merge -p '{"spec":{"taints":[]}}'
 done
 if [ -z "${TEST_RELEASE_CONTROLLER_IMAGE:-}" ]; then
@@ -34,7 +34,7 @@ if [ -z "${TEST_RELEASE_CONTROLLER_IMAGE:-}" ]; then
   controller_digest=$(docker exec "$name-control-plane" ctr --namespace=k8s.io images ls | awk '$1=="docker.io/library/supply-policy-controller:local" {print $3}')
   [[ "$controller_digest" =~ ^sha256:[a-f0-9]{64}$ ]]
   controller_image="docker.io/library/supply-policy-controller@$controller_digest"
-  for node in $(kind get nodes --name "$name"); do
+  for node in $(kubectl --kubeconfig "$kubeconfig" get nodes -o jsonpath='{.items[*].metadata.name}'); do
     docker exec "$node" ctr --namespace=k8s.io images tag --force docker.io/library/supply-policy-controller:local "$controller_image"
   done
 fi

@@ -6,6 +6,17 @@ import subprocess
 import tarfile
 import urllib.request
 
+def tree_hash(directory):
+    digest = hashlib.sha256()
+    for path in sorted(directory.rglob('*')):
+        relative = path.relative_to(directory)
+        if relative.parts[0] == '.git' or str(relative) == '.prepared' or path.is_dir():
+            continue
+        digest.update(str(relative).encode() + b'\0')
+        digest.update(path.read_bytes() if not path.is_symlink() else path.readlink().as_posix().encode())
+        digest.update(b'\0')
+    return digest.hexdigest()
+
 root = Path.cwd()
 lock = json.loads(Path('integration/admission/inputs.lock.json').read_text())['controller']
 patch = root / 'patches/policy-controller-freshness.patch'
@@ -32,5 +43,8 @@ if not (source / '.prepared').exists():
     subprocess.run(['git', '-C', str(source), 'apply', str(patch)], check=True)
     subprocess.run(['git', '-C', str(source), 'apply', '--check', str(dependency_patch)], check=True)
     subprocess.run(['git', '-C', str(source), 'apply', str(dependency_patch)], check=True)
-    (source / '.prepared').write_text(patch_hash)
+    (source / '.prepared').write_text(json.dumps({'patch': patch_hash, 'dependencies': dependency_hash, 'tree': tree_hash(source)}))
+prepared = json.loads((source / '.prepared').read_text())
+if prepared != {'patch': patch_hash, 'dependencies': dependency_hash, 'tree': tree_hash(source)}:
+    raise SystemExit('DENY prepared source changed; remove this ignored source cache and rebuild: ' + str(source))
 print(source)
