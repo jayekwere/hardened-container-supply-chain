@@ -41,7 +41,7 @@
     "scanner-version.txt": "d6ba09a5538c0b2f281b92d2f34a3a8725a24900fd48908c70b0959398854dea"
   },
   "limitations": [
-    "No runtime NetworkPolicy traffic-denial result is claimed.",
+    "Runtime NetworkPolicy was not tested at v0.1.1 creation; later two-node results are recorded in network-policy-local.json.",
     "No VEX assertion is emitted.",
     "No signature-verifying admission controller is installed."
   ]

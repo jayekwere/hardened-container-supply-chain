@@ -25,7 +25,7 @@ make check
 make cluster
 ```
 
-`make check` runs formatting and dependency checks, vet, race-enabled Go tests, chart lint and both policy examples, two uncached image builds, Go container integration tests, a fresh vulnerability scan, and CycloneDX SBOM generation. `make cluster` creates its own cluster and private kubeconfig, installs the real chart by digest, runs Go integration tests, and deletes that cluster. It never selects an existing cluster.
+`make check` runs formatting and dependency checks, vet, race-enabled Go tests, chart lint and both policy examples, two uncached image builds, Go container integration tests, a fresh vulnerability scan, and CycloneDX SBOM generation. `make cluster` creates its own cluster and private kubeconfig, installs the real chart by digest, runs Go integration tests, and deletes that cluster. It never selects an existing cluster. It now uses two nodes and a digest-pinned policy agent alongside kindnet, and verifies 10 real traffic flows with policy absent, present, removed, and reapplied. See [runtime network-policy evidence](docs/network-policy.md).
 
 | Command | Result required |
 | --- | --- |
@@ -35,7 +35,7 @@ make cluster
 | `make integration` | HTTP responds; UID/GID, read-only root, zero capabilities and no-new-privileges verified; shell absent |
 | `make scan` | Versioned standard-library inventory, matching config digest, fresh database, no blocking findings |
 | `./scripts/sign-local.sh` | Ephemeral-key SBOM signature verifies; changed bytes fail |
-| `make cluster` | Service works; process restrictions hold; privileged pod is denied by restricted admission |
+| `make cluster` | Service/runtime/admission checks pass; allowed ingress remains reachable; cross-namespace ingress and workload HTTP/DNS egress time out; removing the policy restores traffic |
 
 Individual commands reuse `artifacts/` from prior commands. Run `make tools` first, and build before running image-dependent checks. The local signature exercise deliberately disables transparency-log use; the release workflow requires identity certificates and normal transparency verification.
 
