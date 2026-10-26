@@ -32,7 +32,7 @@ jobs:
         run: ./scripts/sign-local.sh
       - name: Disposable cluster and network-policy integration
         run: make cluster
-      - name: Signature-verifying admission integration
+      - name: Signature and attestation admission integration
         run: make admission
       - name: Retain evidence
         if: always()

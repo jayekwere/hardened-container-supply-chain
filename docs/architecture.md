@@ -13,7 +13,7 @@ flowchart LR
   P --> A[Signed SBOM + evidence]
   I --> X[Exact identity verification]
   A --> X
-  X --> G[API-server signature admission]
+  X --> G[API-server signature + SBOM + evidence admission]
   G --> D[Helm deployment by digest]
 ```
 
@@ -27,4 +27,4 @@ The chart emits JSON documents, which are valid YAML. This keeps the gate depend
 
 Trust boundaries are source review → build engine → scanner/database → registry → signature verifier → cluster kernel/network plugin. A correct signature establishes artifact integrity and expected signer identity. It does not independently establish source correctness, vulnerability absence, or uncompromised build infrastructure.
 
-A separate checksummed controller chart installs TLS mutating/validating webhooks and a ClusterImagePolicy for the exact release subject and issuer. Namespace enrollment is explicit. Both webhooks fail closed, unmatched images are denied, and the additional container fields and actual application Deployment template are exercised through the API server. The test installation has its own disposable cluster and kubeconfig; the application chart does not bootstrap this cluster-wide infrastructure.
+A separate checksummed controller chart installs TLS mutating/validating webhooks and two ClusterImagePolicies for the exact release subject and issuer. One requires the image signature; the other requires both signed SBOM and evidence predicates with content checks. Every matching policy must pass. Namespace enrollment is explicit. Both webhooks fail closed, unmatched images are denied, and the additional container fields and actual application Deployment template are exercised through the API server. A local-only TLS registry supplies synthetic signed negative attestations; its ephemeral key trust never enters the production installation. The test installation has its own disposable cluster and kubeconfig; the application chart does not bootstrap this cluster-wide infrastructure.

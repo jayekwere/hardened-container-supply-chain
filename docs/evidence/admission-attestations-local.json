@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-25",
+  "timezone": "America/Vancouver",
+  "codeRevision": "a6d67aa934a6f61c0bc380974e216146f4709ebf",
+  "startedAtUTC": "2026-10-26T01:41:37Z",
+  "finishedAtUTC": "2026-10-26T01:42:43Z",
+  "outcome": "passed",
+  "caseCount": 30,
+  "requestCount": 30,
+  "classificationRegressionCases": 18,
+  "fixtureSetCount": 9,
+  "transitionAttempts": 0,
+  "finalDecisionCounts": {
+    "allowed": 11,
+    "signature-denied": 5,
+    "no-policy-denied": 1,
+    "identity-denied": 4,
+    "attestation-denied": 8,
+    "unavailable": 1
+  },
+  "requestDecisionCounts": {
+    "allowed": 11,
+    "signature-denied": 5,
+    "no-policy-denied": 1,
+    "identity-denied": 4,
+    "attestation-denied": 8,
+    "unavailable": 1
+  },
+  "cases": [
+    {
+      "name": "signed-pod-persisted",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "signed-chart-deployment",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "unsigned-pod",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "unsigned-sidecar",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "unsigned-init",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "unsigned-chart-deployment",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "unmatched-repository",
+      "expected": "no-policy-denied",
+      "observed": "no-policy-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "signed-ephemeral",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "unsigned-ephemeral",
+      "expected": "signature-denied",
+      "observed": "signature-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "wrong-workflow",
+      "expected": "identity-denied",
+      "observed": "identity-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "wrong-issuer",
+      "expected": "identity-denied",
+      "observed": "identity-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "trust-restored",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "outside-enrolled-namespace",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-wrong-workflow",
+      "expected": "identity-denied",
+      "observed": "identity-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-wrong-issuer",
+      "expected": "identity-denied",
+      "observed": "identity-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-trust-restored",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-complete",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-missing-sbom",
+      "expected": "attestation-denied",
+      "observed": "attestation-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-missing-evidence",
+      "expected": "attestation-denied",
+      "observed": "attestation-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-invalid-sbom",
+      "expected": "attestation-denied",
+      "observed": "attestation-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-evidence-image-mismatch",
+      "expected": "attestation-denied",
+      "observed": "attestation-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-evidence-revision-mismatch",
+      "expected": "attestation-denied",
+      "observed": "attestation-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-untrusted-sbom",
+      "expected": "attestation-denied",
+      "observed": "attestation-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-tampered-evidence",
+      "expected": "attestation-denied",
+      "observed": "attestation-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "attestation-wrong-subject-evidence",
+      "expected": "attestation-denied",
+      "observed": "attestation-denied",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "fixture-requirements-restored",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "release-requirements-restored",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "verifier-unavailable-fail-closed",
+      "expected": "unavailable",
+      "observed": "unavailable",
+      "exitCode": 1,
+      "attempt": 1
+    },
+    {
+      "name": "outside-scope-during-outage",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    },
+    {
+      "name": "verifier-restored",
+      "expected": "allowed",
+      "observed": "allowed",
+      "exitCode": 0,
+      "attempt": 1
+    }
+  ],
+  "transitions": [],
+  "controllerImage": "ghcr.io/sigstore/policy-controller/policy-controller@sha256:0492bb264fb1d9bdc8e3f343ef542cc85b7dd7c7fd8d9524b453c2bd31a1d128",
+  "signedImage": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22",
+  "unsignedImage": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c",
+  "fixtureRegistryImage": "docker.io/library/registry:3.0.0@sha256:6c5666b861f3505b116bb9aa9b25175e71210414bd010d92035ff64018f9457e",
+  "nodes": [
+    {
+      "architecture": "arm64",
+      "kernelVersionCore": "6.12.76",
+      "kernelReleaseSHA256": "e03cb8411480c03ca447ad16916583446ee98878e1be6ff8e9859020f8e6ceea",
+      "kubeletVersion": "v1.34.0",
+      "containerRuntimeVersion": "containerd://2.1.3"
+    }
+  ],
+  "rawEvidenceSHA256": "5db05054723d3ddbe06ba5793eeb7e66636089f0c389273297d14ec9c9097baa",
+  "fixtureInventorySHA256": "493731bc45e44a948d6b3cc77df9cd737f59c3b78634afcba19446dbfbede0d3",
+  "fixturePublicKeySHA256": "060e11e1bd304d95ddb9456d9893f49cf10e17e013904f169bbb50fdf366c599",
+  "testedSourceSHA256": {
+    "integration/admission_test.go": "26ed782381c8c46c0755cfe2aff7e43b79f7909114e2ffcc4f6adc11f9a7cc45",
+    "integration/admission_classification_test.go": "21038ef23e7fee680849fd310b38b8baee5e820d747f0172337cac01739117fb",
+    "integration/admission/inputs.lock.json": "6bb8f1843369ffe3d2b1d553954a702bfbeea837c6f6ff9ac77cd40bc1567bf9",
+    "integration/admission/controller-values.json": "830210a30c4f7bcd01ccebab4c9b273641906fbb7ab569f1e26ad8ac33cdc103",
+    "integration/admission/release-policy.json": "c77b00cc8c6cf7ed483ac49a2d6fab32414cd9f485037c5222e1a325e4bb83cb",
+    "integration/admission/attestations-policy.json": "4d1a620fb28cf5e07965c65956fe499472a423f2363148dabaf8369e3e043443",
+    "scripts/admission.sh": "312a00940feb7fad8f87480ba2774977ebff6938200f816ede4d3f632f79fc30",
+    "scripts/install-admission.sh": "1f4e79707be51cb050216a230ef1ae0e7b76e211e9d4a8a9d39da2e0266d3ffd",
+    "scripts/prepare-admission-fixtures.py": "22124640c36ddfad139de0c381073956e12caa15d1bb8f1f31a2dc145c92d6b7",
+    "scripts/check-inputs.py": "383b873098481938af03ec1b6cead102f56d8c52693237b95a9b1b159e233daa",
+    "charts/supply-demo/templates/deployment.yaml": "51f44f0d4f0c38ae345b011fa9da69944aa0be67bfc1f852fc5852633f3e81c3",
+    "charts/supply-demo/values.schema.json": "278a95ed58c97d709659d60e02791eb527e581b0d66dde1ce4095c60f2b6e7ff",
+    ".github/workflows/quality.yml": "46cd6e67dcf107418504af718a32c3a2e77a45837a01fa1bfc56c3abc4e50244",
+    "Makefile": "8220c872e40460d372cd0a08773c02b88b799f9d097580322eaf410bbbbaec3b"
+  },
+  "scope": "Real API-server admission; production exact keyless trust requires the image signature and both attestation types. Local-only synthetic attestation fixtures temporarily use an ephemeral key and TLS source while retaining the production content policies and independent real image signature. Production trust is restored before outage/recovery. One gated Pod is persisted; other requests use server-side dry run. No fixture workload execution, fresh admission scan or report-hash recomputation is claimed.",
+  "hostedVerification": "admission-attestations-hosted.json",
+  "testPackageSeconds": 66.335,
+  "localCallerOverrideRegression": "Passed with COSIGN_REPOSITORY=invalid.invalid/disallowed; fixture preparation clears this inherited override."
+}
