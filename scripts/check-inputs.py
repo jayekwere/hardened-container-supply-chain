@@ -28,7 +28,13 @@ assert re.fullmatch('[a-f0-9]{64}', admission['chart']['sha256'])
 for field in ['controller', 'cleanupHelperImage', 'fixtureRegistryImage']:
     image = admission[field]['image'] if field == 'controller' else admission[field]
     assert re.search(r'@sha256:[a-f0-9]{64}$', image)
-assert values['webhook']['image']['repository'] + '@' + values['webhook']['image']['version'] == admission['controller']['image']
+assert values['webhook']['image']['repository'] == 'invalid.invalid/controller-build-required'
+assert values['webhook']['image']['version'] == 'sha256:' + '0' * 64
+assert admission['controller']['image'] in Path('integration/admission/Controller.Dockerfile').read_text()
+assert re.fullmatch('[a-f0-9]{64}', admission['controller']['sourceArchive']['sha256'])
+assert admission['controller']['sourceCommit'] in admission['controller']['sourceArchive']['url']
+assert admission['controller']['buildImage'].split('@')[0] == 'golang:' + version + '-alpine'
+assert re.search(r'@sha256:[a-f0-9]{64}$', admission['controller']['buildImage'])
 assert values['webhook']['failurePolicy'] == 'Fail'
 assert values['webhook']['configData']['no-match-policy'] == 'deny'
 authority = trust['spec']['authorities'][0]

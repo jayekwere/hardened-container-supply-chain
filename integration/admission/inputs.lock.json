@@ -8,7 +8,12 @@
   "controller": {
     "version": "v0.15.1",
     "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
-    "image": "ghcr.io/sigstore/policy-controller/policy-controller@sha256:0492bb264fb1d9bdc8e3f343ef542cc85b7dd7c7fd8d9524b453c2bd31a1d128"
+    "image": "ghcr.io/sigstore/policy-controller/policy-controller@sha256:0492bb264fb1d9bdc8e3f343ef542cc85b7dd7c7fd8d9524b453c2bd31a1d128",
+    "sourceArchive": {
+      "url": "https://codeload.github.com/sigstore/policy-controller/tar.gz/cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+      "sha256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4"
+    },
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c"
   },
   "cleanupHelperImage": "registry.k8s.io/kubectl@sha256:497d298f891edb7608dfce9dae4bb08dffc4ddcd7f5d24a0512d4bbf33e04f26",
   "signedImage": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22",

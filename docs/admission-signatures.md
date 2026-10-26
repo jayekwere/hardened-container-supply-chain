@@ -1,5 +1,7 @@
 # Admission-time image signature enforcement
 
+The current installer requires a built patched verifier image in `CONTROLLER_IMAGE`; see [build, installation and upgrade instructions](trust-updates.md). The earlier execution records below describe the previous verifier and remain historical evidence.
+
 The API server now has a reproducible signature-verifying admission installation and Go integration suite. The trust rule accepts this repository's exact release workflow identity and OIDC issuer, with normal certificate and transparency-log verification. The controller image and installation chart are pinned; no signing secret or private certificate is committed.
 
 The current installation also requires signed SBOM and evidence attestations through a separate mandatory policy. See [attestation requirements and the expanded suite](admission-attestations.md). The 16-case execution records below describe the original signature-only implementation; the current `make admission` runs the expanded suite.
@@ -21,7 +23,7 @@ Raw decisions and errors are written to `artifacts/admission/decisions.json`; te
 The reusable installer requires an explicit kubeconfig. It creates `image-policy-system` and installs the pinned controller, `release-signer` policy and `release-attestations` policy. The selected cluster must permit the controller's installation RBAC and have public registry/trust-service connectivity. Use a fresh namespace for the replay examples:
 
 ```sh
-./scripts/install-admission.sh /absolute/path/to/kubeconfig
+./scripts/install-admission.sh /absolute/path/to/kubeconfig "$CONTROLLER_IMAGE"
 kubectl --kubeconfig /absolute/path/to/kubeconfig apply -f examples/admission/namespace.json
 kubectl --kubeconfig /absolute/path/to/kubeconfig wait -n signature-demo \
   --for=create serviceaccount/default --timeout=20s

@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-25",
+  "timezone": "America/Vancouver",
+  "codeRevision": "7e411f1caa3ab87305407cd0d840cfa6b0effed4",
+  "startedAtUTC": "2026-10-26T02:55:32.35520509Z",
+  "finishedAtUTC": "2026-10-26T02:56:34.64246108Z",
+  "outcome": "passed",
+  "trustUpdateProbeCount": 107,
+  "apiServerProbeCount": 41,
+  "directTLSVerifierProbeCount": 66,
+  "uniqueVerifierPods": 3,
+  "unexpectedAdmissionCount": 0,
+  "decisionCounts": {
+    "allowed": 15,
+    "signature-denied": 16,
+    "identity-denied": 31,
+    "freshness-denied": 30,
+    "extra-policy-denied": 15
+  },
+  "phases": [
+    {
+      "name": "warm-cache",
+      "probeCount": 3,
+      "apiServerProbes": 1,
+      "outcomes": {
+        "allowed": 3
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "poisoned-compiled-copy",
+      "probeCount": 15,
+      "apiServerProbes": 5,
+      "outcomes": {
+        "signature-denied": 15
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "scale-down-replicas-only",
+      "probeCount": 1,
+      "apiServerProbes": 1,
+      "outcomes": {
+        "allowed": 1
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "scale-down-image-change",
+      "probeCount": 1,
+      "apiServerProbes": 1,
+      "outcomes": {
+        "signature-denied": 1
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "scale-down-label-change",
+      "probeCount": 1,
+      "apiServerProbes": 1,
+      "outcomes": {
+        "identity-denied": 1
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "signer-tightened",
+      "probeCount": 15,
+      "apiServerProbes": 5,
+      "outcomes": {
+        "identity-denied": 15
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "attestation-tightened",
+      "probeCount": 15,
+      "apiServerProbes": 5,
+      "outcomes": {
+        "identity-denied": 15
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "authoritative-read-unavailable",
+      "probeCount": 15,
+      "apiServerProbes": 5,
+      "outcomes": {
+        "freshness-denied": 15
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "outside-scope-read-outage",
+      "probeCount": 1,
+      "apiServerProbes": 1,
+      "outcomes": {
+        "allowed": 1
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "restored-with-poisoned-copy",
+      "probeCount": 2,
+      "apiServerProbes": 0,
+      "outcomes": {
+        "allowed": 2
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "mandatory-policy-deleted",
+      "probeCount": 15,
+      "apiServerProbes": 5,
+      "outcomes": {
+        "freshness-denied": 15
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "mandatory-policy-recreated",
+      "probeCount": 1,
+      "apiServerProbes": 1,
+      "outcomes": {
+        "allowed": 1
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "extra-policy-created",
+      "probeCount": 15,
+      "apiServerProbes": 5,
+      "outcomes": {
+        "extra-policy-denied": 15
+      },
+      "unexpectedAdmissions": 0
+    },
+    {
+      "name": "production-restored",
+      "probeCount": 7,
+      "apiServerProbes": 5,
+      "outcomes": {
+        "allowed": 7
+      },
+      "unexpectedAdmissions": 0
+    }
+  ],
+  "policyWriteAcknowledgements": {
+    "attestation-tightened": "2026-10-26T02:56:11.885869487Z",
+    "attestations-restored": "2026-10-26T02:56:22.058387884Z",
+    "extra-policy-created": "2026-10-26T02:56:30.051713424Z",
+    "mandatory-policy-deleted": "2026-10-26T02:56:22.43015531Z",
+    "mandatory-policy-recreated": "2026-10-26T02:56:29.597669592Z",
+    "signer-restored": "2026-10-26T02:56:11.755770183Z",
+    "signer-tightened": "2026-10-26T02:55:57.280240396Z"
+  },
+  "drainingPod": "policy-controller-webhook-865d6bf9db-cgp9j",
+  "drainingSignerProbeOutcomes": {
+    "identity-denied": 5
+  },
+  "standardAdmissionCases": 30,
+  "standardAdmissionRequests": 31,
+  "standardUnexpectedAdmissionCount": 0,
+  "classificationRegressionCases": 21,
+  "focusedVerifierCases": 29,
+  "goIntegrationPackageSeconds": 115.635,
+  "controllerBuild": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "b682351682fb3025644e66fb489777c013121e5fe6f8501e6fcb5a9588e2ed2f",
+    "binarySHA256": "ef20d1713a4f73d7fed8ddc5de4123e21ffae632026ac23ba220bbc0dcb7fdbf",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "amd64",
+    "manifestDigest": "sha256:d61ec58a974fa6d987e1c9234f9367ac466524e2231c1507d2f3e4fc869c1f4f"
+  },
+  "nodes": [
+    {
+      "architecture": "amd64",
+      "kernelVersionCore": "6.17.0",
+      "kernelReleaseSHA256": "e08fe509d52ca6e8c7af3d1e79ad3c5b478d6aa28f9da931c3d80de49b9b22f7",
+      "kubeletVersion": "v1.34.0",
+      "containerRuntimeVersion": "containerd://2.1.3"
+    }
+  ],
+  "rawEvidenceSHA256": "efb027ecfce5c8dd78c593fd40781879d528c1a6ae3da7a3c4fc221d520f33f5",
+  "standardAdmissionEvidenceSHA256": "48ec26bbe11833c92697a64caeac7df7252efba00cda1c4a9618dc348cfae693",
+  "controllerFocusedTestOutputSHA256": "002b01afc6604d666db04fbfb5144931397c214797d1f36cafa1c500b4543d44",
+  "testedSourceSHA256": {
+    "patches/policy-controller-freshness.patch": "b682351682fb3025644e66fb489777c013121e5fe6f8501e6fcb5a9588e2ed2f",
+    "integration/trust_updates_test.go": "028849130b9b52407f52ce5baff4fa9b6e4b49e173109b3e484c8ef27a246c68",
+    "integration/admission_test.go": "18da535d6eafad39373ac3bfdb568371b077dd6f18d338f7e72725fb33b14690",
+    "integration/admission_classification_test.go": "292eb18b0d2b7fda52056bfc076258197eac97066b949db25e1cd488c7dd1e3c",
+    "integration/admission/inputs.lock.json": "7897a1ade41d1e530f969ccd338b4bb9a7a46cdca6e737270935dc6256b84d52",
+    "integration/admission/controller-values.json": "b27cc3291d5b5e5ac830973442994e9f3902e8e87fb5fea9ff251c727bcc2554",
+    "integration/admission/release-policy.json": "c77b00cc8c6cf7ed483ac49a2d6fab32414cd9f485037c5222e1a325e4bb83cb",
+    "integration/admission/attestations-policy.json": "4d1a620fb28cf5e07965c65956fe499472a423f2363148dabaf8369e3e043443",
+    "integration/admission/Controller.Dockerfile": "3179bd4d6c98b406d6193b878507829d0e77cde9d72db359c356eedf0a0ee20e",
+    "integration/admission/Controller.Dockerfile.dockerignore": "2058b84c3be2d9c112ebffb8a79eb6eb7a41d24f2fa4881fd0ec491f2c69e6d0",
+    "scripts/prepare-controller.py": "a045fe6dae5d34ab3400ba8ac9af17a4a1aec738a8855765507fbcc10afec512",
+    "scripts/build-controller.sh": "e29cfc95c898a797499ead4551a635b1c3b894fc1ee95dbb4d46e9add9e6c66c",
+    "scripts/install-admission.sh": "a2805bf78a1ac5b982b8c94e55f88af987b0827f6019432e261fcb81180808f8",
+    "scripts/fetch-admission-chart.py": "8924c32db4a469178ad207557686a0aad6d52fc8005dc4363621d9cb0c42fe22",
+    "scripts/admission.sh": "ab5bd3e88c5878c00be7da73c617e35e9f5e27ed467626d23749a84b9dbbd07f",
+    "scripts/prepare-admission-fixtures.py": "22124640c36ddfad139de0c381073956e12caa15d1bb8f1f31a2dc145c92d6b7",
+    "scripts/check-inputs.py": "28e3d26b9250e84f1ade3223aa47a9ac3e26569268b2c086fb7f0af535741b22",
+    ".github/workflows/quality.yml": "1c3f989936124ee9cfc2233b10fa8a75d0c0a3fa15942d90320ac0ac5de87a72",
+    "Makefile": "9b129c9497a71c2fe6a39e92d6ee7f89a6c2d615e979b8a9cd7590216c9efb94"
+  },
+  "scope": "Strict post-write probes through the real API server and directly addressed CA-verified verifier Pods, including an existing TLS connection into a gracefully terminating Pod. Workload requests use dry run; one extra gated Deployment is persisted for scale-down checks. Administrative policy/RBAC setup calls are excluded from probe counts. The last-read/object-persistence window and initial migration from unpatched processes are not claimed atomic.",
+  "deployedControllerImage": "docker.io/library/supply-policy-controller@sha256:345e9d2c5dd6cf665bae5eb868462275d49459c71a9e34ea33666f6dc54798da",
+  "standardTransitions": [
+    {
+      "case": "verifier-restored",
+      "attempt": 1,
+      "expected": "allowed",
+      "observed": "unavailable",
+      "exitCode": 1
+    }
+  ],
+  "workflowRunURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40260523403",
+  "workflowConclusion": "success",
+  "artifactId": 12624860426,
+  "artifactDigest": "sha256:aea6b7edabfc49780b25b191653d4dba4cf2cb7aa8327ce4c88335a5998b8c0d",
+  "engineImageId": "sha256:a6824a4e2f369b78ca44b55e149e9a19f747fa315269968fb655828a2cd69424",
+  "runtimeManifestMatchesBuiltArchive": false,
+  "runtimeImportNote": "The engine import reconstructed the manifest. The build archive and deployed reference are recorded separately; live tests exercised deployedControllerImage. No digest-equality or registry-publication claim is made.",
+  "networkPolicyProbes": 80,
+  "networkPolicyMismatches": 0
+}

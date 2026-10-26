@@ -10,7 +10,7 @@ The application is intentionally small so the controls can be inspected end to e
 
 [Release v0.1.1](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) completed all hosted gates. Anonymous signature verification and runtime tests against the published digest also passed.
 
-Admission now requires the image signature and both signed SBOM/evidence predicates. Local and hosted runs reached all 30 expected final decisions; the [exact results](docs/admission-attestations.md) disclose five temporary admissions during a hosted trust-policy update, so immediate policy revocation is not claimed.
+Admission requires the image signature and both signed SBOM/evidence predicates. A downstream verifier patch now reads authoritative policies around each validation rather than trusting the older watched snapshot. See [the trust-update fix, build/upgrade commands, results and limits](docs/trust-updates.md). The earlier five stale admissions remain preserved as historical evidence.
 
 See [verification evidence](docs/verification.md) for dated local results and hosted workflow results. The initial live scan found vulnerable standard-library code; [remediation evidence](docs/remediation.md) records the compiler upgrade and rescan. Synthetic negative fixtures are clearly marked and are never presented as real findings. There are no active exceptions and no VEX assertions.
 
@@ -39,7 +39,7 @@ make admission
 | `make scan` | Versioned standard-library inventory, matching config digest, fresh database, no blocking findings |
 | `./scripts/sign-local.sh` | Ephemeral-key SBOM signature verifies; changed bytes fail |
 | `make cluster` | Service/runtime/admission checks pass; allowed ingress remains reachable; cross-namespace ingress and workload HTTP/DNS egress time out; removing the policy restores traffic |
-| `make admission` | Image signature and both signed SBOM/evidence predicates required; missing, altered and untrusted attestations denied; verifier outage fails closed and recovery restores admission |
+| `make admission` | Build the patched verifier; require signatures and both predicates; reject stale trust, failed policy reads and unsafe template updates; preserve restoration and fail-closed outage behavior |
 
 `make admission` separately provisions a disposable API-server verifier and runs passing/failing admission requests. It requires the exact release identity for the image signature and both attestations, with content checks for the SBOM and release evidence. See [attestation requirements, negative fixtures and exact results](docs/admission-attestations.md), plus the [signature and availability controls](docs/admission-signatures.md).
 
@@ -96,7 +96,9 @@ export TAG='v0.1.1'
 ./scripts/verify-release.sh "$IMAGE" "$TAG"
 
 export KUBECONFIG='/absolute/path/to/your/kubeconfig'
-./scripts/install-admission.sh "$KUBECONFIG"
+# Set CONTROLLER_IMAGE to the built/copied digest from docs/trust-updates.md.
+: "${CONTROLLER_IMAGE:?explicit patched verifier digest required}"
+./scripts/install-admission.sh "$KUBECONFIG" "$CONTROLLER_IMAGE"
 export PATH="$PWD/.tools/bin:$PATH"
 DIGEST="${IMAGE##*@}"
 helm template demo charts/supply-demo --set "image.digest=$DIGEST" > artifacts/deploy.json.yaml
@@ -109,6 +111,8 @@ kubectl -n supply-demo port-forward service/demo 8080:8080
 ```
 
 These deployment commands target your selected cluster and assume Kubernetes 1.34, Linux amd64 workload nodes for the published image, pull access to the image, and a network plugin that enforces NetworkPolicy. The chart supports Kubernetes 1.30+; the pinned integration environment tests 1.34. The network policy permits only namespace-local ingress to TCP 8080 and denies all pod egress, including DNS. The service needs neither DNS nor external connectivity.
+
+Build and distribute the patched verifier using [these commands](docs/trust-updates.md#install-the-patched-verifier-explicitly); the installer requires its explicit image digest and cannot fall back to the old verifier.
 
 The explicit installer enables API-server enforcement of the image signature and both SBOM/evidence attestations in the enrolled namespace; the application chart itself does not install cluster-wide verification infrastructure. The two admission policies pin the exact v0.1.1 workflow identity, check the released SBOM/evidence profile, and reject unmatched images. For a future release or rollback, review the exact signer identity and content profile in both policies, verify the selected digest, then run `helm upgrade` with that digest. Admission does not fetch the referenced scan reports or perform a new vulnerability scan.
 
