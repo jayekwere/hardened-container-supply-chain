@@ -20,3 +20,20 @@ assert agent['spec']['template']['spec']['containers'][0]['image'] == enforcer['
 assert re.search(r'@sha256:[a-f0-9]{64}$', enforcer['image'])
 assert re.fullmatch('[a-f0-9]{40}', enforcer['upstreamCommit'])
 print('PASS runtime policy enforcer image pinned and consistent')
+
+admission = json.loads(Path('integration/admission/inputs.lock.json').read_text())
+values = json.loads(Path('integration/admission/controller-values.json').read_text())
+trust = json.loads(Path('integration/admission/release-policy.json').read_text())
+assert re.fullmatch('[a-f0-9]{64}', admission['chart']['sha256'])
+for field in ['controller', 'cleanupHelperImage']:
+    image = admission[field]['image'] if field == 'controller' else admission[field]
+    assert re.search(r'@sha256:[a-f0-9]{64}$', image)
+assert values['webhook']['image']['repository'] + '@' + values['webhook']['image']['version'] == admission['controller']['image']
+assert values['webhook']['failurePolicy'] == 'Fail'
+assert values['webhook']['configData']['no-match-policy'] == 'deny'
+authority = trust['spec']['authorities'][0]
+assert len(trust['spec']['authorities']) == 1
+assert authority['keyless']['identities'] == [{'issuer': admission['issuer'], 'subject': admission['subject']}]
+assert authority['ctlog']['url'] == 'https://rekor.sigstore.dev'
+assert not any(k.startswith('insecure') for k in authority['keyless'])
+print('PASS admission controller pins, exact trust identity and fail-closed settings')

@@ -67,6 +67,10 @@ The [first quality run](https://github.com/jayekwere/hardened-container-supply-c
 
 The follow-up two-node run passed all 80 observed probes with zero expectation mismatches. Same-namespace ingress and unselected-peer controls remained reachable; cross-namespace ingress and workload HTTP/DNS egress timed out under policy. Removing the policy restored all 10 flows; reapplying it reproduced the results over three consecutive rounds. See [exact matrix and reproducible commands](network-policy.md) and [local evidence](evidence/network-policy-local.json). The [hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40248892351) independently passed the same 80-probe matrix on two Linux amd64 nodes, also with zero mismatches; [hosted evidence](evidence/network-policy-hosted.json) records its exact counts and artifact hashes. Both environments retain the original application image digests.
 
+## Admission-time signature enforcement
+
+A pinned TLS admission verifier and exact release-identity policy are now available through `make admission` and the explicit-kubeconfig installer. The matrix covers signed/unsigned Pods and actual Helm Deployment templates, sidecars, init containers, ephemeral-container updates, wrong signer/issuer, no matching policy, namespace scope, verifier outage and recovery. See [methodology and exact results](admission-signatures.md). Final local and hosted results are recorded after the complete suite passes.
+
 ## Operational limitations
 
 - kindnet supplies connectivity while the digest-pinned policy agent supplies enforcement in the two-node test. Runtime TCP 8080 and UDP DNS 53 flows are now verified. Other CNIs, kernels, protocols, ports and IPv6 are not covered by this matrix. The older port-forward check remains a service-behavior check only.
@@ -75,7 +79,7 @@ The follow-up two-node run passed all 80 observed probes with zero expectation m
 - Inventory and scanning cover discovered packages in the final image, including the Go standard library. They do not audit builder-image packages, pipeline-tool vulnerabilities, every application logic bug, or unknown vulnerabilities. Zero findings is a dated scanner result only.
 - LOW/MEDIUM findings are visible but do not block. A high-severity risk acceptance is not an exploitability determination; no VEX is emitted.
 - The chart has one replica, fixed small resources and no ingress, TLS, authentication or availability guarantees. CPU or memory pressure can make probes fail. Its diagnostics are for a small functional demonstration.
-- Image verification is explicit; there is no installed signature-verifying admission controller. An administrator can bypass the CLI or alter workloads. Additional network policies can broaden effective access.
+- Signature verification is enforced at admission in enrolled namespaces after the explicit verifier installation. This policy checks image signatures; SBOM/evidence attestations remain CLI checks. Administrators can alter enrollment, policy or webhooks. Additional network policies can broaden effective access.
 - Release publication can leave unsigned staged images if a later step fails. Only a completed release with successful signature and both attestation verifications is a supported deployment input.
 - Anonymous pulls and verification were tested for this published release. Private forks and mirrors may require credentials; public source alone does not establish package visibility.
 - Hosted artifact retention is finite; final release assets preserve the principal evidence. Scheduled scanning depends on the hosted scheduler, repository activity and service availability; it is not a continuous runtime monitor.

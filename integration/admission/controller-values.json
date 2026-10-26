@@ -1,0 +1,55 @@
+{
+  "webhook": {
+    "image": {
+      "repository": "ghcr.io/sigstore/policy-controller/policy-controller",
+      "version": "sha256:0492bb264fb1d9bdc8e3f343ef542cc85b7dd7c7fd8d9524b453c2bd31a1d128"
+    },
+    "failurePolicy": "Fail",
+    "configData": {
+      "no-match-policy": "deny"
+    },
+    "securityContext": {
+      "enabled": true,
+      "runAsNonRoot": true,
+      "runAsUser": 1000,
+      "runAsGroup": 1000,
+      "fsGroup": 1000,
+      "seccompProfile": {
+        "type": "RuntimeDefault"
+      }
+    },
+    "podSecurityContext": {
+      "enabled": true,
+      "allowPrivilegeEscalation": false,
+      "readOnlyRootFilesystem": true,
+      "runAsUser": 1000,
+      "capabilities": {
+        "drop": [
+          "ALL"
+        ]
+      }
+    },
+    "resources": {
+      "requests": {
+        "cpu": "100m",
+        "memory": "128Mi"
+      },
+      "limits": {
+        "cpu": "500m",
+        "memory": "512Mi"
+      }
+    }
+  },
+  "cosign": {
+    "webhookTimeoutSeconds": {
+      "mutating": 20,
+      "validating": 20
+    }
+  },
+  "leasescleanup": {
+    "image": {
+      "repository": "registry.k8s.io/kubectl",
+      "version": "sha256:497d298f891edb7608dfce9dae4bb08dffc4ddcd7f5d24a0512d4bbf33e04f26"
+    }
+  }
+}

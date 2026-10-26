@@ -1,0 +1,31 @@
+{
+  "apiVersion": "policy.sigstore.dev/v1beta1",
+  "kind": "ClusterImagePolicy",
+  "metadata": {
+    "name": "release-signer"
+  },
+  "spec": {
+    "images": [
+      {
+        "glob": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:*"
+      }
+    ],
+    "authorities": [
+      {
+        "name": "release-workflow",
+        "keyless": {
+          "identities": [
+            {
+              "issuer": "https://token.actions.githubusercontent.com",
+              "subject": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/release.yml@refs/tags/v0.1.1"
+            }
+          ]
+        },
+        "ctlog": {
+          "url": "https://rekor.sigstore.dev"
+        },
+        "signatureFormat": "legacy"
+      }
+    ]
+  }
+}

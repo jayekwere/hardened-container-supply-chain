@@ -6,7 +6,7 @@ export GOSUMDB := off
 export GOCACHE := $(CURDIR)/.cache/go-build
 export PATH := $(CURDIR)/.tools/bin:$(PATH)
 
-.PHONY: tools test chart image reproduce integration scan check cluster
+.PHONY: tools test chart image reproduce integration scan check cluster admission
 tools:
 	python3 scripts/bootstrap.py
 test:
@@ -17,6 +17,7 @@ test:
 	test -z "$$(.tools/go/bin/gofmt -l cmd internal integration)"
 	$(GO) vet ./...
 	$(GO) test -tags=kubernetes -run TestProbeClassification -count=1 ./integration
+	$(GO) test -tags=admission -run TestAdmissionClassification -count=1 ./integration
 	$(GO) test -race -count=1 -coverprofile=artifacts-coverage.tmp ./...
 	@mkdir -p artifacts
 	@mv artifacts-coverage.tmp artifacts/coverage.txt
@@ -33,3 +34,6 @@ scan:
 check: test chart reproduce integration scan
 cluster:
 	./scripts/cluster.sh
+
+admission:
+	./scripts/admission.sh

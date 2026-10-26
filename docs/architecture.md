@@ -13,7 +13,8 @@ flowchart LR
   P --> A[Signed SBOM + evidence]
   I --> X[Exact identity verification]
   A --> X
-  X --> D[Helm deployment by digest]
+  X --> G[API-server signature admission]
+  G --> D[Helm deployment by digest]
 ```
 
 The runtime has one process and one port. There is no datastore, sidecar, shell, writable application volume, service-account credential, or application secret. Fixed HTTP responses keep the application useful for connectivity/probe testing without obscuring the supply chain.
@@ -25,3 +26,5 @@ A release has two distinct digests: the image manifest digest selects the distri
 The chart emits JSON documents, which are valid YAML. This keeps the gate dependency-free and makes its limited input grammar explicit. Its four resources are a Deployment, ClusterIP Service, ServiceAccount, and NetworkPolicy. The rendered output is evaluated before deployment; the cluster separately applies restricted pod admission. The two-node integration environment also installs a digest-pinned NetworkPolicy agent beside kindnet. A test-only Go client enters the actual pod network namespace on its node, explicitly binds the pod IP, and probes literal pod/Service IPs and UDP DNS. No client or debug container is added to the application image or Deployment.
 
 Trust boundaries are source review → build engine → scanner/database → registry → signature verifier → cluster kernel/network plugin. A correct signature establishes artifact integrity and expected signer identity. It does not independently establish source correctness, vulnerability absence, or uncompromised build infrastructure.
+
+A separate checksummed controller chart installs TLS mutating/validating webhooks and a ClusterImagePolicy for the exact release subject and issuer. Namespace enrollment is explicit. Both webhooks fail closed, unmatched images are denied, and the additional container fields and actual application Deployment template are exercised through the API server. The test installation has its own disposable cluster and kubeconfig; the application chart does not bootstrap this cluster-wide infrastructure.

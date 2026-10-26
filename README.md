@@ -23,6 +23,7 @@ make tools
 make check
 ./scripts/sign-local.sh
 make cluster
+make admission
 ```
 
 `make check` runs formatting and dependency checks, vet, race-enabled Go tests, chart lint and both policy examples, two uncached image builds, Go container integration tests, a fresh vulnerability scan, and CycloneDX SBOM generation. `make cluster` creates its own cluster and private kubeconfig, installs the real chart by digest, runs Go integration tests, and deletes that cluster. It never selects an existing cluster. It now uses two nodes and a digest-pinned policy agent alongside kindnet, and verifies 10 real traffic flows with policy absent, present, removed, and reapplied. Local and hosted runs each passed all 80 probes with zero mismatches. See [runtime network-policy evidence](docs/network-policy.md).
@@ -36,6 +37,9 @@ make cluster
 | `make scan` | Versioned standard-library inventory, matching config digest, fresh database, no blocking findings |
 | `./scripts/sign-local.sh` | Ephemeral-key SBOM signature verifies; changed bytes fail |
 | `make cluster` | Service/runtime/admission checks pass; allowed ingress remains reachable; cross-namespace ingress and workload HTTP/DNS egress time out; removing the policy restores traffic |
+| `make admission` | Exact release signer admitted; unsigned and wrong-identity images denied across container fields; verifier outage fails closed and recovery restores admission |
+
+`make admission` separately provisions a disposable signature-verifying API-server webhook and runs passing/failing admission requests. See [the trust policy, replay examples and exact results](docs/admission-signatures.md).
 
 Individual commands reuse `artifacts/` from prior commands. Run `make tools` first, and build before running image-dependent checks. The local signature exercise deliberately disables transparency-log use; the release workflow requires identity certificates and normal transparency verification.
 
@@ -89,20 +93,22 @@ export IMAGE='ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b477313
 export TAG='v0.1.1'
 ./scripts/verify-release.sh "$IMAGE" "$TAG"
 
+export KUBECONFIG='/absolute/path/to/your/kubeconfig'
+./scripts/install-admission.sh "$KUBECONFIG"
 export PATH="$PWD/.tools/bin:$PATH"
 DIGEST="${IMAGE##*@}"
 helm template demo charts/supply-demo --set "image.digest=$DIGEST" > artifacts/deploy.json.yaml
 bin/policy manifests --file artifacts/deploy.json.yaml
 kubectl create namespace supply-demo
 kubectl label namespace supply-demo pod-security.kubernetes.io/enforce=restricted \
-  pod-security.kubernetes.io/enforce-version=v1.34
+  pod-security.kubernetes.io/enforce-version=v1.34 policy.sigstore.dev/include=true
 helm install demo charts/supply-demo --namespace supply-demo --set "image.digest=$DIGEST" --wait
 kubectl -n supply-demo port-forward service/demo 8080:8080
 ```
 
-These deployment commands target your selected cluster and assume Kubernetes 1.34, pull access to the image, and a network plugin that enforces NetworkPolicy. The chart supports Kubernetes 1.30+; the pinned integration environment tests 1.34. The network policy permits only namespace-local ingress to TCP 8080 and denies all pod egress, including DNS. The service needs neither DNS nor external connectivity.
+These deployment commands target your selected cluster and assume Kubernetes 1.34, Linux amd64 workload nodes for the published image, pull access to the image, and a network plugin that enforces NetworkPolicy. The chart supports Kubernetes 1.30+; the pinned integration environment tests 1.34. The network policy permits only namespace-local ingress to TCP 8080 and denies all pod egress, including DNS. The service needs neither DNS nor external connectivity.
 
-Verification is an explicit pre-deployment command. The chart does not install an admission webhook and Kubernetes does not automatically verify the image signature. Configure an admission verifier separately if continuous enforcement is required. For rollback, verify a previous release's digest and run `helm upgrade` with that digest.
+The explicit installer enables API-server signature enforcement for the enrolled namespace; the application chart itself does not install cluster-wide verification infrastructure. The admission policy pins the exact v0.1.1 workflow identity and rejects unmatched images. The CLI helper additionally verifies SBOM and evidence attestations, which the admission policy does not require. For a future release or rollback, review the corresponding exact signer identity in the admission policy, verify the selected digest, then run `helm upgrade` with that digest.
 
 ## Evidence and design
 

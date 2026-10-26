@@ -43,6 +43,6 @@
   "limitations": [
     "Runtime NetworkPolicy was not tested at v0.1.1 creation; later two-node results are recorded in network-policy-local.json.",
     "No VEX assertion is emitted.",
-    "No signature-verifying admission controller is installed."
+    "No signature-verifying admission controller existed at v0.1.1 creation; later enforcement is recorded in admission-signatures.md."
   ]
 }
