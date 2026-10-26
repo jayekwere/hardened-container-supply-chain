@@ -14,12 +14,13 @@ test:
 	python3 scripts/test_image_gate.py
 	python3 scripts/test_controller_predicates.py
 	python3 scripts/test_controller_vex.py
+	python3 scripts/test_bootstrap_policy.py
 	test "$$($(GO) env GOVERSION)" = go1.27.3
 	test -z "$$($(GO) list -mod=readonly -m all | tail -n +2)"
 	test -z "$$(.tools/go/bin/gofmt -l cmd internal integration)"
 	$(GO) vet ./...
 	$(GO) test -tags=kubernetes -run TestProbeClassification -count=1 ./integration
-	$(GO) test -tags=admission -run TestAdmissionClassification -count=1 ./integration
+	$(GO) test -tags=admission -run 'TestAdmissionClassification|TestPolicyWrite' -count=1 ./integration
 	$(GO) test -race -count=1 -coverprofile=artifacts-coverage.tmp ./...
 	@mkdir -p artifacts
 	@mv artifacts-coverage.tmp artifacts/coverage.txt

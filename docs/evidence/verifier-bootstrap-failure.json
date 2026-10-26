@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-26",
+  "timezone": "America/Vancouver",
+  "tag": "controller-v0.1.0",
+  "sourceRevision": "b3d147c7edce74af27af26998b4f3168587eb514",
+  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40332398669",
+  "outcome": "failed-closed-before-publication",
+  "failedStep": "Signature and attestation admission integration",
+  "error": "Initial ClusterImagePolicy creation failed calling defaulting.clusterimagepolicy.sigstore.dev: connection refused after chart readiness",
+  "publishJob": "skipped",
+  "releaseRecordJob": "skipped",
+  "imagePublished": false,
+  "artifact": {
+    "id": 12656695659,
+    "digest": "sha256:7f100aa679646dba8212782b34397ed7151dbe43f8ec4c1ffd30cb64c1f20214"
+  },
+  "response": "Bounded, recorded bootstrap retry for unavailable policy webhooks only. Genuine denials, foreign webhooks and process errors fail immediately; workload-negative cases are unchanged.",
+  "separateMainRunFailure": {
+    "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40332373422",
+    "outcome": "failed-closed-before-policy-write-acknowledgement",
+    "error": "ClusterImagePolicy apply GET failed with conversion webhook EOF while a verifier was draining",
+    "logSHA256": "d93883ba77bc2356064efd9b3b1c53bb6b446c336e9a06e5741bfc317fae145b",
+    "response": "Record bounded idempotent administrative policy retries before acknowledging a write. Workload-negative probes are never retried after an unexpected admission."
+  },
+  "validationEndpointFailure": {
+    "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40336651375",
+    "sourceRevision": "1f4cf7d4b36c9896c6db91dcc761a918e4c3233b",
+    "outcome": "failed-closed-before-policy-write-acknowledgement",
+    "error": "ClusterImagePolicy patch failed calling validating.clusterimagepolicy.sigstore.dev with EOF",
+    "logSHA256": "bd4945a1b55230762e3306bfd985b9605f76109e7071bcaf69da7d2685255a97",
+    "response": "The bounded policy-apply retry classifier now covers conversion, defaulting and validation endpoints. Genuine denials and workload requests are excluded."
+  }
+}

@@ -46,8 +46,9 @@ func TestTrustUpdates(t *testing.T) {
 	started := time.Now().UTC().Format(time.RFC3339Nano)
 	acknowledgements := map[string]string{}
 	var endpointPods []string
+	policyWrites := []policyWriteAttempt{}
 	t.Cleanup(func() {
-		d := map[string]any{"schemaVersion": 1, "startedAtUTC": started, "finishedAtUTC": time.Now().UTC().Format(time.RFC3339Nano), "outcome": outcome, "signedImage": inputs.SignedImage, "policyWriteAcknowledgements": acknowledgements, "endpointPods": endpointPods, "observations": observations}
+		d := map[string]any{"schemaVersion": 1, "startedAtUTC": started, "finishedAtUTC": time.Now().UTC().Format(time.RFC3339Nano), "outcome": outcome, "signedImage": inputs.SignedImage, "policyWriteAcknowledgements": acknowledgements, "policyWriteAttempts": policyWrites, "endpointPods": endpointPods, "observations": observations}
 		b, _ := json.MarshalIndent(d, "", "  ")
 		if err := os.WriteFile("../artifacts/admission/trust-updates.json", append(b, '\n'), 0600); err != nil {
 			t.Error(err)
@@ -69,7 +70,8 @@ func TestTrustUpdates(t *testing.T) {
 		return nil, -1
 	}
 	must := func(input []byte, args ...string) []byte {
-		out, code := command(input, args...)
+		out, code, attempts := applyPolicyCommand(command, input, time.Sleep, args...)
+		policyWrites = append(policyWrites, attempts...)
 		if code != 0 {
 			t.Fatalf("kubectl %v: %s", args, out)
 		}

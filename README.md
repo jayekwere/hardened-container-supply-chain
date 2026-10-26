@@ -14,7 +14,7 @@ Admission requires the image signature and both signed SBOM/evidence predicates.
 
 The separate [verifier release and three-control-plane tests](docs/verifier-release.md) cover its dependency remediation, scan/signing gates, evidence verification and direct requests to each API server.
 
-See [verification evidence](docs/verification.md) for dated local results and hosted workflow results. The initial live scan found vulnerable standard-library code; [remediation evidence](docs/remediation.md) records the compiler upgrade and rescan. Synthetic negative fixtures are clearly marked and are never presented as real findings. There are no active exceptions and no VEX assertions.
+See [verification evidence](docs/verification.md) for dated local results and hosted workflow results. The initial live scan found vulnerable standard-library code; [remediation evidence](docs/remediation.md) records the compiler upgrade and rescan. Synthetic negative fixtures are clearly marked and are never presented as real findings. There are no active risk-acceptance exceptions. The application has no VEX assertion; the separate verifier uses one [bounded, package-absence VEX case](docs/verifier-release.md#bounded-vex-evidence), retaining the original scanner finding.
 
 ## Run the complete checks
 
