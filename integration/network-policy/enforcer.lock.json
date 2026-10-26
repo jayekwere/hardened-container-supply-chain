@@ -1,0 +1,8 @@
+{
+  "project": "kube-network-policies",
+  "version": "v1.1.2",
+  "upstreamCommit": "a145b01caf668ce509766b0a48ff4e153a5e50f8",
+  "referenceManifest": "https://github.com/kubernetes-sigs/kube-network-policies/blob/a145b01caf668ce509766b0a48ff4e153a5e50f8/install.yaml",
+  "image": "registry.k8s.io/networking/kube-network-policies:v1.1.2@sha256:c671f98e444825d57c590c92da1b5e66070917c4d3dff1f9279775e6b73254fe",
+  "notes": "The tagged upstream manifest still referenced v1.1.1; this fixture explicitly selects and digest-pins the v1.1.2 image. Traditional NetworkPolicy only; no experimental policy CRDs."
+}

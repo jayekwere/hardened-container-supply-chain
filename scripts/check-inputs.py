@@ -12,3 +12,11 @@ for name, tool in lock.items():
         assert item['url'].startswith('https://') and item['checksumSource'].startswith('https://')
         assert re.fullmatch('[a-f0-9]{64}', item['sha256']), name
 print('PASS compiler pins and download locks consistent')
+
+enforcer = json.loads(Path('integration/network-policy/enforcer.lock.json').read_text())
+manifest = json.loads(Path('integration/network-policy/enforcer.json').read_text())
+agent = next(item for item in manifest['items'] if item['kind'] == 'DaemonSet')
+assert agent['spec']['template']['spec']['containers'][0]['image'] == enforcer['image']
+assert re.search(r'@sha256:[a-f0-9]{64}$', enforcer['image'])
+assert re.fullmatch('[a-f0-9]{40}', enforcer['upstreamCommit'])
+print('PASS runtime policy enforcer image pinned and consistent')

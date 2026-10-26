@@ -12,7 +12,7 @@ Observed on 2026-10-25 (America/Vancouver). Results below were executed, not inf
 | `make integration` | 3 top-level Go tests pass; HTTP and kernel runtime diagnostics pass; all 3 deliberately unsafe runtime settings are rejected; `/bin/sh` absent |
 | `make scan` | Exit 0; CycloneDX inventory contains stdlib v1.27.3; 0 findings; config identity and fresh DB checks pass; empty exception ledger |
 | `scripts/sign-local.sh` | Exit 0; valid SBOM signature accepted; tampered bytes rejected; ephemeral private key deleted |
-| `make cluster` | Exit 0; Helm deployment Ready in an isolated Kubernetes 1.34.0 cluster; all 3 Go subtests pass; cluster removed |
+| Initial `make cluster` | Exit 0; original single-node workload checks passed; superseded by the two-node traffic verification below |
 | Workflow checks | actionlint exit 0; pinned-action and permission regression guard exit 0 |
 
 Linux amd64 manifest digest: `sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22`.
@@ -63,9 +63,13 @@ See [structured release verification](evidence/release-verification.json).
 
 The [first quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40245866237) stopped at an exporter unsupported by the runner's default builder. The digest-pinned disposable builder corrected that portability issue. The [v0.1.0 publishing attempt](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40246350655) then correctly stopped when an engine upload recompressed a layer and changed the manifest digest. It created no supported release. The successful path uses an OCI copy that preserves original compressed bytes, with a transfer regression and registry digest comparison. Use the completed v0.1.1 release; the earlier staged tag is not a verified deployment input.
 
+## Runtime network-policy verification
+
+The follow-up two-node run passed all 80 observed probes with zero expectation mismatches. Same-namespace ingress and unselected-peer controls remained reachable; cross-namespace ingress and workload HTTP/DNS egress timed out under policy. Removing the policy restored all 10 flows; reapplying it reproduced the results over three consecutive rounds. See [exact matrix and reproducible commands](network-policy.md) and [local evidence](evidence/network-policy-local.json). The [hosted quality run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40248892351) independently passed the same 80-probe matrix on two Linux amd64 nodes, also with zero mismatches; [hosted evidence](evidence/network-policy-hosted.json) records its exact counts and artifact hashes. Both environments retain the original application image digests.
+
 ## Operational limitations
 
-- The default disposable-cluster CNI does not enforce NetworkPolicy. The rendered selectors/rules are checked, but no runtime traffic-denial result is claimed. Port-forwarding verifies service behavior and bypasses ordinary pod networking policy.
+- kindnet supplies connectivity while the digest-pinned policy agent supplies enforcement in the two-node test. Runtime TCP 8080 and UDP DNS 53 flows are now verified. Other CNIs, kernels, protocols, ports and IPv6 are not covered by this matrix. The older port-forward check remains a service-behavior check only.
 - Runtime seccomp is set to RuntimeDefault and accepted by the cluster; exact allowed/denied syscall behavior is platform-dependent and is not individually probed.
 - Reproducibility is two uncached builds in one configured environment, not an independent cross-host rebuild. The host engine, runner image, Python, C compiler and other host tools are not all digest-pinned. BuildKit itself now uses a digest-pinned disposable container builder.
 - Inventory and scanning cover discovered packages in the final image, including the Go standard library. They do not audit builder-image packages, pipeline-tool vulnerabilities, every application logic bug, or unknown vulnerabilities. Zero findings is a dated scanner result only.

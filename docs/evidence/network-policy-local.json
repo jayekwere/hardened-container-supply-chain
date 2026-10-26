@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-25",
+  "timezone": "America/Vancouver",
+  "startedAtUTC": "2026-10-26T00:17:15Z",
+  "finishedAtUTC": "2026-10-26T00:17:57Z",
+  "outcome": "passed",
+  "nodeCount": 2,
+  "nodes": [
+    {
+      "architecture": "arm64",
+      "kernelVersion": "6.12.76-linuxkit",
+      "kubeletVersion": "v1.34.0",
+      "containerRuntimeVersion": "containerd://2.1.3"
+    },
+    {
+      "architecture": "arm64",
+      "kernelVersion": "6.12.76-linuxkit",
+      "kubeletVersion": "v1.34.0",
+      "containerRuntimeVersion": "containerd://2.1.3"
+    }
+  ],
+  "enforcerImage": "registry.k8s.io/networking/kube-network-policies:v1.1.2@sha256:c671f98e444825d57c590c92da1b5e66070917c4d3dff1f9279775e6b73254fe",
+  "workloadManifestDigest": "sha256:a1fe6ec5772948818f8e52ddbfcb198865bb49fd4d68b36c1607a2feaaf88330",
+  "flowCount": 10,
+  "observationCount": 80,
+  "phaseResults": [
+    {
+      "name": "baseline",
+      "completedRounds": 1,
+      "observations": 10,
+      "outcomes": {
+        "reachable": 10
+      },
+      "expectationMismatches": 0
+    },
+    {
+      "name": "enforced",
+      "completedRounds": 3,
+      "observations": 30,
+      "outcomes": {
+        "reachable": 15,
+        "timeout": 15
+      },
+      "expectationMismatches": 0
+    },
+    {
+      "name": "restored",
+      "completedRounds": 1,
+      "observations": 10,
+      "outcomes": {
+        "reachable": 10
+      },
+      "expectationMismatches": 0
+    },
+    {
+      "name": "reapplied",
+      "completedRounds": 3,
+      "observations": 30,
+      "outcomes": {
+        "reachable": 15,
+        "timeout": 15
+      },
+      "expectationMismatches": 0
+    }
+  ],
+  "flowExpectationsWithPolicy": [
+    {
+      "name": "same-namespace-to-pod",
+      "protocol": "http",
+      "allowed": true
+    },
+    {
+      "name": "same-namespace-to-service",
+      "protocol": "http",
+      "allowed": true
+    },
+    {
+      "name": "cross-namespace-to-pod",
+      "protocol": "http",
+      "allowed": false
+    },
+    {
+      "name": "cross-namespace-to-service",
+      "protocol": "http",
+      "allowed": false
+    },
+    {
+      "name": "workload-to-same-namespace-peer",
+      "protocol": "http",
+      "allowed": false
+    },
+    {
+      "name": "workload-to-other-namespace-peer",
+      "protocol": "http",
+      "allowed": false
+    },
+    {
+      "name": "workload-to-dns-udp53",
+      "protocol": "dns",
+      "allowed": false
+    },
+    {
+      "name": "unselected-peer-to-other-peer",
+      "protocol": "http",
+      "allowed": true
+    },
+    {
+      "name": "unselected-peer-to-dns",
+      "protocol": "dns",
+      "allowed": true
+    },
+    {
+      "name": "unselected-other-to-local-peer",
+      "protocol": "http",
+      "allowed": true
+    }
+  ],
+  "rawEvidenceSHA256": "c98a771395e0cf3f41fb2215ec6099c9e276a4dff3dee2783607bb174f01211f",
+  "testedSourceSHA256": {
+    "scripts/cluster.sh": "0cb5eef8bec872d851570a24d0ae4f19e9f1337747947374fe418c7a6b9a763d",
+    "integration/network_policy_test.go": "4bf091584e763f003c913371480b3a1e5a53eabb597f206261f58a8799373f42",
+    "integration/netprobe/main.go": "a05c0d166a03c855851a3b18a9fdfece13b4ddcb1905eacc7cd572c3b6cd5dcf",
+    "integration/network-policy/enforcer.json": "306c4acb77592afd754b5467b3377b8ed1f9fc4f169f3e93b65de7241fda5c26",
+    "integration/network-policy/enforcer.lock.json": "93e2c25494d9283bc297d71c94e9c495130ed648be12179fb15284aad2afb3a2",
+    "integration/network-policy/kind.yaml": "793622fd7cd8d6e3dec9be15cc33178b0b41704d9150a01d9f6e79cb0e7b546e",
+    "charts/supply-demo/templates/networkpolicy.yaml": "8a5dfddec65894e934f85cfe02ead5f6c418443ae7ad9864b8d4fd9bd8b8a76e"
+  },
+  "hostedVerification": {
+    "outcome": "passed",
+    "workflowRunURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40248892351",
+    "evidence": "network-policy-hosted.json"
+  },
+  "scope": "IPv4 TCP 8080 and UDP DNS 53 on two nodes using kindnet and the pinned policy agent. No claim about every CNI, protocol, port, or kernel."
+}

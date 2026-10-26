@@ -30,7 +30,7 @@ jobs:
         run: make check
       - name: Local signature and tamper rejection
         run: ./scripts/sign-local.sh
-      - name: Disposable cluster integration
+      - name: Disposable cluster and network-policy integration
         run: make cluster
       - name: Retain evidence
         if: always()
@@ -42,6 +42,7 @@ jobs:
             artifacts/*.txt
             artifacts/*.cdx.json
             artifacts/*.yaml
-            artifacts/cluster/tests.txt
+            artifacts/cluster/*.txt
+            artifacts/cluster/*.json
           retention-days: 14
           if-no-files-found: error
