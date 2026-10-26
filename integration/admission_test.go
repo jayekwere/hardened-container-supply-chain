@@ -309,26 +309,28 @@ func TestAdmissionSignatures(t *testing.T) {
 	run("fixture-requirements-restored", "allowed", pod("fixture-requirements-restored", "signature-demo", inputs.SignedImage), create...)
 	applyAttestations(nil)
 	run("release-requirements-restored", "allowed", pod("release-requirements-restored", "signature-demo", inputs.SignedImage), create...)
-	runningVerifiers := func() []string {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		out, err := exec.CommandContext(ctx, "docker", "exec", name+"-control-plane", "crictl", "ps", "-o", "json").Output()
-		if err != nil {
-			t.Fatalf("cannot inspect verifier runtime: %v", err)
-		}
-		var runtime struct {
-			Containers []struct {
-				ID     string
-				Labels map[string]string
+	runningVerifiers := func() map[string]string {
+		ids := map[string]string{}
+		for _, node := range admissionControlPlanes(t) {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			out, err := exec.CommandContext(ctx, "docker", "exec", node, "crictl", "ps", "-o", "json").Output()
+			if err != nil {
+				t.Fatalf("cannot inspect verifier runtime: %v", err)
 			}
-		}
-		if err := json.Unmarshal(out, &runtime); err != nil {
-			t.Fatal(err)
-		}
-		var ids []string
-		for _, container := range runtime.Containers {
-			if container.Labels["io.kubernetes.pod.namespace"] == "image-policy-system" {
-				ids = append(ids, container.ID)
+			var runtime struct {
+				Containers []struct {
+					ID     string
+					Labels map[string]string
+				}
+			}
+			if err := json.Unmarshal(out, &runtime); err != nil {
+				t.Fatal(err)
+			}
+			for _, container := range runtime.Containers {
+				if container.Labels["io.kubernetes.pod.namespace"] == "image-policy-system" {
+					ids[container.ID] = node
+				}
 			}
 		}
 		return ids
@@ -356,9 +358,9 @@ func TestAdmissionSignatures(t *testing.T) {
 		}
 		// The controller has a long drain period. Terminate only its test
 		// runtime task so no existing admission connection can survive.
-		for _, id := range runningVerifiers() {
+		for id, node := range runningVerifiers() {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			out, err := exec.CommandContext(ctx, "docker", "exec", name+"-control-plane", "ctr", "--namespace=k8s.io", "tasks", "kill", "--signal", "SIGKILL", id).CombinedOutput()
+			out, err := exec.CommandContext(ctx, "docker", "exec", node, "ctr", "--namespace=k8s.io", "tasks", "kill", "--signal", "SIGKILL", id).CombinedOutput()
 			cancel()
 			if err != nil && len(runningVerifiers()) != 0 {
 				t.Fatalf("cannot stop verifier test task: %v %s", err, out)

@@ -1,0 +1,71 @@
+name: controller-release
+on:
+  push:
+    tags: ['controller-v*']
+permissions:
+  contents: read
+concurrency:
+  group: controller-release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  quality:
+    uses: ./.github/workflows/quality.yml
+    permissions:
+      contents: read
+  publish:
+    needs: quality
+    if: github.repository == 'jayekwere/hardened-container-supply-chain'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: make tools
+      - name: Gate, publish, sign, verify and exercise the exact verifier digest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./scripts/publish-controller.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: controller-evidence-${{ github.ref_name }}-${{ github.run_attempt }}
+          path: |
+            artifacts/controller/*.json
+            artifacts/controller/*.jsonl
+            artifacts/controller/*.txt
+            artifacts/controller/*.sha256
+            artifacts/controller/go.mod
+            artifacts/controller/go.sum
+            artifacts/admission/*.json
+            artifacts/admission/*.txt
+          retention-days: 90
+          if-no-files-found: error
+  record:
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: controller-evidence-${{ github.ref_name }}-${{ github.run_attempt }}
+          path: evidence
+      - name: Record verified verifier release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          image=Path('evidence/controller/image-reference.txt').read_text().strip()
+          Path('release-notes.txt').write_text('Patched admission verifier. Fresh scan passed; exact digest signed with SBOM and build evidence attestations. Three-control-plane admission and trust-update tests passed against the published digest.\n\nImage: `'+image+'`\n\nSee attached raw results and repository documentation for counts, verification commands and limitations.\n')
+          PY
+          gh release create "$RELEASE_TAG" --verify-tag --title "$RELEASE_TAG" --notes-file release-notes.txt evidence/controller/* evidence/admission/multi-control-plane.json evidence/admission/trust-updates.json evidence/admission/decisions.json

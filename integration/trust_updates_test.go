@@ -107,9 +107,11 @@ func TestTrustUpdates(t *testing.T) {
 		}}
 	}
 	apiProbe := func(phase, expected, namespace, image string) {
-		start := time.Now().UTC().Format(time.RFC3339Nano)
-		out, code := command(encode(pod(namespace, image)), "create", "--dry-run=server", "-f", "-", "-o", "json")
-		record(phase, "api-server", start, expected, classify(code, string(out)), string(out))
+		for _, node := range admissionControlPlanes(t) {
+			start := time.Now().UTC().Format(time.RFC3339Nano)
+			out, code := controlPlaneCommand(t, node, encode(pod(namespace, image)), "create", "--dry-run=server", "-f", "-", "-o", "json")
+			record(phase, node, start, expected, classify(code, string(out)), string(out))
+		}
 	}
 	objectProbe := func(phase, expected string, object any) {
 		start := time.Now().UTC().Format(time.RFC3339Nano)

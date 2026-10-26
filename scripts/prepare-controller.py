@@ -10,6 +10,8 @@ root = Path.cwd()
 lock = json.loads(Path('integration/admission/inputs.lock.json').read_text())['controller']
 patch = root / 'patches/policy-controller-freshness.patch'
 patch_hash = hashlib.sha256(patch.read_bytes()).hexdigest()
+dependency_patch = root / 'patches/policy-controller-dependencies.patch'
+dependency_hash = hashlib.sha256(dependency_patch.read_bytes()).hexdigest()
 cache = root / '.tools/controller-source'
 cache.mkdir(parents=True, exist_ok=True)
 archive = cache / (lock['sourceCommit'] + '.tar.gz')
@@ -17,7 +19,7 @@ if not archive.exists():
     archive.write_bytes(urllib.request.urlopen(lock['sourceArchive']['url'], timeout=120).read())
 if hashlib.sha256(archive.read_bytes()).hexdigest() != lock['sourceArchive']['sha256']:
     raise SystemExit('DENY controller source checksum mismatch')
-source = cache / (lock['sourceCommit'][:12] + '-' + patch_hash[:16])
+source = cache / (lock['sourceCommit'][:12] + '-' + patch_hash[:12] + '-' + dependency_hash[:12])
 if not (source / '.prepared').exists():
     source.mkdir(exist_ok=True)
     with tarfile.open(archive) as bundle:
@@ -28,5 +30,7 @@ if not (source / '.prepared').exists():
     subprocess.run(['git', 'init', '--quiet', str(source)], check=True)
     subprocess.run(['git', '-C', str(source), 'apply', '--check', str(patch)], check=True)
     subprocess.run(['git', '-C', str(source), 'apply', str(patch)], check=True)
+    subprocess.run(['git', '-C', str(source), 'apply', '--check', str(dependency_patch)], check=True)
+    subprocess.run(['git', '-C', str(source), 'apply', str(dependency_patch)], check=True)
     (source / '.prepared').write_text(patch_hash)
 print(source)

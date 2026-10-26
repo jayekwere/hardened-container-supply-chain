@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Pre-upgrade verifier scan; release gate intentionally rejected this inventory",
+  "source": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "b682351682fb3025644e66fb489777c013121e5fe6f8501e6fcb5a9588e2ed2f",
+    "binarySHA256": "eaed8cbeeeee326efc8ff4b564ba782931dc192c54180c48f6fb4d3833e6c341",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "arm64",
+    "manifestDigest": "sha256:c786e111771d925c2553099faab54121cbf9c5e6edebbebe318b822918aff495"
+  },
+  "scanSHA256": "9282061cc0767f3b1b5793d299db038a53355dbdcd6340bf2dcf481828715e7e",
+  "gateExit": 1,
+  "severityCounts": {
+    "MEDIUM": 21,
+    "HIGH": 27,
+    "LOW": 2,
+    "UNKNOWN": 2
+  },
+  "findings": [
+    {
+      "VulnerabilityID": "CVE-2026-85747",
+      "PkgName": "github.com/docker/distribution",
+      "InstalledVersion": "v2.8.3+incompatible",
+      "FixedVersion": "",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-114437",
+      "PkgName": "github.com/go-chi/chi/v5",
+      "InstalledVersion": "v5.2.4",
+      "FixedVersion": "5.4.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-34986",
+      "PkgName": "github.com/go-jose/go-jose/v4",
+      "InstalledVersion": "v4.1.3",
+      "FixedVersion": "4.1.4",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "GHSA-pmwq-pjrm-6p5r",
+      "PkgName": "github.com/in-toto/in-toto-golang",
+      "InstalledVersion": "v0.9.0",
+      "FixedVersion": "0.11.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-63209",
+      "PkgName": "github.com/klauspost/compress",
+      "InstalledVersion": "v1.18.4",
+      "FixedVersion": "1.18.7",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-48702",
+      "PkgName": "github.com/sigstore/rekor",
+      "InstalledVersion": "v1.5.0",
+      "FixedVersion": "1.5.2",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-49834",
+      "PkgName": "github.com/sigstore/sigstore-go",
+      "InstalledVersion": "v1.1.4",
+      "FixedVersion": "1.2.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-54787",
+      "PkgName": "github.com/sigstore/sigstore-go",
+      "InstalledVersion": "v1.1.4",
+      "FixedVersion": "1.2.1",
+      "Severity": "LOW"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39984",
+      "PkgName": "github.com/sigstore/timestamp-authority/v2",
+      "InstalledVersion": "v2.0.4",
+      "FixedVersion": "2.0.6",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-49835",
+      "PkgName": "github.com/sigstore/timestamp-authority/v2",
+      "InstalledVersion": "v2.0.4",
+      "FixedVersion": "2.1.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-2303",
+      "PkgName": "go.mongodb.org/mongo-driver",
+      "InstalledVersion": "v1.17.6",
+      "FixedVersion": "1.17.7",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39883",
+      "PkgName": "go.opentelemetry.io/otel/sdk",
+      "InstalledVersion": "v1.42.0",
+      "FixedVersion": "1.43.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-81870",
+      "PkgName": "go.opentelemetry.io/otel/sdk",
+      "InstalledVersion": "v1.42.0",
+      "FixedVersion": "1.45.0",
+      "Severity": "LOW"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39828",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39829",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39830",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39831",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39832",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39835",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-42508",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-46595",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-46597",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-56854",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.55.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39827",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39833",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39834",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-46598",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.52.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-56855",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.56.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-78662",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "0.56.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "GO-2026-5932",
+      "PkgName": "golang.org/x/crypto",
+      "InstalledVersion": "v0.49.0",
+      "FixedVersion": "",
+      "Severity": "UNKNOWN"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-56864",
+      "PkgName": "golang.org/x/mod",
+      "InstalledVersion": "v0.34.0",
+      "FixedVersion": "0.40.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-56865",
+      "PkgName": "golang.org/x/mod",
+      "InstalledVersion": "v0.34.0",
+      "FixedVersion": "0.40.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-25681",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.55.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-27136",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.55.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-33814",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.53.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39821",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.55.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-46600",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.56.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-78669",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.60.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-25680",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.55.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-42502",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.55.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-42506",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.55.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-78659",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.60.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-78660",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.60.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-78663",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.60.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-97032",
+      "PkgName": "golang.org/x/net",
+      "InstalledVersion": "v0.52.0",
+      "FixedVersion": "0.60.0",
+      "Severity": "MEDIUM"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-39824",
+      "PkgName": "golang.org/x/sys",
+      "InstalledVersion": "v0.42.0",
+      "FixedVersion": "0.44.0",
+      "Severity": "UNKNOWN"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-56851",
+      "PkgName": "golang.org/x/text",
+      "InstalledVersion": "v0.35.0",
+      "FixedVersion": "0.41.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-56852",
+      "PkgName": "golang.org/x/text",
+      "InstalledVersion": "v0.35.0",
+      "FixedVersion": "0.39.0",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-84304",
+      "PkgName": "google.golang.org/grpc",
+      "InstalledVersion": "v1.79.3",
+      "FixedVersion": "1.83.1",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-84445",
+      "PkgName": "google.golang.org/grpc",
+      "InstalledVersion": "v1.79.3",
+      "FixedVersion": "1.82.2, 1.83.2, 1.84.0-dev.0.20260825144003-d5a41119e0e3, 1.85.0-dev.0.20260825072537-93e31b48545e",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "GHSA-hrxh-6v49-42gf",
+      "PkgName": "google.golang.org/grpc",
+      "InstalledVersion": "v1.79.3",
+      "FixedVersion": "1.82.1",
+      "Severity": "HIGH"
+    },
+    {
+      "VulnerabilityID": "CVE-2026-84303",
+      "PkgName": "google.golang.org/grpc",
+      "InstalledVersion": "v1.79.3",
+      "FixedVersion": "1.83.1",
+      "Severity": "MEDIUM"
+    }
+  ]
+}
