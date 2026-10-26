@@ -34,6 +34,13 @@ class BootstrapTests(unittest.TestCase):
         self.assertEqual(observations[0]['outcome'], 'rejected')
         self.assertEqual(len(calls), 1)
 
+    def test_conversion_failure_recovers(self):
+        failed = 'conversion webhook for policy.sigstore.dev/v1alpha1, Kind=ClusterImagePolicy failed: EOF'
+        passed, observations, calls = self.execute([(1, failed), (0, 'configured\n')])
+        self.assertTrue(passed)
+        self.assertEqual([x['outcome'] for x in observations], ['webhook-unavailable', 'applied'])
+        self.assertEqual(len(calls), 2)
+
     def test_foreign_webhook_is_not_retried(self):
         passed, _, calls = self.execute([(1, 'failed calling webhook "other.invalid": connection refused')])
         self.assertFalse(passed)

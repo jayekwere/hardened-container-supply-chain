@@ -62,8 +62,8 @@ python3 scripts/fetch-admission-chart.py
   --values integration/admission/controller-values.json \
   --set "webhook.image.repository=${CONTROLLER_IMAGE%@*}" \
   --set "webhook.image.version=${CONTROLLER_IMAGE##*@}" --wait --timeout 180s --no-hooks
-.tools/bin/kubectl --kubeconfig /absolute/path/to/kubeconfig apply \
-  -f integration/admission/release-policy.json -f integration/admission/attestations-policy.json
+python3 scripts/apply-bootstrap-policy.py /absolute/path/to/kubeconfig integration/admission/release-policy.json
+python3 scripts/apply-bootstrap-policy.py /absolute/path/to/kubeconfig integration/admission/attestations-policy.json
 ```
 
 Drain and retire **every** older unpatched verifier instance before relying on the new guarantee. `rollout status` alone does not prove that an older terminating process or established connection has ended. Perform the initial migration in an operator-controlled maintenance window and confirm process termination on every relevant node. The regression suite tests subsequent policy updates with the patched verifier; it does not claim that upgrading a live unpatched fleet is instantaneous.

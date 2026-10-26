@@ -21,10 +21,12 @@ def apply(kubeconfig, policy, runner=subprocess.run, pause=time.sleep, attempts=
             observations.append({'attempt': attempt, 'outcome': 'execution-error', 'output': str(error)})
             return False, observations
         text = result.stdout.lower()
-        retryable = ('denied the request' not in text and 'failed calling webhook' in text and
-                     '.clusterimagepolicy.sigstore.dev' in text and
-                     any(word in text for word in ['connection refused', 'no endpoints available',
-                                                   'context deadline exceeded', 'tls handshake timeout', 'i/o timeout']))
+        transport = any(word in text for word in ['connection refused', 'no endpoints available',
+                                                  'context deadline exceeded', 'tls handshake timeout', 'i/o timeout'])
+        unavailable = 'failed calling webhook' in text and '.clusterimagepolicy.sigstore.dev' in text and transport
+        conversion = ('conversion webhook for policy.sigstore.dev/' in text and 'failed:' in text and
+                      (transport or 'eof' in text))
+        retryable = 'denied the request' not in text and (unavailable or conversion)
         outcome = 'applied' if result.returncode == 0 else 'webhook-unavailable' if retryable else 'rejected'
         observations.append({'attempt': attempt, 'outcome': outcome, 'exitCode': result.returncode, 'output': result.stdout})
         if result.returncode == 0:

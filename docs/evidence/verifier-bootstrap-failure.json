@@ -15,5 +15,12 @@
     "id": 12656695659,
     "digest": "sha256:7f100aa679646dba8212782b34397ed7151dbe43f8ec4c1ffd30cb64c1f20214"
   },
-  "response": "Bounded, recorded bootstrap retry for unavailable policy webhooks only. Genuine denials, foreign webhooks and process errors fail immediately; workload-negative cases are unchanged."
+  "response": "Bounded, recorded bootstrap retry for unavailable policy webhooks only. Genuine denials, foreign webhooks and process errors fail immediately; workload-negative cases are unchanged.",
+  "separateMainRunFailure": {
+    "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40332373422",
+    "outcome": "failed-closed-before-policy-write-acknowledgement",
+    "error": "ClusterImagePolicy apply GET failed with conversion webhook EOF while a verifier was draining",
+    "logSHA256": "d93883ba77bc2356064efd9b3b1c53bb6b446c336e9a06e5741bfc317fae145b",
+    "response": "Record bounded idempotent administrative policy retries before acknowledging a write. Workload-negative probes are never retried after an unexpected admission."
+  }
 }

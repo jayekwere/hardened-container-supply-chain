@@ -28,14 +28,15 @@ type admissionAttempt struct {
 	Output   string `json:"output"`
 }
 type admissionEvidence struct {
-	SchemaVersion   int                `json:"schemaVersion"`
-	StartedAt       string             `json:"startedAtUTC"`
-	FinishedAt      string             `json:"finishedAtUTC"`
-	Outcome         string             `json:"outcome"`
-	SignedImage     string             `json:"signedImage"`
-	UnsignedImage   string             `json:"unsignedImage"`
-	ControllerImage string             `json:"controllerImage"`
-	Attempts        []admissionAttempt `json:"attempts"`
+	SchemaVersion   int                  `json:"schemaVersion"`
+	StartedAt       string               `json:"startedAtUTC"`
+	FinishedAt      string               `json:"finishedAtUTC"`
+	Outcome         string               `json:"outcome"`
+	SignedImage     string               `json:"signedImage"`
+	UnsignedImage   string               `json:"unsignedImage"`
+	ControllerImage string               `json:"controllerImage"`
+	Attempts        []admissionAttempt   `json:"attempts"`
+	PolicyWrites    []policyWriteAttempt `json:"policyWriteAttempts"`
 }
 
 func TestAdmissionSignatures(t *testing.T) {
@@ -84,7 +85,8 @@ func TestAdmissionSignatures(t *testing.T) {
 	}
 	must := func(input []byte, args ...string) []byte {
 		t.Helper()
-		out, code := command(input, args...)
+		out, code, attempts := applyPolicyCommand(command, input, time.Sleep, args...)
+		evidence.PolicyWrites = append(evidence.PolicyWrites, attempts...)
 		if code != 0 {
 			t.Fatalf("kubectl %v exit %d: %s", args, code, out)
 		}
