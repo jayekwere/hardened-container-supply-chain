@@ -61,6 +61,8 @@ References: [authoritative advisory](https://vuln.go.dev/ID/GO-2026-5932.json), 
 
 ## Remaining boundaries
 
+The later [maintenance and failure controls](operations.md) provide an API-enforced workload pause and expanded node/leader/quorum tests. The release-specific results below remain unchanged historical observations.
+
 The verifier itself is installed by a trusted administrator; it cannot establish its own initial admission trust. Verify its release before installation. Existing unpatched verifier processes must all terminate during migration. Application admission still requires its independent signature and both application attestations.
 
 Two authoritative reads are not a transaction with eventual object persistence. Existing approvals and running Pods are not recalled; multi-policy writes are not atomic. Mutable trust references and unsupported modes remain intentionally rejected. API availability, administrator-controlled enrollment/routing and node integrity remain trusted. A scan is a database snapshot and module inventory, not a proof that every possible defect is absent. The focused verifier tests do not claim execution of the complete upstream suite.

@@ -4,7 +4,16 @@ cd "$(dirname "$0")/.."
 export PATH="$PWD/.tools/bin:$PATH"
 name="hsc-admission-$$"
 kubeconfig="$PWD/.tools/kubeconfig-$name"
+# Each replay owns these generated outputs; a focused run must not retain an
+# older passing record for a suite it did not execute.
+rm -rf artifacts/admission
 mkdir -p artifacts/admission
+pattern=${TEST_ADMISSION_RUN:-.}
+python3 - "$pattern" <<'PY'
+import json,sys
+from pathlib import Path
+Path('artifacts/admission/run-selection.json').write_text(json.dumps({'pattern':sys.argv[1],'scope':'full' if sys.argv[1]=='.' else 'focused'},indent=2)+'\n')
+PY
 cleanup() {
   code=$?
   if [ "$code" -ne 0 ] && [ -f "$kubeconfig" ]; then
@@ -50,7 +59,7 @@ for field in signedImage unsignedImage; do
   image=$(python3 -c 'import json,sys;print(json.load(open("integration/admission/inputs.lock.json"))[sys.argv[1]])' "$field")
   oras resolve "$image" > "artifacts/admission/$field-digest.txt"
 done
-TEST_ADMISSION_KUBECONFIG="$kubeconfig" TEST_ADMISSION_KIND_NAME="$name" TEST_ADMISSION_CONTROLLER_IMAGE="$controller_image" TEST_ADMISSION_FIXTURES="$PWD/artifacts/admission/fixtures.json" go test -tags=admission -count=1 -timeout=15m -v ./integration | tee artifacts/admission/tests.txt
+TEST_ADMISSION_KUBECONFIG="$kubeconfig" TEST_ADMISSION_KIND_NAME="$name" TEST_ADMISSION_CONTROLLER_IMAGE="$controller_image" TEST_ADMISSION_FIXTURES="$PWD/artifacts/admission/fixtures.json" go test -tags=admission -run "$pattern" -count=1 -timeout=15m -v ./integration | tee artifacts/admission/tests.txt
 kubectl --kubeconfig "$kubeconfig" -n image-policy-system get pods -l app.kubernetes.io/instance=policy-controller -o json > artifacts/admission/controller-pods.json
 if [ -n "${TEST_RELEASE_CONTROLLER_IMAGE:-}" ]; then
   python3 - "$controller_image" <<'PY'
