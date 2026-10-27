@@ -70,6 +70,7 @@ func TestAvailability(t *testing.T) {
 	paused := map[string]bool{}
 	placement := map[string]string{}
 	configurations := map[string]json.RawMessage{}
+	recovery := map[string]map[string]json.RawMessage{}
 	outcome := "failed"
 	nodeAction := func(action, node string) {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -86,10 +87,28 @@ func TestAvailability(t *testing.T) {
 				nodeAction("unpause", node)
 			}
 		}
-		record := map[string]any{"schemaVersion": 1, "outcome": outcome, "startedAtUTC": started, "finishedAtUTC": time.Now().UTC().Format(time.RFC3339Nano), "verifierPlacement": placement, "effectiveConfiguration": configurations, "etcdMembers": members, "observations": observations}
+		record := map[string]any{"schemaVersion": 1, "outcome": outcome, "startedAtUTC": started, "finishedAtUTC": time.Now().UTC().Format(time.RFC3339Nano), "verifierPlacement": placement, "effectiveConfiguration": configurations, "etcdMembers": members, "recovery": recovery, "observations": observations}
 		raw, _ := json.MarshalIndent(record, "", "  ")
 		if err := os.WriteFile("../artifacts/admission/availability.json", append(raw, '\n'), 0600); err != nil {
 			t.Error(err)
+		}
+	})
+	// Capture the failing topology before cleanup resumes nodes or later tests
+	// roll the verifier. A final workflow log alone can show a different state.
+	t.Cleanup(func() {
+		if !t.Failed() {
+			return
+		}
+		for key, args := range map[string][]string{
+			"nodes":     {"get", "nodes"},
+			"pods":      {"get", "pods", "-A"},
+			"endpoints": {"-n", "image-policy-system", "get", "endpointslices"},
+		} {
+			ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+			command := append([]string{"--kubeconfig", os.Getenv("TEST_ADMISSION_KUBECONFIG"), "--request-timeout=4s"}, append(args, "-o", "json")...)
+			out, _ := exec.CommandContext(ctx, "kubectl", command...).CombinedOutput()
+			cancel()
+			_ = os.WriteFile("../artifacts/admission/availability-failed-"+key+".txt", out, 0600)
 		}
 	})
 	pod := func(image string) []byte {
@@ -122,7 +141,7 @@ func TestAvailability(t *testing.T) {
 			probe(phase, node, inputs.UnsignedImage, "signature-denied")
 		}
 	}
-	ready := func() {
+	ready := func(phase string) {
 		for _, node := range nodes {
 			deadline := time.Now().Add(60 * time.Second)
 			for {
@@ -136,8 +155,33 @@ func TestAvailability(t *testing.T) {
 				time.Sleep(time.Second)
 			}
 		}
+		// A ready API is insufficient: the previously paused node's verifier,
+		// service endpoint and DNS replica must recover before the next fault.
+		deadline := time.Now().Add(120 * time.Second)
+		for {
+			snapshot := map[string]json.RawMessage{}
+			for key, args := range map[string][]string{
+				"nodes":     {"get", "nodes"},
+				"verifiers": {"-n", "image-policy-system", "get", "pods", "-l", "app.kubernetes.io/instance=policy-controller"},
+				"endpoints": {"-n", "image-policy-system", "get", "endpointslices", "-l", "kubernetes.io/service-name=webhook"},
+				"dns":       {"-n", "kube-system", "get", "pods", "-l", "k8s-app=kube-dns"},
+			} {
+				out, code := controlPlaneCommand(t, nodes[0], nil, append([]string{"--request-timeout=5s"}, append(args, "-o", "json")...)...)
+				if code == 0 && json.Valid(out) {
+					snapshot[key] = out
+				}
+			}
+			recovery[phase] = snapshot
+			if healthyRecovery(snapshot, nodes) {
+				break
+			}
+			if time.Now().After(deadline) {
+				t.Fatalf("%s: API recovered but verifier/DNS placement or endpoints did not", phase)
+			}
+			time.Sleep(time.Second)
+		}
 	}
-	ready()
+	ready("baseline")
 	for _, resource := range []string{"deployment", "poddisruptionbudget"} {
 		raw, code := controlPlaneCommand(t, nodes[0], nil, "-n", "image-policy-system", "get", resource, "policy-controller-webhook", "-o", "json")
 		if code != 0 || !json.Valid(raw) {
@@ -192,7 +236,7 @@ func TestAvailability(t *testing.T) {
 	nodeAction("pause", nodes[0])
 	check("verifier-node-paused", nodes[1:])
 	nodeAction("unpause", nodes[0])
-	ready()
+	ready("verifier-node-restored")
 	check("verifier-node-restored", nodes)
 
 	for _, node := range nodes {
@@ -234,7 +278,7 @@ func TestAvailability(t *testing.T) {
 	}
 	check("elected-leader-paused", survivors)
 	nodeAction("unpause", leaderNode)
-	ready()
+	ready("leader-restored")
 	check("leader-restored", nodes)
 
 	// Keep a verifier and its API alive, but remove two of the three etcd voters.
@@ -260,7 +304,7 @@ func TestAvailability(t *testing.T) {
 	observations = append(observations, trustObservation{"quorum-lost-admission", nodes[1], at, "rejected", got, string(out)})
 	nodeAction("unpause", nodes[0])
 	nodeAction("unpause", nodes[2])
-	ready()
+	ready("quorum-restored")
 	check("quorum-restored", nodes)
 	for _, node := range nodes {
 		members["restored"] = append(members["restored"], localEtcdStatus(t, node))
@@ -282,7 +326,7 @@ func quorumFailure(out string) bool {
 			return false
 		}
 	}
-	return strings.Contains(text, "etcdserver: request timed out") || strings.Contains(text, "etcdserver: leader changed") || strings.Contains(text, "context deadline exceeded") || strings.Contains(text, "server was unable to return a response in the time allotted") || strings.Contains(text, "timed out waiting for the condition")
+	return strings.Contains(text, "etcdserver: request timed out") || strings.Contains(text, "etcdserver: leader changed") || strings.Contains(text, "context deadline exceeded") || strings.Contains(text, "net/http: request canceled (client.timeout") || strings.Contains(text, "server was unable to return a response in the time allotted") || strings.Contains(text, "timed out waiting for the condition")
 }
 
 func TestQuorumFailureClassification(t *testing.T) {
@@ -292,9 +336,14 @@ func TestQuorumFailureClassification(t *testing.T) {
 	}{
 		{"etcdserver: request timed out", true},
 		{"context deadline exceeded", true},
+		{"net/http: request canceled (Client.Timeout exceeded while awaiting headers)", true},
+		{"net/http: request canceled (Client.Timeout or context cancellation while reading body)", true},
 		{"Error from server (Timeout): the server was unable to return a response in the time allotted", true},
 		{"unknown flag: context deadline exceeded", false},
 		{"Forbidden: context deadline exceeded", false},
+		{"Forbidden: Client.Timeout exceeded while awaiting headers", false},
+		{"Forbidden: net/http: request canceled (Client.Timeout or context cancellation while reading body)", false},
+		{"net/http: request canceled (context canceled)", false},
 		{"Unauthorized", false},
 		{"certificate has expired: context deadline exceeded", false},
 		{"AlreadyExists: timed out waiting for the condition", false},

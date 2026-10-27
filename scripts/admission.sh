@@ -41,6 +41,10 @@ done
 # Reserve the paused API/etcd node so that this case isolates control-plane loss.
 # Verifier process loss has its own fail-closed test.
 kubectl --kubeconfig "$kubeconfig" taint node "$name-control-plane3" hsc.test/control-plane-only=true:NoSchedule
+# A complete node outage must leave DNS as well as a verifier available. The
+# default kind placement can put both DNS replicas on the first control plane.
+kubectl --kubeconfig "$kubeconfig" -n kube-system patch deployment coredns --type=merge -p '{"spec":{"template":{"spec":{"affinity":{"podAntiAffinity":{"requiredDuringSchedulingIgnoredDuringExecution":[{"labelSelector":{"matchLabels":{"k8s-app":"kube-dns"}},"topologyKey":"kubernetes.io/hostname"}]}}}}}}'
+kubectl --kubeconfig "$kubeconfig" -n kube-system rollout status deployment/coredns --timeout=180s
 if [ -z "${TEST_RELEASE_CONTROLLER_IMAGE:-}" ]; then
   kind load docker-image supply-policy-controller:local --name "$name"
   controller_digest=$(docker exec "$name-control-plane" ctr --namespace=k8s.io images ls | awk '$1=="docker.io/library/supply-policy-controller:local" {print $3}')
