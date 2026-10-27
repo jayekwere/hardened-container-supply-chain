@@ -87,6 +87,8 @@ The [focused local replay](https://github.com/jayekwere/hardened-container-suppl
 
 Supplementary raw operating evidence is attached to the same [verifier release](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/controller-v0.1.1). These later files are not authenticated by the earlier build-evidence attestation. The original published-digest release run and its scan/signature/SBOM evidence remain unchanged. Native local image identity and hosted engine-import identity are recorded separately from that published-digest run.
 
+The [October 27 recovery replay](failover-recovery.md) adds separate-node DNS placement in the disposable cluster, a full verifier/DNS/endpoint recovery barrier between faults, exact client-timeout classification and diagnostics captured at the failure point. Its complete local results are recorded separately from the earlier release evidence.
+
 ## Limits that remain
 
 These are single-host containerized nodes. They establish behavior for the recorded faults, not independent physical failure domains, arbitrary network partitions, sustained production load or zero downtime. Quorum loss is deliberately unavailable. API consistency, namespace enrollment, administrator authority, node/runtime integrity, the build host and initial verifier trust remain boundaries. Unsupported mutable trust references remain rejected; no general upstream compatibility claim is added. Scans remain dated inventories, and later runtime results are not authenticated by the earlier build attestation. Existing published results and availability failures remain historical evidence.

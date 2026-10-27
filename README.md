@@ -20,6 +20,10 @@ The [maintenance and failure controls](docs/operations.md) add an API-enforced w
 
 See [verification evidence](docs/verification.md) for dated local results and hosted workflow results. The initial live scan found vulnerable standard-library code; [remediation evidence](docs/remediation.md) records the compiler upgrade and rescan. Synthetic negative fixtures are clearly marked and are never presented as real findings. There are no active risk-acceptance exceptions. The application has no VEX assertion; the separate verifier uses one [bounded, package-absence VEX case](docs/verifier-release.md#bounded-vex-evidence), retaining the original scanner finding.
 
+## October 27 failover replay
+
+The [updated full local admission suite](docs/failover-recovery.md) passed in **367.545 seconds**, with **334 recorded observations and zero unexpected admissions**. It includes 183 trust-update probes, the 30-case signature/attestation matrix, 65 maintenance observations, 16 direct multi-control-plane observations and 40 node/leader/quorum observations. Ten deliberately incomplete recovery states were rejected by regression tests. DNS replicas now occupy separate nodes in the disposable cluster, and the next fault waits for verifier, DNS and endpoint recovery. Exact commands, source hashes, transient failures, the earlier failing run and remaining limits are recorded in that document. This update changes the replay and its recovery checks; the signed verifier release is unchanged.
+
 ## Run the complete checks
 
 Requirements: a Unix shell, Make, Python 3.12+, OpenSSL for disposable admission fixtures, a C compiler for Go's race detector, and a running OCI-compatible local engine with `docker buildx` and support for its container builder driver. The build script creates and removes a disposable BuildKit 0.30.0 builder pinned by image digest. Internet access is required for locked tool downloads, pinned images, public release verification and a vulnerability database updated within 24 hours. Linux amd64 and macOS arm64 tool installations are locked in `tools.lock.json`.

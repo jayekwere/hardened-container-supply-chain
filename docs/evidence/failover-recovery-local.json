@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "scope": {
+    "pattern": ".",
+    "scope": "full"
+  },
+  "architecture": "linux/arm64",
+  "command": "make test && make admission",
+  "outcome": "passed",
+  "admissionTestSeconds": 367.545,
+  "availabilityTestSeconds": 149.69,
+  "sourceSHA256": {
+    "Makefile": "0a83e06a7dde657eb22d73d2e8de29b1d739b06d3877256b60ecb324e58ada23",
+    "scripts/admission.sh": "9264c37ce3a4281688a5a2bfd9e13b404a16b8b8b03d5d5b5161e6f451ae8ae2",
+    "integration/availability_test.go": "3a9c128af0bb7a6f3a5939aefae22e60ab7f49c1df1c54df4ff2d68ea1ca348d",
+    "integration/recovery_test.go": "cfef2e0c97c6633e6036ae33e33d655c35f4a2a1f07969f0418694b126910e7e",
+    "integration/admission/controller-values.json": "4f6d564f0f03a081ac8d46c1026e84612348e77e80589bc83a463068fe89ea9a"
+  },
+  "controllerBuild": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "b682351682fb3025644e66fb489777c013121e5fe6f8501e6fcb5a9588e2ed2f",
+    "dependencyPatchSHA256": "a5764716eadb3bccc7368525298491149195d0ff70decccd0b921de9f5f19ff9",
+    "goModSHA256": "471fe854daa9885743e103b431c4959f9d4f2b8f62868164d1bf25a110bb38ad",
+    "goSumSHA256": "dfb42b3aee4911f9e4bd8b374e54003b9af4dda46b50e0a5ab1fd772ac668d7f",
+    "packageClosureSHA256": "7281f82cd59eaf5d61cba9889740ece30d7d257ab308f46f5116251d726cd987",
+    "binarySHA256": "3b064866aecdc0d5bca35e4092db4dda79a9d4835cc759da92be169665b98eb8",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "arm64",
+    "manifestDigest": "sha256:b1d41fd9788b66b6d1c248c24495b310c20143235ad8fceb55d36b5a071cd441"
+  },
+  "suites": {
+    "decisions": {
+      "outcome": "passed",
+      "observations": 30,
+      "observed": {
+        "allowed": 11,
+        "signature-denied": 5,
+        "no-policy-denied": 1,
+        "identity-denied": 4,
+        "attestation-denied": 8,
+        "unavailable": 1
+      },
+      "rawSHA256": "ac40afd29ac8110dc96563452a206f45eeacce58c4c5fc85a6931145b8760072"
+    },
+    "availability": {
+      "outcome": "passed",
+      "observations": 40,
+      "observed": {
+        "allowed": 16,
+        "signature-denied": 16,
+        "unavailable": 6,
+        "storage-unavailable": 2
+      },
+      "rawSHA256": "d6e04486a1ad70397938f4f084728300e597ecfa245943a5e138f9ccf3c7088a",
+      "phases": {
+        "baseline": {
+          "allowed": 3,
+          "signature-denied": 3
+        },
+        "elected-leader-paused": {
+          "allowed": 2,
+          "signature-denied": 2
+        },
+        "leader-restored": {
+          "allowed": 3,
+          "signature-denied": 3
+        },
+        "quorum-lost-admission": {
+          "storage-unavailable": 1
+        },
+        "quorum-lost-storage": {
+          "storage-unavailable": 1
+        },
+        "quorum-restored": {
+          "allowed": 3,
+          "signature-denied": 3
+        },
+        "verifier-node-paused": {
+          "unavailable": 6,
+          "allowed": 2,
+          "signature-denied": 2
+        },
+        "verifier-node-restored": {
+          "allowed": 3,
+          "signature-denied": 3
+        }
+      },
+      "etcdMembers": {
+        "after-leader-loss": [
+          {
+            "node": "hsc-admission-77286-control-plane",
+            "memberID": 2583549131277751082,
+            "leaderID": 7596112777700495752,
+            "term": 4
+          },
+          {
+            "node": "hsc-admission-77286-control-plane2",
+            "memberID": 7596112777700495752,
+            "leaderID": 7596112777700495752,
+            "term": 4
+          }
+        ],
+        "before-leader-loss": [
+          {
+            "node": "hsc-admission-77286-control-plane",
+            "memberID": 2583549131277751082,
+            "leaderID": 5168082754394736034,
+            "term": 3
+          },
+          {
+            "node": "hsc-admission-77286-control-plane2",
+            "memberID": 7596112777700495752,
+            "leaderID": 5168082754394736034,
+            "term": 3
+          },
+          {
+            "node": "hsc-admission-77286-control-plane3",
+            "memberID": 5168082754394736034,
+            "leaderID": 5168082754394736034,
+            "term": 3
+          }
+        ],
+        "restored": [
+          {
+            "node": "hsc-admission-77286-control-plane",
+            "memberID": 2583549131277751082,
+            "leaderID": 5168082754394736034,
+            "term": 5
+          },
+          {
+            "node": "hsc-admission-77286-control-plane2",
+            "memberID": 7596112777700495752,
+            "leaderID": 5168082754394736034,
+            "term": 5
+          },
+          {
+            "node": "hsc-admission-77286-control-plane3",
+            "memberID": 5168082754394736034,
+            "leaderID": 5168082754394736034,
+            "term": 5
+          }
+        ]
+      },
+      "recoveryCheckpoints": [
+        "baseline",
+        "leader-restored",
+        "quorum-restored",
+        "verifier-node-restored"
+      ]
+    },
+    "maintenance": {
+      "outcome": "passed",
+      "observations": 65,
+      "observed": {
+        "allowed": 23,
+        "maintenance-denied": 39,
+        "signature-denied": 3
+      },
+      "rawSHA256": "8afccda90761f3a9034166bc7a8974ae13cd473f3428b1c6c94472021114d9c3"
+    },
+    "multi-control-plane": {
+      "outcome": "passed",
+      "observations": 16,
+      "observed": {
+        "allowed": 8,
+        "signature-denied": 8
+      },
+      "rawSHA256": "db4141b3863ef0a79c6a378c91077d4c6f445f330e3a2d15cd36d0832ce29d15"
+    },
+    "trust-updates": {
+      "outcome": "passed",
+      "observations": 183,
+      "observed": {
+        "allowed": 31,
+        "signature-denied": 26,
+        "identity-denied": 51,
+        "freshness-denied": 50,
+        "extra-policy-denied": 25
+      },
+      "rawSHA256": "ca77f920d33f987f6549c5429792c6b854f3dfb254a0509ecb030a747419a8b5"
+    }
+  },
+  "goOutputSHA256": "82ce2307a2fee1367391bed38d889b0775b5f4ae8cf4964d696fba11b4aa9ac6",
+  "availabilityStartedAtUTC": "2026-10-27T14:44:52.893076Z",
+  "availabilityFinishedAtUTC": "2026-10-27T14:47:22.577737Z",
+  "unexpectedAdmissions": 0,
+  "limits": [
+    "Single-host containerized nodes, not independent failure domains",
+    "Six transient unavailability responses were retried and retained, not counted as signature denials",
+    "Quorum loss deliberately remains unavailable",
+    "The signed verifier binary and published release are unchanged",
+    "Current replay improves failure isolation; the original failed CI did not retain enough topology to prove one exclusive root cause"
+  ]
+}
