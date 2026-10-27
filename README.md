@@ -22,7 +22,7 @@ See [verification evidence](docs/verification.md) for dated local results and ho
 
 ## October 27 failover replay
 
-The [updated full local admission suite](docs/failover-recovery.md) passed in **367.545 seconds**, with **334 recorded observations and zero unexpected admissions**. It includes 183 trust-update probes, the 30-case signature/attestation matrix, 65 maintenance observations, 16 direct multi-control-plane observations and 40 node/leader/quorum observations. Ten deliberately incomplete recovery states were rejected by regression tests. DNS replicas now occupy separate nodes in the disposable cluster, and the next fault waits for verifier, DNS and endpoint recovery. Exact commands, source hashes, transient failures, the earlier failing run and remaining limits are recorded in that document. This update changes the replay and its recovery checks; the signed verifier release is unchanged.
+The [initial recovery candidate's full local admission suite](docs/failover-recovery.md) passed in **367.545 seconds**, with **334 recorded observations and zero unexpected admissions**. It includes 183 trust-update probes, the 30-case signature/attestation matrix, 65 maintenance observations, 16 direct multi-control-plane observations and 40 node/leader/quorum observations. Ten deliberately incomplete recovery states were rejected by regression tests. DNS replicas now occupy separate nodes in the disposable cluster, and the next fault waits for verifier, DNS and endpoint recovery. Exact commands, source hashes, transient failures, the earlier failing run and remaining limits are recorded in that document. This update changes the replay and its recovery checks; the signed verifier release is unchanged.
 
 ## Run the complete checks
 

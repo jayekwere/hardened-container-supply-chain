@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "d09b0142965f646b3a178a0645f38cd3f89763e8",
+  "qualityRun": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40525398039",
+  "qualityOutcome": "failed",
+  "availabilityOutcome": "failed",
+  "availabilityObserved": {
+    "allowed": 13,
+    "signature-denied": 13,
+    "unavailable": 6,
+    "storage-unavailable": 1
+  },
+  "electedLeaderPaused": {
+    "unavailable": 5,
+    "allowed": 2,
+    "signature-denied": 2
+  },
+  "failure": "Unclassified API client timeout while reading the quorum-loss response body",
+  "observedClientError": "net/http: request canceled (Client.Timeout or context cancellation while reading body)",
+  "admissionExitCode": 1,
+  "policyDenialClaimed": false,
+  "rawAvailabilitySHA256": "9f714fc2a8502da0695752679db1d48c7fe5aa3b3b0bdda6a74cb2e96f25cc0b",
+  "nextChange": "Classify the net/http Client.Timeout cancellation family as unavailability, while rejecting authorization errors and explicit cancellation without Client.Timeout"
+}

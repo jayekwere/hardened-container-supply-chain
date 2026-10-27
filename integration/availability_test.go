@@ -326,7 +326,7 @@ func quorumFailure(out string) bool {
 			return false
 		}
 	}
-	return strings.Contains(text, "etcdserver: request timed out") || strings.Contains(text, "etcdserver: leader changed") || strings.Contains(text, "context deadline exceeded") || strings.Contains(text, "client.timeout exceeded while awaiting headers") || strings.Contains(text, "server was unable to return a response in the time allotted") || strings.Contains(text, "timed out waiting for the condition")
+	return strings.Contains(text, "etcdserver: request timed out") || strings.Contains(text, "etcdserver: leader changed") || strings.Contains(text, "context deadline exceeded") || strings.Contains(text, "net/http: request canceled (client.timeout") || strings.Contains(text, "server was unable to return a response in the time allotted") || strings.Contains(text, "timed out waiting for the condition")
 }
 
 func TestQuorumFailureClassification(t *testing.T) {
@@ -337,10 +337,13 @@ func TestQuorumFailureClassification(t *testing.T) {
 		{"etcdserver: request timed out", true},
 		{"context deadline exceeded", true},
 		{"net/http: request canceled (Client.Timeout exceeded while awaiting headers)", true},
+		{"net/http: request canceled (Client.Timeout or context cancellation while reading body)", true},
 		{"Error from server (Timeout): the server was unable to return a response in the time allotted", true},
 		{"unknown flag: context deadline exceeded", false},
 		{"Forbidden: context deadline exceeded", false},
 		{"Forbidden: Client.Timeout exceeded while awaiting headers", false},
+		{"Forbidden: net/http: request canceled (Client.Timeout or context cancellation while reading body)", false},
+		{"net/http: request canceled (context canceled)", false},
 		{"Unauthorized", false},
 		{"certificate has expired: context deadline exceeded", false},
 		{"AlreadyExists: timed out waiting for the condition", false},

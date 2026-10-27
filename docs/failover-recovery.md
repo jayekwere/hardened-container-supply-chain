@@ -30,7 +30,7 @@ That focused command is not a full-suite result. The recorded passing run below 
 
 | Check | Exact result |
 | --- | --- |
-| `make test` | Passed, including vet, race tests, locked inputs, policy tests, 11 recovery-readiness cases and 11 quorum-error classification cases |
+| `make test` | Passed, including vet, race tests, locked inputs, policy tests, 11 recovery-readiness cases and 11 quorum-error classification cases on that initial candidate |
 | Full `make admission` Go invocation | Passed in 367.545 seconds |
 | Signature and attestation matrix | 30 cases in 30 requests; 11 intended admissions, 18 policy denials and 1 expected unavailable response |
 | Availability | 34 logical controls in 40 observations; 16 intended admissions, 16 signature denials, 6 transient webhook failures and 2 required quorum-loss availability failures; 149.69 seconds |
@@ -45,3 +45,9 @@ Across the five runtime suites there were 334 recorded observations and zero une
 ## Remaining limits
 
 These are containerized nodes on one host. The result does not establish physical-host resilience, arbitrary partition handling, sustained-load availability or zero downtime. Recovery readiness is an observed condition, not a promise that a later failure cannot occur. Quorum loss remains unavailable by design. Real installations need resilient DNS, verifier placement and routing appropriate to their environment; the DNS placement adjustment here is scoped to the disposable cluster. The existing trust-update races, administrator boundary and lack of retroactive Pod enforcement remain documented in the operating guide.
+
+## First hosted candidate and client timeout forms
+
+[Hosted run #40525398039](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40525398039) passed the image/chart/reproducibility gates, signing/tamper control and NetworkPolicy suite. Its admission invocation failed after **393.909 seconds**. Leader failover had passed; the deliberate quorum-loss request returned exit 1 with `net/http: request canceled (Client.Timeout or context cancellation while reading body)`, which the first classifier did not recognize. It was not admitted and is not presented as a policy denial. [The failed candidate record](evidence/failover-recovery-first-hosted.json) is retained separately.
+
+The classifier now recognizes the `net/http` Client.Timeout cancellation family, covering both header and body timeouts. Authorization/configuration errors still take precedence, and explicit cancellation without Client.Timeout is not accepted as quorum evidence. **14 classification cases and the existing 11 recovery cases passed locally**, together with the rest of `make test`. The 367.545-second full local runtime result above belongs to the initial recovery candidate; it is not silently relabelled as a full local replay of this later classifier change. Final-source hosted quality must pass before merge.
