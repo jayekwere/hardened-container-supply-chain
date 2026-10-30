@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-30",
+  "scope": "compatible revision focused local tests; full build/scan/cluster results pending",
+  "finding": "GHSA-2hw4-c9m4-f2fj",
+  "previousModule": "knative.dev/pkg v0.0.0-20230612155445-74c4be5e935e",
+  "fixedModule": "knative.dev/pkg v0.0.0-20260820190123-c9015f8bfdea",
+  "requestBodyCapBytes": 3145728,
+  "maximumReadBytesOnOverflow": 3145729,
+  "before": {
+    "testExit": 1,
+    "bodyLimitLeafPassed": 8,
+    "bodyLimitLeafFailed": 10,
+    "oversizedRequestsReachedStubController": 10
+  },
+  "after": {
+    "testExit": 0,
+    "bodyLimitLeafPassed": 18,
+    "freshnessLeafPassed": 29,
+    "dependencyLeafPassed": 25,
+    "observabilityStartupLeafPassed": 2
+  },
+  "rootChecks": {
+    "makeTest": "passed",
+    "actionlint": "passed",
+    "workflowTrustGuard": "passed",
+    "shellSyntax": "passed"
+  },
+  "independentLocalRecompilation": "not run; mandatory release gate",
+  "rawSHA256": {
+    "compatible-focused-tests.txt": "870154a21240b30de545d1dc2756e43a9ab07d8ad46d0133cf929219d99a5531"
+  },
+  "actualImageScan": "pending",
+  "beforeStartup": {
+    "failedCases": 2,
+    "logSHA256": "5e3430bacb210650c23a16a5d57d229cb810e519df1c6d5d0d4263fccd5b8d51"
+  }
+}

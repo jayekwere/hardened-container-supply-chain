@@ -486,3 +486,237 @@
 +		})
 +	}
 +}
+--- /dev/null
++++ b/pkg/webhook/body_limit_test.go
+@@ -0,0 +1,188 @@
++package webhook
++
++import (
++	"context"
++	"encoding/json"
++	"io"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"testing"
++
++	"go.uber.org/zap"
++	admissionv1 "k8s.io/api/admission/v1"
++	apixv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
++	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
++	"knative.dev/pkg/apis"
++	"knative.dev/pkg/logging"
++	knativewebhook "knative.dev/pkg/webhook"
++)
++
++const admissionBodyCap = 3 * 1024 * 1024
++
++type bodyLimitAdmission struct {
++	path, reread string
++	calls        int
++	deny         bool
++}
++
++func (c *bodyLimitAdmission) Path() string { return c.path }
++func (c *bodyLimitAdmission) Admit(ctx context.Context, r *admissionv1.AdmissionRequest) *admissionv1.AdmissionResponse {
++	c.calls++
++	body, err := io.ReadAll(apis.GetHTTPRequest(ctx).Body)
++	if err != nil {
++		panic(err)
++	}
++	c.reread = string(body)
++	status := metav1.StatusSuccess
++	if c.deny {
++		status = metav1.StatusFailure
++	}
++	return &admissionv1.AdmissionResponse{Allowed: !c.deny, Result: &metav1.Status{Status: status}}
++}
++
++type bodyLimitConversion struct {
++	path  string
++	calls int
++	deny  bool
++}
++
++func (c *bodyLimitConversion) Path() string { return c.path }
++func (c *bodyLimitConversion) Convert(_ context.Context, r *apixv1.ConversionRequest) *apixv1.ConversionResponse {
++	c.calls++
++	status := metav1.StatusSuccess
++	if c.deny {
++		status = metav1.StatusFailure
++	}
++	return &apixv1.ConversionResponse{UID: r.UID, ConvertedObjects: r.Objects, Result: metav1.Status{Status: status}}
++}
++
++type bodyLimitReader struct {
++	io.Reader
++	bytes int
++}
++
++func (r *bodyLimitReader) Read(p []byte) (int, error) {
++	n, err := r.Reader.Read(p)
++	r.bytes += n
++	return n, err
++}
++
++// Exercise the actual shared server boundary and both decoding handlers. All
++// inputs stay below 3.2 MiB; this tests bounded reads without an OOM experiment.
++func TestAdmissionBodyLimit(t *testing.T) {
++	for _, route := range []string{"admission", "conversion"} {
++		t.Run(route, func(t *testing.T) {
++			prefix := `{"apiVersion":"admission.k8s.io/v1","kind":"AdmissionReview","request":{"uid":"body-limit","operation":"CREATE","kind":{"version":"v1","kind":"Pod"},"resource":{"version":"v1","resource":"pods"},"object":{"padding":"`
++			suffix := `"}}}`
++			version, kind := "admission.k8s.io/v1", "AdmissionReview"
++			if route == "conversion" {
++				prefix = `{"apiVersion":"apiextensions.k8s.io/v1","kind":"ConversionReview","request":{"uid":"body-limit","desiredAPIVersion":"hsc.test/v1","objects":[{"padding":"`
++				suffix = `"}]}}`
++				version, kind = "apiextensions.k8s.io/v1", "ConversionReview"
++			}
++			payload := func(size int) string {
++				return prefix + strings.Repeat("x", size-len(prefix)-len(suffix)) + suffix
++			}
++			for _, tc := range []struct {
++				name        string
++				size        int
++				length      int64
++				whitespace  bool
++				contentType string
++				deny        bool
++				status      int
++			}{
++				{"ordinary", 512, 0, false, "application/json", false, 200},
++				{"exact-cap", admissionBodyCap, 0, false, "application/json", false, 200},
++				{"one-byte-over", admissionBodyCap + 1, 0, false, "application/json", false, 400},
++				{"over-cap", admissionBodyCap + 4096, 0, false, "application/json", false, 400},
++				{"unknown-length", admissionBodyCap + 4096, -1, false, "application/json", false, 400},
++				{"misstated-length", admissionBodyCap + 4096, 1, false, "application/json", false, 400},
++				{"leading-whitespace", 512, -1, true, "application/json", false, 400},
++				{"controller-denial", 512, 0, false, "application/json", true, 200},
++				{"wrong-content-type", 512, 0, false, "text/plain", false, 415},
++			} {
++				t.Run(tc.name, func(t *testing.T) {
++					body := payload(tc.size)
++					if tc.whitespace {
++						body = strings.Repeat(" ", admissionBodyCap+4096) + body
++					}
++					admit := &bodyLimitAdmission{path: "/admit", deny: tc.deny}
++					convert := &bodyLimitConversion{path: "/convert", deny: tc.deny}
++					ctx := logging.WithLogger(context.Background(), zap.NewNop().Sugar())
++					ctx = knativewebhook.WithOptions(ctx, knativewebhook.Options{ServiceName: "body-limit-test"})
++					server, err := knativewebhook.New(ctx, []interface{}{admit, convert})
++					if err != nil {
++						t.Fatal(err)
++					}
++					server.InformersHaveSynced()
++					path := admit.Path()
++					if route == "conversion" {
++						path = convert.Path()
++					}
++					req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
++					counted := &bodyLimitReader{Reader: req.Body}
++					req.Body = io.NopCloser(counted)
++					if tc.length != 0 {
++						req.ContentLength = tc.length
++					}
++					if tc.length == -1 {
++						req.TransferEncoding = []string{"chunked"}
++					}
++					req.Header.Set("Content-Type", tc.contentType)
++					response := httptest.NewRecorder()
++					server.ServeHTTP(response, req)
++					calls := admit.calls + convert.calls
++					if response.Code != tc.status {
++						t.Errorf("status=%d, expected=%d, callbacks=%d, bytesRead=%d", response.Code, tc.status, calls, counted.bytes)
++					}
++					if tc.status != 200 {
++						if calls != 0 {
++							t.Errorf("rejected request reached controller %d times", calls)
++						}
++						if counted.bytes > admissionBodyCap+1 {
++							t.Errorf("body read exceeds cap plus overflow byte: %d", counted.bytes)
++						}
++						if tc.status == 400 && !strings.Contains(response.Body.String(), "http: request body too large") {
++							t.Errorf("rejection lacks body-limit error: %.200s", response.Body)
++						}
++						return
++					}
++					if calls != 1 {
++						t.Fatalf("ordinary request callbacks=%d", calls)
++					}
++					var review struct {
++						APIVersion, Kind string
++						Response         struct {
++							UID     string
++							Allowed bool
++							Result  struct{ Status string }
++							Status  struct{ Status string }
++						}
++					}
++					if err := json.Unmarshal(response.Body.Bytes(), &review); err != nil {
++						t.Fatal(err)
++					}
++					if review.APIVersion != version || review.Kind != kind || review.Response.UID != "body-limit" {
++						t.Fatalf("response identity changed: %+v", review)
++					}
++					if route == "admission" && (review.Response.Allowed == tc.deny || admit.reread != body) {
++						t.Fatal("admission decision or preserved request body changed")
++					}
++					wantStatus := metav1.StatusSuccess
++					if tc.deny {
++						wantStatus = metav1.StatusFailure
++					}
++					gotStatus := review.Response.Result.Status
++					if route == "admission" {
++						gotStatus = review.Response.Status.Status
++					}
++					if gotStatus != wantStatus {
++						t.Fatal("controller result changed")
++					}
++				})
++			}
++		})
++	}
++}
+--- /dev/null
++++ b/pkg/webhook/observability_startup_test.go
+@@ -0,0 +1,40 @@
++package webhook
++
++import (
++	"testing"
++
++	"go.opentelemetry.io/otel/attribute"
++	sdkresource "go.opentelemetry.io/otel/sdk/resource"
++	knativeresource "knative.dev/pkg/observability/resource"
++)
++
++// Shared startup initializes this resource before serving admission requests.
++// A schema conflict must fail the regression instead of crashing the verifier.
++func TestVerifierObservabilityStartup(t *testing.T) {
++	t.Setenv("SYSTEM_NAMESPACE", "image-policy-system")
++	t.Setenv("POD_NAME", "resource-probe")
++	for _, tc := range []struct{ name, override, service string }{
++		{"default-service", "", "policy-controller"},
++		{"service-override", "custom-verifier", "custom-verifier"},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			t.Setenv("OTEL_SERVICE_NAME", tc.override)
++			defer func() {
++				if failure := recover(); failure != nil {
++					t.Errorf("observability startup panicked: %v", failure)
++				}
++			}()
++			r := knativeresource.Default("policy-controller")
++			if r == nil || r.SchemaURL() != sdkresource.Default().SchemaURL() {
++				t.Fatal("resource schema differs from the pinned SDK")
++			}
++			attrs := map[attribute.Key]string{}
++			for _, a := range r.Attributes() {
++				attrs[a.Key] = a.Value.AsString()
++			}
++			if attrs["service.name"] != tc.service || attrs["k8s.namespace.name"] != "image-policy-system" || attrs["k8s.pod.name"] != "resource-probe" {
++				t.Fatal("service, namespace or pod identity was lost")
++			}
++		})
++	}
++}

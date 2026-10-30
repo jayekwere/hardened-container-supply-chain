@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-30",
+  "scope": "unpublished first body-limit candidate, prior to exporter follow-up",
+  "source": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "cbde60bc279650523e64e43068cf15620965dd394b13021f3c14b90f5ada2960",
+    "dependencyPatchSHA256": "8850e845fc1d68caeb5573791eda273b75edf3fecb5636aa4339b3b2d3d2d305",
+    "goModSHA256": "1e3ed56a1d69efad38143d4663ac1352c1c1fdd2dde1b5fed7a2c197294467c9",
+    "goSumSHA256": "181d9e5bb38264bf7fd941c0a97bf4735aba109591e6795c258601379c74b3db",
+    "packageClosureSHA256": "bd09f8f2942b4cffd9240b9d8c98da360ca42d9fda64fef74aa5d6995ba8ce85",
+    "binarySHA256": "db2bfc9d2706b20ec7a040a540ca99c4b6c167757fcadf8a7078a0c3aa7e2bcb",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "amd64",
+    "manifestDigest": "sha256:22b67dab1617bd0814e670e33956a6d320598b6b4b8ef8bdf5422f4fc60b79ed"
+  },
+  "findings": [
+    {
+      "id": "CVE-2026-81870",
+      "module": "go.opentelemetry.io/otel/exporters/otlp/otlptrace",
+      "version": "v1.43.0",
+      "severity": "LOW"
+    },
+    {
+      "id": "CVE-2026-81870",
+      "module": "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc",
+      "version": "v1.43.0",
+      "severity": "LOW"
+    },
+    {
+      "id": "CVE-2026-81870",
+      "module": "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp",
+      "version": "v1.43.0",
+      "severity": "LOW"
+    },
+    {
+      "id": "GO-2026-5932",
+      "module": "golang.org/x/crypto",
+      "version": "v0.58.0",
+      "severity": "UNKNOWN"
+    }
+  ],
+  "scanSHA256": "2cab1af8205d816e5d0c3597ffe352deab0b0028a0a2ac4169ce221a73740865",
+  "disposition": "Three introduced LOW entries are addressed by pinning all affected trace exporter modules to v1.46.0 before publication."
+}

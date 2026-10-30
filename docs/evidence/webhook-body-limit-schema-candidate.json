@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-30",
+  "scope": "superseded first scan-clean candidate, before local cluster bootstrap",
+  "finding": "GHSA-2hw4-c9m4-f2fj",
+  "previousModule": "knative.dev/pkg v0.0.0-20230612155445-74c4be5e935e",
+  "fixedModule": "knative.dev/pkg v0.0.0-20260531000007-52dbd5ece63f",
+  "requestBodyCapBytes": 3145728,
+  "maximumReadBytesOnOverflow": 3145729,
+  "source": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "cbde60bc279650523e64e43068cf15620965dd394b13021f3c14b90f5ada2960",
+    "dependencyPatchSHA256": "8588ba730afdf08402792838374353daddcbd65716ff8fcdc4ffa243c835946c",
+    "goModSHA256": "889b8cd8106bc651bac89e96dc02ebc480a9c02083355416de664f01638b6837",
+    "goSumSHA256": "66c8b63f3a05151c2d77b3b993a795cd978e0bd9917794981f4ac56bdd25eb0f",
+    "packageClosureSHA256": "24f0db90bb04146e7b9ff5bb7f0f67b92b04e54cdd0dfc772b25c6a1dd45f08b",
+    "binarySHA256": "184c1e715a067fd01de0da3944507a3e280d2fdfe94e37a0b705e5a92902c292",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "amd64",
+    "manifestDigest": "sha256:6fd6c154e14206be51bc5703b2f0af9a7c6869719e529232015a896860ab8afc"
+  },
+  "before": {
+    "testExit": 1,
+    "bodyLimitLeafPassed": 8,
+    "bodyLimitLeafFailed": 10,
+    "oversizedRequestsReachedStubController": 10
+  },
+  "after": {
+    "testExit": 0,
+    "bodyLimitLeafPassed": 18,
+    "freshnessLeafPassed": 29,
+    "dependencyLeafPassed": 25
+  },
+  "rootChecks": {
+    "makeTest": "passed",
+    "actionlint": "passed",
+    "workflowTrustGuard": "passed",
+    "shellSyntax": "passed"
+  },
+  "scan": {
+    "gateExit": 0,
+    "rawSeverities": {
+      "UNKNOWN": 1
+    },
+    "rawFindings": [
+      "GO-2026-5932"
+    ],
+    "newVEXCases": 0,
+    "newExceptions": 0
+  },
+  "independentLocalRecompilation": "not run; mandatory release gate",
+  "rawSHA256": {
+    "source.json": "b10e803e5483f54ab813d7e7aafacffd0fc7b5cb87dd1dd7035f2ba12c96748d",
+    "go.mod": "889b8cd8106bc651bac89e96dc02ebc480a9c02083355416de664f01638b6837",
+    "go.sum": "66c8b63f3a05151c2d77b3b993a795cd978e0bd9917794981f4ac56bdd25eb0f",
+    "unit-tests.txt": "faafe9bfd3db8913e8675f6d66ed65d73f1f9e5831079b7fccf6e271ce00ce5d",
+    "scan.json": "49a0572d0de7edcb498c0904ae1c68cdbc7680a4cef11beceb909dc9a7e23bda",
+    "scan-policy-input.json": "4fe74cfc20f2f15d0c703bedb63a2fb5bb5842389dfa2b36371f681c24449893",
+    "scan-policy.txt": "696f7c13a204aa6039bfad2ac0499efd9749373620d7c9094845e10a1cbc5163",
+    "sbom.cdx.json": "28377f393f9ae6600fafc446207748916f278b1569857897aaa01f0dca9d0f6b",
+    "db-metadata.json": "235919340d2e104e18b4d81ce217f56dca41587b6149554c6548f19811b76a4c",
+    "packages.txt": "24f0db90bb04146e7b9ff5bb7f0f67b92b04e54cdd0dfc772b25c6a1dd45f08b",
+    "medium-before-final.log": "dd5b4fab8a0f7fe3c7f078ba8c6f0d92c490b22c6c8669cb0fb79b1d69b6c162",
+    "medium-upgrade-final.log": "4983e3080a49583643292dd2ef264d24647371d47ea272dd7bd484ecc365bb9c"
+  },
+  "runtimeBootstrap": {
+    "outcome": "failed",
+    "admissionTestsExecuted": false,
+    "nativeImage": "sha256:921b2704b75ee2bd3fc7c2788696a3960e04f0f13b41d602ddea4b0d1ef76c3f",
+    "observedError": "panic: conflicting Schema URL: https://opentelemetry.io/schemas/1.43.0 and https://opentelemetry.io/schemas/1.40.0",
+    "startupRegressionBefore": {
+      "testExit": 1,
+      "failedCases": 2
+    },
+    "startupRegressionLogSHA256": "5e3430bacb210650c23a16a5d57d229cb810e519df1c6d5d0d4263fccd5b8d51"
+  }
+}

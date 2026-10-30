@@ -1,5 +1,7 @@
 # Scheduled quality-check maintenance
 
+The later [webhook body-limit fix](webhook-body-limit.md) resolves the MEDIUM finding discussed below. The scan counts in this document describe the earlier dated builds and remain historical.
+
 Reviewed on 2026-10-30. The three scheduled failures ran the same source revision, `89200c5b590c638298b79a856fba5368e425f093`, that passed on October 27. They had two separate causes.
 
 | Run | Failure | Change |
