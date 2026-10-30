@@ -2,6 +2,8 @@
 
 The verifier is a separate artifact from the sample application. Both use the existing public OCI repository, with independent digests, release tags and workflow identities; the verifier uses `controller-v*` tags. Its build uses the checksum-locked source archive, the authoritative-read patch and a checked-in dependency patch. The dependency patch records the complete resulting module and checksum changes; normal builds use `-mod=readonly` and `go mod verify`. The root application module remains dependency-free.
 
+The October 30 [scheduled-check review](quality-maintenance.md) upgrades two dependencies after new findings. Release-specific counts and scans below describe their dated source revisions. Historical release verification requires that tag's source checkout because the signed evidence binds both patch hashes; a different dependency patch must reject.
+
 The initial verifier scan found 52 findings: 27 HIGH, 21 MEDIUM, two LOW and two UNKNOWN. The existing gate rejected that image with 29 blocking reasons. [Pre-remediation evidence](evidence/verifier-pre-remediation.json) records the inventory, exact versions, build identity and scan hash. That initial gate used no VEX or suppression. Dependency upgrades removed 51 findings. One UNKNOWN advisory remains in the raw report: `GO-2026-5932`, scoped to the `golang.org/x/crypto/openpgp` package family. The release gate handles only this finding through the bounded VEX control below; it does not claim a zero-finding raw scan.
 
 ## Reproduce the controls
@@ -135,7 +137,9 @@ The two paused-node timeouts and the recovery rejection are availability failure
 
 [Published structured evidence](evidence/verifier-release-published.json) contains all phase counts, source/raw-output hashes, acknowledgement times, actual image IDs and artifact identity. [Independent anonymous verification](evidence/verifier-anonymous-verification.json) records the separate consumer check. Release assets preserve raw scan/SBOM/VEX files, module files, focused test output, authenticated build evidence, verification failures and individual runtime decisions. Later runtime results are separate assets; the earlier build-evidence attestation does not authenticate those later files.
 
-Use the checked [release lock](../integration/admission/verifier-release.lock.json). For full report-byte verification, download the release assets into a separate directory:
+## Verify the selected release
+
+The checked [release lock](../integration/admission/verifier-release.lock.json) now selects the October 30 replacement. Require its completed release workflow and published assets before use. The counts above remain historical `controller-v0.1.1` results. For full report-byte verification, download the selected release's assets into a separate directory:
 
 ```sh
 make tools
@@ -149,7 +153,7 @@ gh release download "$CONTROLLER_TAG" --repo jayekwere/hardened-container-supply
 ./scripts/verify-controller-release.sh "$CONTROLLER_IMAGE" "$CONTROLLER_TAG" artifacts/downloaded-controller
 ```
 
-Observed consumer output:
+The original `controller-v0.1.1` consumer check produced this output with its matching source:
 
 ```text
 PASS signed verifier claims and downloaded report hashes
