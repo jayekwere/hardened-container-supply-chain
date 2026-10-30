@@ -137,7 +137,9 @@ The two paused-node timeouts and the recovery rejection are availability failure
 
 [Published structured evidence](evidence/verifier-release-published.json) contains all phase counts, source/raw-output hashes, acknowledgement times, actual image IDs and artifact identity. [Independent anonymous verification](evidence/verifier-anonymous-verification.json) records the separate consumer check. Release assets preserve raw scan/SBOM/VEX files, module files, focused test output, authenticated build evidence, verification failures and individual runtime decisions. Later runtime results are separate assets; the earlier build-evidence attestation does not authenticate those later files.
 
-Use the checked [release lock](../integration/admission/verifier-release.lock.json). For full report-byte verification, download the release assets into a separate directory:
+## Verify the selected release
+
+The checked [release lock](../integration/admission/verifier-release.lock.json) now selects the October 30 replacement. Require its completed release workflow and published assets before use. The counts above remain historical `controller-v0.1.1` results. For full report-byte verification, download the selected release's assets into a separate directory:
 
 ```sh
 make tools
@@ -151,7 +153,7 @@ gh release download "$CONTROLLER_TAG" --repo jayekwere/hardened-container-supply
 ./scripts/verify-controller-release.sh "$CONTROLLER_IMAGE" "$CONTROLLER_TAG" artifacts/downloaded-controller
 ```
 
-Observed consumer output:
+The original `controller-v0.1.1` consumer check produced this output with its matching source:
 
 ```text
 PASS signed verifier claims and downloaded report hashes

@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
-  "tag": "controller-v0.1.1",
-  "image": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:59964fb24d115ce431a71a8d7c907788fea29a6ac855d306726a958c10c31f91",
+  "tag": "controller-v0.1.2",
+  "image": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:2006b0d693326fc0abdacc9836f58da122bf15f03c92de3aa10c676d0cf884f5",
   "platform": "linux/amd64",
-  "sourceRevision": "02fcc679cf485c7f6231c94a399df6a97ed70699",
+  "sourceRevision": "a1a8093e20843b558660720632ce030c0be3fce1",
   "issuer": "https://token.actions.githubusercontent.com",
-  "identity": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/controller-release.yml@refs/tags/controller-v0.1.1",
-  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40342659964"
+  "identity": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/controller-release.yml@refs/tags/controller-v0.1.2",
+  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/workflows/controller-release.yml",
+  "notes": "Selected replacement reference. Require the completed controller-v0.1.2 release and authenticated assets before installation; the reference alone is not a publication receipt."
 }

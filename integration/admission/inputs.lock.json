@@ -20,7 +20,7 @@
   "unsignedImage": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:6d97b57f4b1757a41321b49e1a8afd19d5012a80c09688982d844fa01b1b206c",
   "issuer": "https://token.actions.githubusercontent.com",
   "subject": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/release.yml@refs/tags/v0.1.1",
-  "notes": "Chart 0.10.8 has an older image default. Installation always overrides it with an explicit downstream digest. controller.image supplies certificate files for the custom build. The published downstream reference is in verifier-release.lock.json. The unsigned application fixture is the existing repacked manifest from the unsupported v0.1.0 upload; its existence is checked separately.",
+  "notes": "Chart 0.10.8 has an older image default. Installation always overrides it with an explicit downstream digest. controller.image supplies certificate files for the custom build. The selected downstream release reference is in verifier-release.lock.json; require its completed release workflow and authenticated assets before installation. The unsigned application fixture is the existing repacked manifest from the unsupported v0.1.0 upload; its existence is checked separately.",
   "fixtureRegistryImage": "docker.io/library/registry:3.0.0@sha256:6c5666b861f3505b116bb9aa9b25175e71210414bd010d92035ff64018f9457e",
   "attestationProfile": {
     "sourceRevision": "fbd97e985473537e99f47e8e987b6ade222e3bc6",

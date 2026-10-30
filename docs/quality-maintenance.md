@@ -47,6 +47,18 @@ make cluster
 
 The task-stop reproduction failed with the previous condition and passes with the fix. `make test`, actionlint, workflow trust-boundary checks and shell syntax checks passed locally. The native Linux arm64 verifier build, upstream security regressions, independent recompilation and fresh image scan all exited 0. The three blocking findings are absent from the rebuilt image; the raw OpenPGP UNKNOWN remains and only its existing bounded VEX case is applied. [Structured local results](evidence/quality-maintenance-local.json) bind these observations to their build inputs and raw report hashes.
 
+That raw scan also contains one MEDIUM, `GHSA-2hw4-c9m4-f2fj` in `knative.dev/pkg`. The existing policy exposes LOW/MEDIUM findings and blocks HIGH, CRITICAL and UNKNOWN; it does not require a risk exception for MEDIUM. This advisory is neither suppressed nor described as remediated. The passing gate is not a zero-finding claim.
+
+| Local verification | Exact result |
+| --- | --- |
+| Task-stop regression | 6 cases pass; the previous condition fails the 2 replica/replacement races |
+| Verifier freshness regressions | 29 leaf cases pass |
+| Upstream dependency regressions and legitimate controls | 25 leaf cases pass across 8 selected top-level tests |
+| Native Linux arm64 build and fresh scan | Exit 0; independent recompilation is byte-identical |
+| Linux amd64 cross-build and fresh scan | Exit 0; manifest `sha256:2006b0d693326fc0abdacc9836f58da122bf15f03c92de3aa10c676d0cf884f5`; independent amd64 recompilation is reserved for the release gate |
+| Raw scan | 0 HIGH, 0 CRITICAL, 1 MEDIUM and 1 UNKNOWN; the existing bounded OpenPGP VEX handles only the UNKNOWN |
+| Old scan replay through the unchanged gate | Exit 1, with all 3 original blocking reasons |
+
 The replacement tag is `controller-v0.1.2`. Publication is conditional on the existing quality and release gates; selecting its reference in source does not establish that publication completed. Check the [release workflow](https://github.com/jayekwere/hardened-container-supply-chain/actions/workflows/controller-release.yml) and published assets before installation. Final hosted counts and publication results are retained in the fix's pull request, job artifacts and release assets. Earlier release and scan results remain historical.
 
 Daily checks use a current vulnerability database. A future finding can correctly make a previously passing source revision fail again. Updating a dependency requires a new build, scan, signatures and evidence; a green result does not permanently certify an older image.
