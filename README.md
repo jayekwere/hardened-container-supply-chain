@@ -32,7 +32,7 @@ flowchart LR
 
 ## Results and release status
 
-The remaining webhook MEDIUM finding is fixed in source by upgrading the shared server library to its first fixed release. The real admission and conversion handlers now enforce a **3 MiB request-body read limit**. All **18 bounded regression cases** pass; the old module fails the 10 oversized cases. The rebuilt verifier's local scan has **0 MEDIUM, HIGH or CRITICAL findings**, with only the existing bounded OpenPGP VEX case remaining. See [the fix, exact tests and limits](docs/webhook-body-limit.md).
+The remaining webhook MEDIUM finding is fixed in source by upgrading the shared server library to a fixed revision compatible with the telemetry SDK. The real admission and conversion handlers now enforce a **3 MiB request-body read limit**. All **18 bounded regression cases** and **2 startup regressions** pass; the old module fails the 10 oversized cases. The full image scan and cluster replay remain required before release. See [the fix, exact tests, earlier failed candidates and limits](docs/webhook-body-limit.md).
 
 The [application v0.1.1 release](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) passed hosted gates, anonymous signature verification and runtime tests against its published digest.
 

@@ -17,8 +17,8 @@ docker run --rm \
   -e REPRODUCE="${CONTROLLER_REPRODUCE:-0}" \
   "$sdk" sh -eu -c '
     test "$(go env GOVERSION)" = go1.27.3
-    test -z "$(gofmt -l pkg/webhook/freshness.go pkg/webhook/freshness_test.go pkg/webhook/body_limit_test.go)"
-    go test -mod=readonly -count=1 -v ./pkg/webhook -run "^(TestPolicyFreshness|TestAdmissionBodyLimit)" > /out/unit-tests.txt 2>&1
+    test -z "$(gofmt -l pkg/webhook/freshness.go pkg/webhook/freshness_test.go pkg/webhook/body_limit_test.go pkg/webhook/observability_startup_test.go)"
+    go test -mod=readonly -count=1 -v ./pkg/webhook -run "^(TestPolicyFreshness|TestAdmissionBodyLimit|TestVerifierObservabilityStartup)" > /out/unit-tests.txt 2>&1
     # Exercise the upgraded dependencies through their own security regressions
     # and ordinary parse/round-trip controls, including HTML absent from this binary.
     go test -mod=readonly -count=1 -v github.com/go-jose/go-jose/v4 -run "^(TestRsaKeyChecks|TestEmbeddedPrivateJWKRejected|TestPrivateEPKRejected|TestUnmarshalPrivateJWKAllowed|TestRoundtripRsaPrivate)$" >> /out/unit-tests.txt 2>&1

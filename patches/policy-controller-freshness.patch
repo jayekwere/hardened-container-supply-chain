@@ -677,3 +677,46 @@
 +		})
 +	}
 +}
+--- /dev/null
++++ b/pkg/webhook/observability_startup_test.go
+@@ -0,0 +1,40 @@
++package webhook
++
++import (
++	"testing"
++
++	"go.opentelemetry.io/otel/attribute"
++	sdkresource "go.opentelemetry.io/otel/sdk/resource"
++	knativeresource "knative.dev/pkg/observability/resource"
++)
++
++// Shared startup initializes this resource before serving admission requests.
++// A schema conflict must fail the regression instead of crashing the verifier.
++func TestVerifierObservabilityStartup(t *testing.T) {
++	t.Setenv("SYSTEM_NAMESPACE", "image-policy-system")
++	t.Setenv("POD_NAME", "resource-probe")
++	for _, tc := range []struct{ name, override, service string }{
++		{"default-service", "", "policy-controller"},
++		{"service-override", "custom-verifier", "custom-verifier"},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			t.Setenv("OTEL_SERVICE_NAME", tc.override)
++			defer func() {
++				if failure := recover(); failure != nil {
++					t.Errorf("observability startup panicked: %v", failure)
++				}
++			}()
++			r := knativeresource.Default("policy-controller")
++			if r == nil || r.SchemaURL() != sdkresource.Default().SchemaURL() {
++				t.Fatal("resource schema differs from the pinned SDK")
++			}
++			attrs := map[attribute.Key]string{}
++			for _, a := range r.Attributes() {
++				attrs[a.Key] = a.Value.AsString()
++			}
++			if attrs["service.name"] != tc.service || attrs["k8s.namespace.name"] != "image-policy-system" || attrs["k8s.pod.name"] != "resource-probe" {
++				t.Fatal("service, namespace or pod identity was lost")
++			}
++		})
++	}
++}
