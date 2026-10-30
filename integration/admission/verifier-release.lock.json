@@ -3,9 +3,9 @@
   "tag": "controller-v0.1.2",
   "image": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:2006b0d693326fc0abdacc9836f58da122bf15f03c92de3aa10c676d0cf884f5",
   "platform": "linux/amd64",
-  "sourceRevision": "a1a8093e20843b558660720632ce030c0be3fce1",
+  "sourceRevision": "8689c76f2fc83470ce634b50071e3f341e33cdf8",
   "issuer": "https://token.actions.githubusercontent.com",
   "identity": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/controller-release.yml@refs/tags/controller-v0.1.2",
-  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/workflows/controller-release.yml",
+  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41088764691",
   "notes": "Selected replacement reference. Require the completed controller-v0.1.2 release and authenticated assets before installation; the reference alone is not a publication receipt."
 }
