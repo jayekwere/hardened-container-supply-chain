@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-30",
+  "verifierDigest": "sha256:b3f83f4957ed77f0fdfb9ef3ed86f581dab49786c57a3786a12ac49418a7111e",
+  "architecture": "arm64",
+  "rawScanSeverities": {
+    "UNKNOWN": 1
+  },
+  "rawFindings": [
+    {
+      "id": "GO-2026-5932",
+      "package": "golang.org/x/crypto",
+      "severity": "UNKNOWN"
+    }
+  ],
+  "admission": {
+    "decisions": {
+      "count": 30,
+      "observed": {
+        "allowed": 11,
+        "signature-denied": 5,
+        "no-policy-denied": 1,
+        "identity-denied": 4,
+        "attestation-denied": 8,
+        "unavailable": 1
+      },
+      "unexpectedAdmissions": 0
+    },
+    "availability": {
+      "count": 42,
+      "observed": {
+        "allowed": 16,
+        "signature-denied": 16,
+        "unavailable": 8,
+        "storage-unavailable": 2
+      },
+      "unexpectedAdmissions": 0
+    },
+    "maintenance": {
+      "count": 65,
+      "observed": {
+        "allowed": 23,
+        "maintenance-denied": 39,
+        "signature-denied": 3
+      },
+      "unexpectedAdmissions": 0
+    },
+    "multi-control-plane": {
+      "count": 16,
+      "observed": {
+        "allowed": 8,
+        "signature-denied": 8
+      },
+      "unexpectedAdmissions": 0
+    },
+    "trust-updates": {
+      "count": 183,
+      "observed": {
+        "allowed": 31,
+        "signature-denied": 26,
+        "identity-denied": 51,
+        "freshness-denied": 50,
+        "extra-policy-denied": 25
+      },
+      "unexpectedAdmissions": 0
+    }
+  },
+  "totalAdmissionObservations": 336,
+  "admissionSeconds": 577.399,
+  "verifierUnitLeafCases": 74,
+  "rawSHA256": {
+    "controller/source.json": "decaf859a9dd6e7e61ebae51b2af4c5208335018e057f3139297c7bf1e660360",
+    "controller/scan.json": "7764c213e5c1ed2359fc1e61dbc42ad11472826c9335db1cc3017d62b6c0637e",
+    "controller/scan-policy.txt": "696f7c13a204aa6039bfad2ac0499efd9749373620d7c9094845e10a1cbc5163",
+    "controller/sbom.cdx.json": "6102a63fcfb755b848b96d4fded2fc93fcd26a95bfeb56179cf8ac61acf31978",
+    "controller/unit-tests.txt": "aac5686367afdd266c7d87e5b47f8eb924310601cea72b67fe686f7bfab07e2b",
+    "controller/db-metadata.json": "235919340d2e104e18b4d81ce217f56dca41587b6149554c6548f19811b76a4c",
+    "controller/vex-evidence.json": "0ed3ef09bb4bef2cad7e4e0452b20177b87ffa7db0431c3dbfecfa1c97e6aa85",
+    "admission/run-selection.json": "0a9e72991ee08378180bdca84c3f1ed37d6722b5d97ea05fdfcfe5cc3b7070c4",
+    "admission/tests.txt": "3b725daf0928da3038ca70b5bdcc66dd60d3a2128f50d12f2a63ecb992b4dace",
+    "admission/decisions.json": "bd54d3495a15525c251f26dc9260d78fbd8adb29cc7c6c9138187cbcbd1d14d5",
+    "admission/availability.json": "5fd2f7125f068e8291154547d31f2de6fa43e72cecd523c02ff01ef878a75ad2",
+    "admission/maintenance.json": "2cfbddb50d372413c4705afbf6f942c8e8afd6afa332fd6719e97d39b815aed8",
+    "admission/multi-control-plane.json": "e675e3e3ba3afa011f4e11de38526f0936c9e8f91e27977cdca9e08fa1e2b3b5",
+    "admission/trust-updates.json": "22fc583ae5cd3719aed158ae6b838a91011e3dcb36658c0ea16aa1317a5b3ea4"
+  },
+  "scope": "native arm64 full admission replay only; network suite not rerun locally for this fix",
+  "testedHead": "eba263ef8d77c60644995018b763fcd5f63e8b1d",
+  "localUncommittedFiles": "documentation evidence only"
+}

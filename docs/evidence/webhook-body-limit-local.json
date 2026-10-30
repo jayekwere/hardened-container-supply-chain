@@ -1,24 +1,39 @@
 {
   "schemaVersion": 1,
   "observedDate": "2026-10-30",
-  "scope": "compatible revision focused local tests; full build/scan/cluster results pending",
+  "scope": "compatible revision, local Linux amd64 cross-build and native arm64 focused tests; cluster/hosted/publication results are separate",
   "finding": "GHSA-2hw4-c9m4-f2fj",
-  "previousModule": "knative.dev/pkg v0.0.0-20230612155445-74c4be5e935e",
   "fixedModule": "knative.dev/pkg v0.0.0-20260820190123-c9015f8bfdea",
   "requestBodyCapBytes": 3145728,
   "maximumReadBytesOnOverflow": 3145729,
-  "before": {
-    "testExit": 1,
-    "bodyLimitLeafPassed": 8,
-    "bodyLimitLeafFailed": 10,
-    "oversizedRequestsReachedStubController": 10
+  "source": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "b411312b24d1fa372107bc0f1310432068d1a61c1c6cdc428d315ff0ed0e2ed0",
+    "dependencyPatchSHA256": "a16af7692386f0def0d23b6056e3a20921efe0fc92be98e9e7b60a01a6bf0b13",
+    "goModSHA256": "61153a011ecb1f1c8ce2f5ab096076307308b036e0444c8adf841583d52fd88c",
+    "goSumSHA256": "0f8a590422b340482b7b7aaf3aa6c7d1f6c7d1c68c7459c5343d1ffc46f3cc09",
+    "packageClosureSHA256": "30a30e1d2b8ab5124a11261818261a82940329742893c10afb3cb557b6bd2605",
+    "binarySHA256": "7c60125fadba11900735f1d34380b221be99f263b27546a9d728c08d42411a5c",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "amd64",
+    "manifestDigest": "sha256:0d8d2e57c375c5175c38a32345ed572c5f83c45885c1e9f4c2bba86fefc5b65d"
+  },
+  "beforeBodyLimit": {
+    "failedCases": 10,
+    "passedControls": 8,
+    "testExit": 1
+  },
+  "beforeStartup": {
+    "failedCases": 2,
+    "testExit": 1
   },
   "after": {
-    "testExit": 0,
     "bodyLimitLeafPassed": 18,
+    "observabilityStartupLeafPassed": 2,
     "freshnessLeafPassed": 29,
     "dependencyLeafPassed": 25,
-    "observabilityStartupLeafPassed": 2
+    "testExit": 0
   },
   "rootChecks": {
     "makeTest": "passed",
@@ -26,13 +41,28 @@
     "workflowTrustGuard": "passed",
     "shellSyntax": "passed"
   },
-  "independentLocalRecompilation": "not run; mandatory release gate",
-  "rawSHA256": {
-    "compatible-focused-tests.txt": "870154a21240b30de545d1dc2756e43a9ab07d8ad46d0133cf929219d99a5531"
+  "scan": {
+    "gateExit": 0,
+    "rawSeverities": {
+      "UNKNOWN": 1
+    },
+    "newVEXCases": 0,
+    "newExceptions": 0
   },
-  "actualImageScan": "pending",
-  "beforeStartup": {
-    "failedCases": 2,
-    "logSHA256": "5e3430bacb210650c23a16a5d57d229cb810e519df1c6d5d0d4263fccd5b8d51"
+  "localIndependentRecompilation": "not run; mandatory release gate",
+  "rawSHA256": {
+    "source.json": "70ff07cb7d8549032540cd62d54bdf0ce0526cf97b92b7dc832d773b4e19ffc4",
+    "go.mod": "61153a011ecb1f1c8ce2f5ab096076307308b036e0444c8adf841583d52fd88c",
+    "go.sum": "0f8a590422b340482b7b7aaf3aa6c7d1f6c7d1c68c7459c5343d1ffc46f3cc09",
+    "unit-tests.txt": "bcb1adeb67a2113c10f64588645865476afd233e660602cabb58f75bfccb176d",
+    "scan.json": "242102431483f3ccee1fb2d6679712e252b34e46d3991dc182e37e5f3bb792f1",
+    "scan-policy-input.json": "8aa537dea577fc1c7635487b8c4a8c0509f67071ec01eea505e315f4f3ba93d3",
+    "scan-policy.txt": "696f7c13a204aa6039bfad2ac0499efd9749373620d7c9094845e10a1cbc5163",
+    "sbom.cdx.json": "839b09fb793373d837a88598679a92ea322885bf217bba1b52f1aa1a483f9c40",
+    "db-metadata.json": "235919340d2e104e18b4d81ce217f56dca41587b6149554c6548f19811b76a4c",
+    "packages.txt": "30a30e1d2b8ab5124a11261818261a82940329742893c10afb3cb557b6bd2605",
+    "medium-before-final.log": "dd5b4fab8a0f7fe3c7f078ba8c6f0d92c490b22c6c8669cb0fb79b1d69b6c162",
+    "medium-schema-before.log": "5e3430bacb210650c23a16a5d57d229cb810e519df1c6d5d0d4263fccd5b8d51",
+    "medium-compatible.log": "870154a21240b30de545d1dc2756e43a9ab07d8ad46d0133cf929219d99a5531"
   }
 }
