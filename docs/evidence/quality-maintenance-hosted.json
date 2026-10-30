@@ -1,0 +1,94 @@
+{
+  "run": 41084094730,
+  "verifierDigest": "sha256:2006b0d693326fc0abdacc9836f58da122bf15f03c92de3aa10c676d0cf884f5",
+  "testedCheckout": "1ec388db7ee27835e1a19493935bb7abc3a9afe1",
+  "admission": {
+    "decisions": {
+      "count": 31,
+      "observed": {
+        "allowed": 11,
+        "signature-denied": 5,
+        "no-policy-denied": 1,
+        "identity-denied": 4,
+        "attestation-denied": 8,
+        "unavailable": 2
+      },
+      "unexpectedAdmissions": 0
+    },
+    "availability": {
+      "count": 46,
+      "observed": {
+        "allowed": 16,
+        "signature-denied": 16,
+        "unavailable": 12,
+        "storage-unavailable": 2
+      },
+      "unexpectedAdmissions": 0
+    },
+    "maintenance": {
+      "count": 65,
+      "observed": {
+        "allowed": 23,
+        "maintenance-denied": 39,
+        "signature-denied": 3
+      },
+      "unexpectedAdmissions": 0
+    },
+    "multi-control-plane": {
+      "count": 18,
+      "observed": {
+        "allowed": 8,
+        "signature-denied": 8,
+        "unavailable": 2
+      },
+      "unexpectedAdmissions": 0
+    },
+    "trust-updates": {
+      "count": 183,
+      "observed": {
+        "allowed": 31,
+        "signature-denied": 26,
+        "identity-denied": 51,
+        "freshness-denied": 50,
+        "extra-policy-denied": 25
+      },
+      "unexpectedAdmissions": 0
+    }
+  },
+  "networkProbes": 80,
+  "totalAdmissionObservations": 343,
+  "schemaVersion": 1,
+  "observedDate": "2026-10-30",
+  "headCommit": "ffd1d88e47c5dba24a3ea7ccd363f0090628d5c2",
+  "mergedCommit": "8689c76f2fc83470ce634b50071e3f341e33cdf8",
+  "testedTree": "5b5a69f27e94e665019290fad09a59f738222c73",
+  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41084094730",
+  "pullRequest": "https://github.com/jayekwere/hardened-container-supply-chain/pull/10",
+  "admissionSeconds": 500.95,
+  "networkPackageSeconds": 40.838,
+  "taskStopCases": 6,
+  "verifierFreshnessLeafCases": 29,
+  "upstreamDependencyLeafCases": 25,
+  "rawSHA256": {
+    "source-revision.txt": "326be137a03c0b6e48b2a6cc375b1b1e0f0900d72a4aaf084a8d5064a2cb643c",
+    "admission/decisions.json": "0936d64260f5b4a3b226080bbda0689705d6363f174b23243cc6d255496943a4",
+    "admission/availability.json": "54d72b18b98aadbb089baa596e1bb454c7b8e9ca9f8a87b5bb58faa4b84005a5",
+    "admission/maintenance.json": "9e250dfe7efd47057a5f511005adad9112c00c921c935e0d0b9138235b04c199",
+    "admission/multi-control-plane.json": "e7a1578c2cdbd6c60a281070e011fb8485372ee09e6d153653e73f1ff0cfd5b4",
+    "admission/trust-updates.json": "a31753d08e0719c32cc1d76bb28585ff7d407e454f8a4b6b4ad7bad8be95ac7d",
+    "admission/run-selection.json": "0a9e72991ee08378180bdca84c3f1ed37d6722b5d97ea05fdfcfe5cc3b7070c4",
+    "admission/tests.txt": "badb103a60a072a763f4e7a694d2bdd60a365489e4ec8cd7709047b04cca3f49",
+    "cluster/network-policy.json": "d557350a287aed2d9799b7a88ca8db42f68e59fbd52fd4163052760d6865475e",
+    "controller/source.json": "21d44a1c98bc6b7b490632ddabd6feedc40fffe7ad7b2b308cadbbd3b09d30eb",
+    "controller/scan.json": "88f01e8b8769199ff10dd2a8c745d4720bde68749b46674289d801698d53143f",
+    "controller/scan-policy.txt": "696f7c13a204aa6039bfad2ac0499efd9749373620d7c9094845e10a1cbc5163",
+    "controller/sbom.cdx.json": "a35fff80fdd9b738763b08090d0f55147d18beb0d4c597045840b909276b4dee",
+    "controller/unit-tests.txt": "97b6ca66ec0d3e79caae077bfbe01c5d7901f5a51f1e5447cca42a128aaed24f",
+    "controller/db-metadata.json": "19baffc814e984fce753d978e6fb8f5b470ad385e2db9ceb930b85a17638927d",
+    "controller/vex-evidence.json": "ff2036237985ada7c195f0a0f391d7efba3f37997d5b1cddac542ab77a19f89c"
+  },
+  "rawScanSeverities": {
+    "UNKNOWN": 1,
+    "MEDIUM": 1
+  }
+}
