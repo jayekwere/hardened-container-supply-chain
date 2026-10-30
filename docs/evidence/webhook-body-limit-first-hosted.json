@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "run": 41100448379,
+  "headCommit": "297469783658f6df135945c950ab9aed16f2f0d0",
+  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41100448379",
+  "outcome": "failed",
+  "observedFailure": "INSTALLATION FAILED: context deadline exceeded",
+  "processExit": 2,
+  "admissionSuiteStarted": false,
+  "rawLogArchiveSHA256": "ac8fd94fdbc895f7d077232d7cba51b675d95982488206d643fb284538ab83b4"
+}

@@ -39,10 +39,13 @@ Observed on 2026-10-30. [Structured evidence](evidence/webhook-body-limit-local.
 | Workflow lint, trust-boundary guard and shell syntax | Exit 0 |
 | Earlier scan-clean candidate | Build/scan exit 0 with only the bounded OpenPGP finding, followed by a failed cluster bootstrap due to schema mismatch |
 | Observability startup regression | Earlier candidate: 2 cases fail; compatible fixed revision: both pass |
-| Compatible revision's full image scan and cluster replay | Pending execution; unit results do not establish successful bootstrap |
+| Compatible revision's Linux amd64 build and scan | Exit 0: no LOW, MEDIUM, HIGH or CRITICAL entries; one existing bounded OpenPGP UNKNOWN finding remains |
+| Compatible revision's native arm64 full admission replay | Exit 0 in 577.399s: 336 observations across all five suites, zero unexpected admissions |
 | Local independent recompilation | Not run; mandatory in the verifier release workflow |
 
-The superseded scan-clean candidate's local cross-build was `sha256:6fd6c154e14206be51bc5703b2f0af9a7c6869719e529232015a896860ab8afc`. It is not a supported release. The compatible revision's image identity will be recorded after its build and scan.
+The compatible Linux amd64 cross-build is `sha256:0d8d2e57c375c5175c38a32345ed572c5f83c45885c1e9f4c2bba86fefc5b65d`. The separate native arm64 runtime build is `sha256:b3f83f4957ed77f0fdfb9ef3ed86f581dab49786c57a3786a12ac49418a7111e`. [Local runtime evidence](evidence/webhook-body-limit-runtime-local.json) records 30 signature/attestation requests, 42 availability requests, 65 maintenance requests, 16 multi-control-plane requests and 183 trust-update probes. Transient unavailability is counted separately from policy denials. The network suite was not rerun locally for this fix.
+
+The superseded scan-clean candidate's cross-build was `sha256:6fd6c154e14206be51bc5703b2f0af9a7c6869719e529232015a896860ab8afc`. It is not a supported release. [The first hosted run](evidence/webhook-body-limit-first-hosted.json) also failed installation before the admission suite started. These failed candidates remain in the evidence history.
 
 ```sh
 make tools
@@ -53,10 +56,28 @@ make admission
 make cluster
 ```
 
-The verifier build runs the new cases alongside the existing freshness checks and retains their output in `unit-tests.txt`. A release's evidence attestation authenticates that report hash. Hosted and published-image results are separate from the local results above and will be recorded in the fix's pull request and release assets after execution.
+The verifier build runs the new cases alongside the existing freshness checks and retains their output in `unit-tests.txt`. A release's evidence attestation authenticates that report hash. Hosted and published-image results are separate from the local results above.
+
+## Hosted results
+
+The [protected pull-request run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41106134124) passed on 2026-10-30. It tested checkout `d8a45f57195459c331e065d4b3f0b0a3af87c7c6`, whose source tree matches merged commit `4c20b82215c9331afbad30da32819e7ad5a60307`. [Structured hosted evidence](evidence/webhook-body-limit-hosted.json) includes report hashes, exact outcomes and the Linux amd64 digest matching the local cross-build.
+
+| Hosted suite | Observations | Result |
+| --- | --- | --- |
+| Signature and attestations | 30 | Passed |
+| Availability and recovery | 40 | Passed |
+| Maintenance gate | 65 | Passed |
+| Three-control-plane decisions | 16 | Passed |
+| Trust updates | 183 | Passed |
+| Admission total | 334 in 529.281s | Zero unexpected admissions |
+| Runtime network policy | 80 | Zero mismatches |
+| Verifier unit tests | 74 leaf cases | Passed |
+| Fresh verifier scan | 1 existing OpenPGP UNKNOWN | Zero LOW, MEDIUM, HIGH or CRITICAL entries |
+
+The full admission run was selected, with no suite filter. All application, workflow, policy, build, signing and runtime gates also passed. Request totals include transient fail-closed errors during recovery; those errors cannot count as a successful policy denial.
 
 ## Releases and limits
 
-The fixed release target is `controller-v0.1.3`. Require its completed release workflow and published assets before installation. Earlier `controller-v0.1.2` evidence remains a historical result and its image still contains the old module. Historical verification requires the matching release-tag source because signed patch and module identities must agree.
+The fixed release is `controller-v0.1.3`, from merged source `4c20b82215c9331afbad30da32819e7ad5a60307`. Require its [completed release workflow](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41109457087) and published assets before installation. That workflow independently recompiles the verifier, scans it again, signs the exact digest, adds SBOM and evidence attestations, checks both negative verification cases, and reruns the complete admission suite against the published image. Its release assets and workflow report provide the publication-specific outcomes. Earlier `controller-v0.1.2` evidence remains a historical result and its image still contains the old module. Historical verification requires the matching release-tag source because signed patch and module identities must agree.
 
 The cap limits bytes consumed by these handlers, not total process memory or concurrent requests. Valid reviews larger than 3 MiB are rejected. A completed JSON value can leave trailing bytes unread; this does not restore unbounded decoder allocation. The tests do not establish production capacity or independent-host availability. Administrator, build-host and node trust boundaries remain as documented in the threat model.
