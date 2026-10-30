@@ -20,23 +20,32 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Record tested source
+        run: |
+          mkdir -p artifacts
+          git rev-parse HEAD > artifacts/source-revision.txt
       - name: Install checksum-locked tools
+        id: tools
         run: make tools
       - name: Validate workflow definitions and trust boundaries
+        id: workflow
         run: |
           .tools/bin/actionlint
           python3 scripts/check-workflows.py
       - name: Unit, policy, chart, reproducibility, runtime, SBOM and vulnerability gates
+        id: core
         run: make check
       - name: Local signature and tamper rejection
+        id: signing
         run: ./scripts/sign-local.sh
-      - name: Disposable cluster and network-policy integration
-        run: make cluster
-      - name: Signature and attestation admission integration
+      - name: Scanned verifier, signature and attestation admission integration
+        id: admission
         run: make admission
-      - name: Patched verifier vulnerability gate
-        run: ./scripts/scan-controller.sh
+      - name: Disposable cluster and network-policy integration
+        id: network
+        run: make cluster
       - name: Retain evidence
+        id: evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -54,3 +63,31 @@ jobs:
             artifacts/controller/*.json
           retention-days: 14
           if-no-files-found: error
+      - name: Summarize gate outcomes
+        if: always()
+        env:
+          TOOLS_RESULT: ${{ steps.tools.outcome }}
+          WORKFLOW_RESULT: ${{ steps.workflow.outcome }}
+          CORE_RESULT: ${{ steps.core.outcome }}
+          SIGNING_RESULT: ${{ steps.signing.outcome }}
+          ADMISSION_RESULT: ${{ steps.admission.outcome }}
+          NETWORK_RESULT: ${{ steps.network.outcome }}
+          EVIDENCE_RESULT: ${{ steps.evidence.outcome }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          stages = [
+              ('Locked tools', 'TOOLS_RESULT'),
+              ('Workflow permissions and pins', 'WORKFLOW_RESULT'),
+              ('Application tests, policies, builds and scan', 'CORE_RESULT'),
+              ('Signature and tamper rejection', 'SIGNING_RESULT'),
+              ('Verifier scan and admission/fault tests', 'ADMISSION_RESULT'),
+              ('Runtime network-policy tests', 'NETWORK_RESULT'),
+              ('Evidence upload', 'EVIDENCE_RESULT'),
+          ]
+          lines = ['## Quality gates', '', '| Stage | Outcome |', '| --- | --- |']
+          lines += [f'| {label} | {os.environ[key] or "not run"} |' for label, key in stages]
+          lines += ['', 'A skipped stage has no passing result. Download the evidence artifact for raw reports and test observations.']
+          Path(os.environ['GITHUB_STEP_SUMMARY']).write_text('\n'.join(lines) + '\n')
+          PY

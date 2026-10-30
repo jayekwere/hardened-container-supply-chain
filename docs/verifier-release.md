@@ -2,6 +2,8 @@
 
 The verifier is a separate artifact from the sample application. Both use the existing public OCI repository, with independent digests, release tags and workflow identities; the verifier uses `controller-v*` tags. Its build uses the checksum-locked source archive, the authoritative-read patch and a checked-in dependency patch. The dependency patch records the complete resulting module and checksum changes; normal builds use `-mod=readonly` and `go mod verify`. The root application module remains dependency-free.
 
+The October 30 [scheduled-check review](quality-maintenance.md) upgrades two dependencies after new findings. Release-specific counts and scans below describe their dated source revisions. Historical release verification requires that tag's source checkout because the signed evidence binds both patch hashes; a different dependency patch must reject.
+
 The initial verifier scan found 52 findings: 27 HIGH, 21 MEDIUM, two LOW and two UNKNOWN. The existing gate rejected that image with 29 blocking reasons. [Pre-remediation evidence](evidence/verifier-pre-remediation.json) records the inventory, exact versions, build identity and scan hash. That initial gate used no VEX or suppression. Dependency upgrades removed 51 findings. One UNKNOWN advisory remains in the raw report: `GO-2026-5932`, scoped to the `golang.org/x/crypto/openpgp` package family. The release gate handles only this finding through the bounded VEX control below; it does not claim a zero-finding raw scan.
 
 ## Reproduce the controls

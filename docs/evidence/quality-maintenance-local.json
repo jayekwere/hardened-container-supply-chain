@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-30",
+  "scope": "local Linux arm64 rebuilt verifier; full hosted and published-image results are separate",
+  "source": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "b682351682fb3025644e66fb489777c013121e5fe6f8501e6fcb5a9588e2ed2f",
+    "dependencyPatchSHA256": "0f566a73dc5e6220679fdab60528743d4d1d50df1f2a100b2388ad2f7ea63175",
+    "goModSHA256": "38d98c4a3c37109a2b7addc331291bea624afc760a0c0f5cb49c14eddb1a6d8c",
+    "goSumSHA256": "1b8bb2db1f6fe1895091a59a0470d18da2ffaf60e95dba9d07f31a5edf9dcd5c",
+    "packageClosureSHA256": "7281f82cd59eaf5d61cba9889740ece30d7d257ab308f46f5116251d726cd987",
+    "binarySHA256": "c5aa14e994bc3c7c8d22088349b404acd8b15e595af42e2efc9197cb4ab8ce1e",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "arm64",
+    "manifestDigest": "sha256:0457f5bcdec74c74fd337d69c811f0a2e2a0806d7bed7710826be38d0ba74ca3"
+  },
+  "rootChecks": {
+    "makeTest": "passed",
+    "actionlint": "passed",
+    "workflowTrustGuard": "passed",
+    "shellSyntax": "passed",
+    "taskStopCases": 6,
+    "oldTaskStopCondition": "two race cases failed before the fix"
+  },
+  "focusedVerifierLeafCases": 29,
+  "dependencyLeafCases": 25,
+  "dependencyTestNames": [
+    "TestPrivateEPKRejected",
+    "TestRoundtripRsaPrivate",
+    "TestRsaKeyChecks",
+    "TestUnmarshalPrivateJWKAllowed",
+    "TestEmbeddedPrivateJWKRejected",
+    "TestTextNodeCoalescing",
+    "TestRenderer",
+    "TestRenderFosteredForeignContent"
+  ],
+  "modules": {
+    "github.com/go-jose/go-jose/v4": "v4.1.6",
+    "golang.org/x/net": "v0.62.0"
+  },
+  "scan": {
+    "gateExit": 0,
+    "rawSeverities": {
+      "UNKNOWN": 1,
+      "MEDIUM": 1
+    },
+    "rawFindings": [
+      {
+        "id": "GO-2026-5932",
+        "module": "golang.org/x/crypto",
+        "version": "v0.58.0",
+        "severity": "UNKNOWN"
+      },
+      {
+        "id": "GHSA-2hw4-c9m4-f2fj",
+        "module": "knative.dev/pkg",
+        "version": "v0.0.0-20230612155445-74c4be5e935e",
+        "severity": "MEDIUM"
+      }
+    ],
+    "remediatedFindingIDs": [
+      "CVE-2026-116587",
+      "CVE-2026-78661",
+      "CVE-2026-97045"
+    ],
+    "newExceptions": 0,
+    "newVEXCases": 0
+  },
+  "rawSHA256": {
+    "scan.json": "082d46648ead31b3f1411106400c07f3f8789bd0d86ab7af6d131feca777d3a2",
+    "scan-policy-input.json": "61ee6264f3c250c08ffd0a57766739318c952d7b404415e6d6611a74a6e07dd7",
+    "scan-policy.txt": "696f7c13a204aa6039bfad2ac0499efd9749373620d7c9094845e10a1cbc5163",
+    "sbom.cdx.json": "f01bb28c372fb457af7277c39a9b11bdb3fc0332f69e4d3f70416f261cc74ed5",
+    "source.json": "d13da810dafaad6fae75d3fb1d8e2df090685c5f6501e0c0765dc757e78453da",
+    "go.mod": "38d98c4a3c37109a2b7addc331291bea624afc760a0c0f5cb49c14eddb1a6d8c",
+    "go.sum": "1b8bb2db1f6fe1895091a59a0470d18da2ffaf60e95dba9d07f31a5edf9dcd5c",
+    "packages.txt": "7281f82cd59eaf5d61cba9889740ece30d7d257ab308f46f5116251d726cd987",
+    "unit-tests.txt": "16d17bae3d0dac6f20a24b2ff4727dd90869ab9aeace861a44e83c859a0130a4",
+    "reproducibility.txt": "69bbe4ebb4a19bc44aef8e0d54e3be9c6308d38deb1ef92a78766911791c98c4",
+    "db-metadata.json": "235919340d2e104e18b4d81ce217f56dca41587b6149554c6548f19811b76a4c",
+    "vex-evidence.json": "23c53c01118904735a72e4ab2269863b3c2f054912fb4be428d5faed37b43ba4"
+  }
+}

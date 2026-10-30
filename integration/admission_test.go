@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -361,13 +362,16 @@ func TestAdmissionSignatures(t *testing.T) {
 		}
 		// The controller has a long drain period. Terminate only its test
 		// runtime task so no existing admission connection can survive.
-		for id, node := range runningVerifiers() {
+		if err := stopVerifierTasks(runningVerifiers, func(id, node string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			out, err := exec.CommandContext(ctx, "docker", "exec", node, "ctr", "--namespace=k8s.io", "tasks", "kill", "--signal", "SIGKILL", id).CombinedOutput()
 			cancel()
-			if err != nil && len(runningVerifiers()) != 0 {
-				t.Fatalf("cannot stop verifier test task: %v %s", err, out)
+			if err != nil {
+				return fmt.Errorf("%w: %s", err, out)
 			}
+			return nil
+		}); err != nil {
+			t.Fatalf("cannot stop verifier test task: %v", err)
 		}
 		ready := 0
 		for _, s := range slices.Items {

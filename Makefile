@@ -20,7 +20,7 @@ test:
 	test -z "$$(.tools/go/bin/gofmt -l cmd internal integration)"
 	$(GO) vet ./...
 	$(GO) test -tags=kubernetes -run TestProbeClassification -count=1 ./integration
-	$(GO) test -tags=admission -run 'TestAdmissionClassification|TestPolicyWrite|TestQuorumFailureClassification|TestRecoveryReadiness' -count=1 ./integration
+	$(GO) test -tags=admission -run 'TestAdmissionClassification|TestPolicyWrite|TestQuorumFailureClassification|TestRecoveryReadiness|TestVerifierTaskStop' -count=1 ./integration
 	$(GO) test -race -count=1 -coverprofile=artifacts-coverage.tmp ./...
 	@mkdir -p artifacts
 	@mv artifacts-coverage.tmp artifacts/coverage.txt

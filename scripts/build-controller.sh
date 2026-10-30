@@ -19,6 +19,10 @@ docker run --rm \
     test "$(go env GOVERSION)" = go1.27.3
     test -z "$(gofmt -l pkg/webhook/freshness.go pkg/webhook/freshness_test.go)"
     go test -mod=readonly -count=1 -v ./pkg/webhook -run "^TestPolicyFreshness" > /out/unit-tests.txt 2>&1
+    # Exercise the upgraded dependencies through their own security regressions
+    # and ordinary parse/round-trip controls, including HTML absent from this binary.
+    go test -mod=readonly -count=1 -v github.com/go-jose/go-jose/v4 -run "^(TestRsaKeyChecks|TestEmbeddedPrivateJWKRejected|TestPrivateEPKRejected|TestUnmarshalPrivateJWKAllowed|TestRoundtripRsaPrivate)$" >> /out/unit-tests.txt 2>&1
+    go test -mod=readonly -count=1 -v golang.org/x/net/html -run "^(TestTextNodeCoalescing|TestRenderFosteredForeignContent|TestRenderer)$" >> /out/unit-tests.txt 2>&1
     go mod verify > /out/modules.txt
     GOOS=linux GOARCH="$TARGETARCH" go list -mod=readonly -deps -f "{{.ImportPath}}" ./cmd/webhook > /tmp/packages.txt
     sort /tmp/packages.txt > /out/packages.txt

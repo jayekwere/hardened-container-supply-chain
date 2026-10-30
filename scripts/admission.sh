@@ -32,6 +32,8 @@ if [ -n "${TEST_RELEASE_CONTROLLER_IMAGE:-}" ]; then
   controller_image=$TEST_RELEASE_CONTROLLER_IMAGE
 else
   ./scripts/build-controller.sh
+  # Reject vulnerable local verifier builds before provisioning the cluster.
+  ./scripts/scan-controller.sh
 fi
 kind create cluster --name "$name" --kubeconfig "$kubeconfig" --config integration/admission/kind-multi.yaml --image kindest/node:v1.34.0@sha256:7416a61b42b1662ca6ca89f02028ac133a309a2a30ba309614e8ec94d976dc5a --wait 180s
 # This disposable cluster schedules the verifier on its control-plane nodes.

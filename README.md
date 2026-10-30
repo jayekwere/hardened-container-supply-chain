@@ -6,23 +6,39 @@ A working container supply chain for a tiny Go HTTP service: build a scratch ima
 
 The application is intentionally small so the controls can be inspected end to end. It serves `GET /healthz`, `/readyz`, and `/version` on port 8080, needs no credentials, writes no application data, and makes no outbound requests.
 
-## Verified status
+## What this project demonstrates
 
-[Application release v0.1.1](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) completed all hosted gates. Anonymous signature verification and runtime tests against the published digest also passed.
+| Control | Passing case | Deliberately failing case |
+| --- | --- | --- |
+| Hardened runtime | HTTP works as UID 65532 with a read-only root and no capabilities | Root, writable root and privilege changes fail integration checks |
+| Reproducible build | Two uncached builds produce the same manifest digest | Archive identity, ownership and architecture mutations are rejected |
+| Image scan | Fresh database and the exact image inventory pass policy | HIGH, CRITICAL, UNKNOWN and invalid exceptions block the gate |
+| NetworkPolicy | Namespace-local ingress stays reachable | Cross-namespace ingress and workload HTTP/DNS egress time out; policy removal restores traffic |
+| Admission | Exact signer, signed SBOM and signed evidence are accepted | Unsigned images, wrong identities, missing predicates and tampered attestations are rejected |
+| Trust changes and faults | Restored trust and surviving control planes admit the valid image | Stale trust, missing policies, lost read permission and unavailable verifiers fail closed |
 
-[Verifier release controller-v0.1.1](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/controller-v0.1.1) is scanned, signed and carries SBOM/build-evidence attestations. Its exact registry digest passed **183 trust-update probes** with **152 required rejections and zero unexpected admissions**, plus **16 control-plane outage controls** and the **30-case admission matrix**. The outage controls used 18 requests, including two fail-closed timeouts; standard recovery used 31 requests, including one fail-closed rejection. [Exact publication results and limitations](docs/verifier-release.md#published-release-results) distinguish those transitions from policy denials.
+The verifier patch and its [183-probe trust-update experiment](docs/trust-updates.md) are the main implementation work: validation reads authoritative policy state before and after signature checks. The tests deliberately freeze or poison the older compiled copy. An unexpected admission fails immediately; a transport failure cannot count as a signature rejection. Earlier failed experiments remain in the evidence history.
 
-Admission requires the image signature and both signed SBOM/evidence predicates. A downstream verifier patch now reads authoritative policies around each validation rather than trusting the older watched snapshot. See [the trust-update fix, build/upgrade commands, results and limits](docs/trust-updates.md). The earlier five stale admissions remain preserved as historical evidence.
+```mermaid
+flowchart LR
+  A[Locked source] --> B[Build twice and test]
+  B --> C[SBOM and vulnerability gate]
+  C --> D[Publish exact digest]
+  D --> E[Sign image and attestations]
+  E --> F[Verify identity and evidence]
+  F --> G[Admission policies]
+  G --> H[Restricted workload and network]
+```
 
-The separate [verifier release and three-control-plane tests](docs/verifier-release.md) cover its dependency remediation, scan/signing gates, evidence verification and direct requests to each API server.
+## Results and release status
 
-The [maintenance and failure controls](docs/operations.md) add an API-enforced workload pause for multi-step trust changes, two replicas with required placement separation, and explicit verifier-node, elected-leader and quorum-loss tests. Existing approvals and running Pods remain outside retroactive enforcement.
+The [application v0.1.1 release](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) passed hosted gates, anonymous signature verification and runtime tests against its published digest.
 
-See [verification evidence](docs/verification.md) for dated local results and hosted workflow results. The initial live scan found vulnerable standard-library code; [remediation evidence](docs/remediation.md) records the compiler upgrade and rescan. Synthetic negative fixtures are clearly marked and are never presented as real findings. There are no active risk-acceptance exceptions. The application has no VEX assertion; the separate verifier uses one [bounded, package-absence VEX case](docs/verifier-release.md#bounded-vex-evidence), retaining the original scanner finding.
+The October 30 scheduled-check review found a verifier outage-test race and newly reported dependency findings. The source now upgrades `go-jose/v4` to `v4.1.6` and `x/net` to `v0.62.0`. The rebuilt verifier passes the fresh scan locally and its independent recompilation is byte-identical. The strict scan policy and the single bounded OpenPGP VEX case are unchanged. See [the diagnosis, regression tests and dated results](docs/quality-maintenance.md). The replacement verifier is `controller-v0.1.2`; use it only after its release workflow passes and its release assets are published. The earlier `controller-v0.1.1` release predates these dependency fixes.
 
-## October 27 failover replay
+The [October 27 main run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/40532668665) passed **341 admission observations**, including **183 trust-update probes with zero unexpected admissions**, and **80 network probes**. These are dated results, not a promise about future scans. [Failover evidence](docs/failover-recovery.md), [release evidence](docs/verifier-release.md) and [the verification record](docs/verification.md) retain the exact commands, counts and failure history.
 
-The [initial recovery candidate's full local admission suite](docs/failover-recovery.md) passed in **367.545 seconds**, with **334 recorded observations and zero unexpected admissions**. It includes 183 trust-update probes, the 30-case signature/attestation matrix, 65 maintenance observations, 16 direct multi-control-plane observations and 40 node/leader/quorum observations. Ten deliberately incomplete recovery states were rejected by regression tests. DNS replicas now occupy separate nodes in the disposable cluster, and the next fault waits for verifier, DNS and endpoint recovery. Exact commands, source hashes, transient failures, the earlier failing run and remaining limits are recorded in that document. This update changes the replay and its recovery checks; the signed verifier release is unchanged.
+The test environment uses disposable containerized nodes on one host. It does not establish independent-host availability or production readiness. Running Pods are not revalidated, policy writes are not atomic, and scans assess a dated package inventory. [Operational limits](docs/operations.md) explain those boundaries.
 
 ## Run the complete checks
 
@@ -100,6 +116,8 @@ Release tags must have the form `vMAJOR.MINOR.PATCH` and point to a commit reach
 
 Take the exact reference from the release's `image-reference.txt` asset. Do not substitute a mutable tag or the local image config digest.
 
+Verifier claim checks compare signed source and patch hashes with the local checkout. Use the matching verifier tag's source when reproducing a historical release; verification against different dependency patches must fail.
+
 ```sh
 export IMAGE='ghcr.io/jayekwere/hardened-container-supply-chain@sha256:e0b4773135955a2d269f5f241771ede7c4fb3a47d37896af175aae8f8e7efe22'
 export TAG='v0.1.1'
@@ -107,8 +125,12 @@ export TAG='v0.1.1'
 
 export KUBECONFIG='/absolute/path/to/your/kubeconfig'
 git fetch origin --tags
-export CONTROLLER_IMAGE=$(python3 -c 'import json;print(json.load(open("integration/admission/verifier-release.lock.json"))["image"])')
-export CONTROLLER_TAG=$(python3 -c 'import json;print(json.load(open("integration/admission/verifier-release.lock.json"))["tag"])')
+export CONTROLLER_TAG='controller-v0.1.2'
+mkdir -p artifacts/controller
+curl --fail --location --proto '=https' \
+  "https://github.com/jayekwere/hardened-container-supply-chain/releases/download/$CONTROLLER_TAG/image-reference.txt" \
+  --output artifacts/controller/image-reference.txt
+export CONTROLLER_IMAGE=$(cat artifacts/controller/image-reference.txt)
 ./scripts/verify-controller-release.sh "$CONTROLLER_IMAGE" "$CONTROLLER_TAG"
 ./scripts/install-admission.sh "$KUBECONFIG" "$CONTROLLER_IMAGE"
 export PATH="$PWD/.tools/bin:$PATH"
