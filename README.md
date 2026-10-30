@@ -32,9 +32,11 @@ flowchart LR
 
 ## Results and release status
 
+The remaining webhook MEDIUM finding is fixed in source by upgrading the shared server library to its first fixed release. The real admission and conversion handlers now enforce a **3 MiB request-body read limit**. All **18 bounded regression cases** pass; the old module fails the 10 oversized cases. The rebuilt verifier's local scan has **0 MEDIUM, HIGH or CRITICAL findings**, with only the existing bounded OpenPGP VEX case remaining. See [the fix, exact tests and limits](docs/webhook-body-limit.md).
+
 The [application v0.1.1 release](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) passed hosted gates, anonymous signature verification and runtime tests against its published digest.
 
-The October 30 scheduled-check review found a verifier outage-test race and newly reported dependency findings. The source now upgrades `go-jose/v4` to `v4.1.6` and `x/net` to `v0.62.0`. The rebuilt verifier passes the fresh scan locally and its independent recompilation is byte-identical. The strict scan policy and the single bounded OpenPGP VEX case are unchanged. See [the diagnosis, regression tests and dated results](docs/quality-maintenance.md). The replacement verifier is [controller-v0.1.2](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/controller-v0.1.2); use it only after [its release workflow](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41088764691) passes and its release assets are published. The earlier `controller-v0.1.1` release predates these dependency fixes.
+The earlier October 30 scheduled-check review fixed a verifier outage-test race and upgraded `go-jose/v4` to `v4.1.6` and `x/net` to `v0.62.0`. Those [dated results](docs/quality-maintenance.md) remain preserved. The next verifier release is [controller-v0.1.3](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/controller-v0.1.3), which includes the body-limit fix; require its completed release workflow and published assets before use. The previous `controller-v0.1.2` image contains the old webhook module.
 
 The [October 30 fix run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41084094730) passed **343 admission observations with zero unexpected admissions**, including **183 trust-update probes**, and **80 network probes with zero mismatches**. It also passed 6 task-stop cases, 29 verifier freshness cases and 25 upstream dependency cases. The hosted Linux amd64 image matches the local cross-build's manifest digest. [Structured hosted results](docs/evidence/quality-maintenance-hosted.json) retain exact counts and report hashes, including transient unavailability separately from policy denials. These are dated results, not a promise about future scans. [Failover evidence](docs/failover-recovery.md), [release evidence](docs/verifier-release.md) and [the verification record](docs/verification.md) preserve the earlier results and failure history.
 
@@ -125,7 +127,7 @@ export TAG='v0.1.1'
 
 export KUBECONFIG='/absolute/path/to/your/kubeconfig'
 git fetch origin --tags
-export CONTROLLER_TAG='controller-v0.1.2'
+export CONTROLLER_TAG='controller-v0.1.3'
 mkdir -p artifacts/controller
 curl --fail --location --proto '=https' \
   "https://github.com/jayekwere/hardened-container-supply-chain/releases/download/$CONTROLLER_TAG/image-reference.txt" \

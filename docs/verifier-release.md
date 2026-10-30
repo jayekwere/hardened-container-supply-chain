@@ -1,5 +1,7 @@
 # Patched verifier release and multi-control-plane checks
 
+The [webhook body-limit update](webhook-body-limit.md) targets `controller-v0.1.3` and resolves the MEDIUM finding present in `controller-v0.1.2`. Require the completed release and use the README's selected-release commands. Earlier release-specific results below remain historical; verify an older release with that tag's source checkout.
+
 The verifier is a separate artifact from the sample application. Both use the existing public OCI repository, with independent digests, release tags and workflow identities; the verifier uses `controller-v*` tags. Its build uses the checksum-locked source archive, the authoritative-read patch and a checked-in dependency patch. The dependency patch records the complete resulting module and checksum changes; normal builds use `-mod=readonly` and `go mod verify`. The root application module remains dependency-free.
 
 The October 30 [scheduled-check review](quality-maintenance.md) upgrades two dependencies after new findings. Release-specific counts and scans below describe their dated source revisions. Historical release verification requires that tag's source checkout because the signed evidence binds both patch hashes; a different dependency patch must reject.
