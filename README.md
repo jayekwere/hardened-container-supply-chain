@@ -166,3 +166,7 @@ SBOMs, raw scans, database metadata, reproducibility output and test results are
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+---
+
+**AI assistance:** AI tools helped with code or documentation.
