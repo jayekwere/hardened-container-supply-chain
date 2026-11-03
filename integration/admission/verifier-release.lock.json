@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "tag": "controller-v0.1.3",
-  "image": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:0d8d2e57c375c5175c38a32345ed572c5f83c45885c1e9f4c2bba86fefc5b65d",
+  "tag": "controller-v0.1.4",
+  "image": "ghcr.io/jayekwere/hardened-container-supply-chain@sha256:994c969861768d50cf421adbf5e3f15035282aa23a1ba8432a6e760da11fac19",
   "platform": "linux/amd64",
-  "sourceRevision": "4c20b82215c9331afbad30da32819e7ad5a60307",
+  "sourceRevision": "77c03fab4e0d47fcb7cff2a9effe91ccf8ed3fa8",
   "issuer": "https://token.actions.githubusercontent.com",
-  "identity": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/controller-release.yml@refs/tags/controller-v0.1.3",
-  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41109457087",
-  "notes": "Selected body-limit fix reference. Require the completed controller-v0.1.3 release and authenticated assets before installation; the reference alone is not a publication receipt."
+  "identity": "https://github.com/jayekwere/hardened-container-supply-chain/.github/workflows/controller-release.yml@refs/tags/controller-v0.1.4",
+  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41742227700",
+  "notes": "Selected dependency-remediation release. Require the completed controller-v0.1.4 workflow and authenticated assets before installation; this reference alone is not a publication receipt."
 }

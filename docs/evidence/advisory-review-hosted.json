@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-11-03",
+  "run": 41739135181,
+  "workflowURL": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41739135181",
+  "source": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "b411312b24d1fa372107bc0f1310432068d1a61c1c6cdc428d315ff0ed0e2ed0",
+    "dependencyPatchSHA256": "2d8016cf82c7ac91bef6b90488b42f1cb72e70c2bcb60fe22dbd67aa88eb54b6",
+    "goModSHA256": "43615a3e6e48626250f3651fbca9d1a393ac9a09a9afabfc4d85585829093e98",
+    "goSumSHA256": "e8bbc8d6823bcaa9ec0784e73ec415cf58c6a241056b95a9cf03fcbcae0c6668",
+    "packageClosureSHA256": "30a30e1d2b8ab5124a11261818261a82940329742893c10afb3cb557b6bd2605",
+    "binarySHA256": "169eb9f4eaa316f46f3b42a0995fc601c73af2b188db0a5740ef6fd55ce98887",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "amd64",
+    "manifestDigest": "sha256:994c969861768d50cf421adbf5e3f15035282aa23a1ba8432a6e760da11fac19"
+  },
+  "testedCheckout": "1a98f1c96d6e4d8edbd89a796aee9e28c3ad8d17",
+  "rawFindings": [],
+  "scanInputByteIdentical": true,
+  "findingFilteringApplied": false,
+  "admission": {
+    "decisions": {
+      "count": 31,
+      "observed": {
+        "allowed": 11,
+        "signature-denied": 5,
+        "no-policy-denied": 1,
+        "identity-denied": 4,
+        "attestation-denied": 8,
+        "unavailable": 2
+      },
+      "unexpectedAdmissions": 0
+    },
+    "availability": {
+      "count": 43,
+      "observed": {
+        "allowed": 16,
+        "signature-denied": 16,
+        "unavailable": 6,
+        "freshness-denied": 3,
+        "storage-unavailable": 2
+      },
+      "unexpectedAdmissions": 0
+    },
+    "maintenance": {
+      "count": 65,
+      "observed": {
+        "allowed": 23,
+        "maintenance-denied": 39,
+        "signature-denied": 3
+      },
+      "unexpectedAdmissions": 0
+    },
+    "multi-control-plane": {
+      "count": 16,
+      "observed": {
+        "allowed": 8,
+        "signature-denied": 8
+      },
+      "unexpectedAdmissions": 0
+    },
+    "trust-updates": {
+      "count": 183,
+      "observed": {
+        "allowed": 31,
+        "signature-denied": 26,
+        "identity-denied": 51,
+        "freshness-denied": 50,
+        "extra-policy-denied": 25
+      },
+      "unexpectedAdmissions": 0
+    }
+  },
+  "totalAdmissionObservations": 338,
+  "admissionSeconds": 517.009,
+  "verifierLeafCases": 74,
+  "networkProbes": 80,
+  "rawSHA256": {
+    "source-revision.txt": "2390935f8d4d449464bb4fff02cc6e029a1025a48b26b87008226fa78c62811f",
+    "controller/source.json": "25a50afc1e35f89950c1a0ef2efc1d570e1075fc7761f7347c1a3ab3fa89db13",
+    "controller/scan.json": "c4a653c38a71cc87499b97cbe11f969be859fdeeb66d65eb9856d795041c7118",
+    "controller/scan-policy-input.json": "c4a653c38a71cc87499b97cbe11f969be859fdeeb66d65eb9856d795041c7118",
+    "controller/sbom.cdx.json": "25592d4ce379d349057d7fea709920b0dac26eb1f3b4d141db990cf11c665e92",
+    "controller/vex.json": "3cb3e41d416091c5117a1b37f0f8bccdc31794ffcec3b6f761aaece479d2edda",
+    "controller/vex-evidence.json": "f551128b3a1a6b40b5da76ed297265404237365313d3753b2ce1f097ad2bbd67",
+    "controller/openpgp-advisory.json": "bde8769150ec1368d9a8dbd61fbbde52296de692c57147e02e3ae295e1981f11",
+    "controller/unit-tests.txt": "2b9c24701d43e6125da69524c48c6fe847899d401ee20b433ad8b925386b0a1d",
+    "controller/db-metadata.json": "a949a9d0c2d9555463db8246fd3848e8c810c35795848b3d641668786fba6053",
+    "admission/run-selection.json": "0a9e72991ee08378180bdca84c3f1ed37d6722b5d97ea05fdfcfe5cc3b7070c4",
+    "admission/tests.txt": "e62ea18444b6a3926a89738cf79f38cdd4c14b245c55a327670b086a84bbf6c8",
+    "admission/decisions.json": "35678bf1f63993b96ff3e73bf63f95f0824c8606a68fc72d09ae8c97efbc7b2e",
+    "admission/availability.json": "f728cfed7e3785102493ef2ae092cbd932731169aa9a677a7f021a6c6894cd1c",
+    "admission/maintenance.json": "654289792122e4c3df9e1996f0fd56dc8eb6609d42558a9311c85ed850c146e9",
+    "admission/multi-control-plane.json": "c320e2b38cc884e16590065541e6ef42ff57f194e15c54d7fee2cf1b880a925a",
+    "admission/trust-updates.json": "ec6747dbcd60a06d1269d50b30aac0585248199486ebd2e5f71fbb41baf7c814",
+    "cluster/network-policy.json": "95a6698341e9e19b0338602a06f8cafab85cea455d8de5cce166adc976851c4e"
+  },
+  "headCommit": "4ad88c55867307c5d416781b8037d0d9a15705ac",
+  "mergedCommit": "77c03fab4e0d47fcb7cff2a9effe91ccf8ed3fa8",
+  "testedTree": "a28749549a5625c54823942470406eac809dc7b8",
+  "pullRequest": "https://github.com/jayekwere/hardened-container-supply-chain/pull/14",
+  "releaseTag": "controller-v0.1.4",
+  "releaseWorkflow": "https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41742227700"
+}
