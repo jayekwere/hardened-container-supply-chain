@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-11-03",
+  "scope": "local native verifier tests and Linux amd64 cross-build/scan; full cluster replay is hosted separately",
+  "source": {
+    "sourceCommit": "cc75baab1d34d3bae47bde7bd934bf79e5ca3afc",
+    "sourceArchiveSHA256": "799227f943b8ea6da0eb16a7a82762f8b1b0d6d393e085c496ced4b1653600c4",
+    "patchSHA256": "b411312b24d1fa372107bc0f1310432068d1a61c1c6cdc428d315ff0ed0e2ed0",
+    "dependencyPatchSHA256": "2d8016cf82c7ac91bef6b90488b42f1cb72e70c2bcb60fe22dbd67aa88eb54b6",
+    "goModSHA256": "43615a3e6e48626250f3651fbca9d1a393ac9a09a9afabfc4d85585829093e98",
+    "goSumSHA256": "e8bbc8d6823bcaa9ec0784e73ec415cf58c6a241056b95a9cf03fcbcae0c6668",
+    "packageClosureSHA256": "30a30e1d2b8ab5124a11261818261a82940329742893c10afb3cb557b6bd2605",
+    "binarySHA256": "169eb9f4eaa316f46f3b42a0995fc601c73af2b188db0a5740ef6fd55ce98887",
+    "buildImage": "golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c",
+    "architecture": "amd64",
+    "manifestDigest": "sha256:994c969861768d50cf421adbf5e3f15035282aa23a1ba8432a6e760da11fac19"
+  },
+  "rootTests": "passed, including vet and race checks",
+  "verifierLeafCases": 74,
+  "remediationTests": {
+    "methods": 3,
+    "unsafeMutations": 32,
+    "positiveInventoryControls": 4,
+    "rawByteCopyControl": 1
+  },
+  "rawFindings": [],
+  "scanExit": 0,
+  "scanInputByteIdentical": true,
+  "findingFilteringApplied": false,
+  "vexStatus": "fixed",
+  "localIndependentRecompilation": "not run; required release gate",
+  "localClusterReplay": "not run for this fix",
+  "before": [
+    {
+      "case": "original-lock",
+      "result": "rejected",
+      "message": "advisory changed; review scope"
+    },
+    {
+      "case": "only-refresh-checksum",
+      "result": "rejected",
+      "message": ""
+    }
+  ],
+  "failedRun": 41655259692,
+  "failedStage": "verifier advisory/VEX review guard",
+  "failedMessage": "advisory changed; review before release",
+  "admissionSuiteStartedInFailedRun": false,
+  "networkSuiteInFailedRun": "skipped",
+  "rawSHA256": {
+    "source.json": "25a50afc1e35f89950c1a0ef2efc1d570e1075fc7761f7347c1a3ab3fa89db13",
+    "scan.json": "d8d89ebf2fd87c27a3ede010019b7c569c7b523a49e3ad5d48f40c12f2715e2c",
+    "scan-policy-input.json": "d8d89ebf2fd87c27a3ede010019b7c569c7b523a49e3ad5d48f40c12f2715e2c",
+    "sbom.cdx.json": "1956ea9325ccf7239e4992676844c9515cfe5e717d275440bf8148b3c86cd60f",
+    "unit-tests.txt": "978f97d353407889c4a6cecca65761358bdd1c39c74e3da2b8bdd2c61cf4b55d",
+    "packages.txt": "30a30e1d2b8ab5124a11261818261a82940329742893c10afb3cb557b6bd2605",
+    "vex.json": "6ce490a584804de81671ea65dcacc27c11a27547c575f44175792253f367eace",
+    "vex-evidence.json": "16400326226e4776f3d9e4311211798ecd999939c34dde73d395d2383a610e1c",
+    "openpgp-advisory.json": "bde8769150ec1368d9a8dbd61fbbde52296de692c57147e02e3ae295e1981f11",
+    "db-metadata.json": "d33792315c20bfc0d73ade2a64054fe4bafeece8770531be5faa9c9effd86831"
+  }
+}

@@ -32,11 +32,13 @@ flowchart LR
 
 ## Results and release status
 
-The webhook MEDIUM finding is fixed by upgrading the shared server library to a fixed revision compatible with the telemetry SDK. The real admission and conversion handlers now enforce a **3 MiB request-body read limit**. All **74 verifier regression cases** pass, including 18 body-limit cases and 2 startup cases. The old module fails all 10 oversized-request cases. The fresh verifier scan contains no LOW, MEDIUM, HIGH or CRITICAL entries; one existing, bounded OpenPGP UNKNOWN finding remains in the raw report. See [the fix, exact tests, earlier failed candidates and limits](docs/webhook-body-limit.md).
+The November 3 scheduled scan stopped when an upstream advisory changed. The verifier now pins the fixed `golang.org/x/crypto` revision, and the fresh local raw scan has **zero findings**. Every scanner finding reaches the normal gate. A reviewed advisory snapshot and a `fixed` VEX record document the module upgrade without excluding findings. Local application/race tests and all **74 verifier regression cases** pass. Full hosted checks and release validation are recorded separately in the [maintenance evidence](docs/quality-reliability.md).
+
+The earlier webhook MEDIUM fix remains in place. The real admission and conversion handlers enforce a **3 MiB request-body read limit**, with 18 body-limit and 2 startup regressions. The old module fails all 10 oversized-request cases. The October 30 scan still had one bounded OpenPGP UNKNOWN finding; that dated result predates the November 3 dependency upgrade. See [the body-limit fix, failed candidates and limits](docs/webhook-body-limit.md).
 
 The [application v0.1.1 release](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/v0.1.1) passed hosted gates, anonymous signature verification and runtime tests against its published digest.
 
-The selected verifier is [controller-v0.1.3](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/controller-v0.1.3), built from merged source `4c20b82215c9331afbad30da32819e7ad5a60307`. Require its [completed release workflow](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41109457087) and authenticated assets before use. The previous `controller-v0.1.2` image contains the old webhook module. The earlier outage-test and dependency fixes remain in the [dated maintenance record](docs/quality-maintenance.md).
+The verifier release target is [controller-v0.1.4](https://github.com/jayekwere/hardened-container-supply-chain/releases/tag/controller-v0.1.4). Require its completed release workflow and authenticated assets before use. Earlier `controller-v0.1.3` evidence remains historical and uses the previous code-absence VEX profile; verify it with that tag's source checkout. The earlier outage-test and dependency fixes remain in the [dated maintenance record](docs/quality-maintenance.md).
 
 The [October 30 body-limit fix run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41106134124) passed **334 admission observations with zero unexpected admissions**, including **183 trust-update probes**, and **80 network probes with zero mismatches**. The local arm64 admission replay passed 336 observations. The hosted Linux amd64 image matches the local cross-build's manifest digest. [Structured hosted results](docs/evidence/webhook-body-limit-hosted.json) retain exact counts and report hashes, including transient unavailability separately from policy denials. These are dated results, not a promise about future scans. [Failover evidence](docs/failover-recovery.md), [release evidence](docs/verifier-release.md) and [the verification record](docs/verification.md) preserve earlier results and failure history.
 
@@ -127,7 +129,7 @@ export TAG='v0.1.1'
 
 export KUBECONFIG='/absolute/path/to/your/kubeconfig'
 git fetch origin --tags
-export CONTROLLER_TAG='controller-v0.1.3'
+export CONTROLLER_TAG='controller-v0.1.4'
 mkdir -p artifacts/controller
 curl --fail --location --proto '=https' \
   "https://github.com/jayekwere/hardened-container-supply-chain/releases/download/$CONTROLLER_TAG/image-reference.txt" \
