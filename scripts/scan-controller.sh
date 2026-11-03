@@ -14,14 +14,14 @@ trivy --cache-dir .cache/trivy image --input artifacts/controller/image.tar --sk
 trivy convert --format cyclonedx --output artifacts/controller/sbom.cdx.json artifacts/controller/scan.json
 image_id=$(python3 scripts/check-controller-image.py)
 python3 - <<'PY'
-import hashlib, json, urllib.request
+import hashlib, json
 from pathlib import Path
 lock=json.loads(Path('security/verifier-vex.lock.json').read_text())
-raw=urllib.request.urlopen(lock['url'],timeout=30).read()
-assert hashlib.sha256(raw).hexdigest()==lock['sha256'], 'advisory changed; review before release'
+raw=Path(lock['advisoryPath']).read_bytes()
+assert hashlib.sha256(raw).hexdigest()==lock['sha256'], 'reviewed advisory snapshot changed'
 Path('artifacts/controller/openpgp-advisory.json').write_bytes(raw)
 PY
 python3 scripts/controller-vex.py
 subject=$(python3 -c 'import json;print(json.load(open("artifacts/controller/build-metadata.json"))["containerimage.digest"])')
 go build -mod=readonly -o bin/policy ./cmd/policy
-bin/policy scan --file artifacts/controller/scan-policy-input.json --image-id "$image_id" --subject "$subject" | tee artifacts/controller/scan-policy.txt
+bin/policy scan --file artifacts/controller/scan.json --image-id "$image_id" --subject "$subject" | tee artifacts/controller/scan-policy.txt

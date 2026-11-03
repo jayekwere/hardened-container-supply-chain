@@ -1,8 +1,12 @@
 {
   "id": "GO-2026-5932",
   "url": "https://vuln.go.dev/ID/GO-2026-5932.json",
-  "sha256": "f277b0400996200a7d5034c676661cd8cf18adeab1fdc5d0dc369e456ddf1fad",
+  "advisoryPath": "security/advisories/GO-2026-5932.json",
+  "sha256": "bde8769150ec1368d9a8dbd61fbbde52296de692c57147e02e3ae295e1981f11",
+  "reviewedOn": "2026-11-03",
   "module": "golang.org/x/crypto",
+  "moduleVersion": "v0.58.1-0.20261009181718-2f1f834330b2",
   "packagePrefix": "golang.org/x/crypto/openpgp",
-  "justification": "vulnerable_code_not_present"
+  "status": "fixed",
+  "findingPolicy": "unfiltered"
 }
