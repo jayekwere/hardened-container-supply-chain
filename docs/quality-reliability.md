@@ -42,6 +42,24 @@ make cluster
 
 `controller-v0.1.4` is the release target. Adoption requires its completed quality, publication and published-image replay gates, plus authenticated downloaded reports. Hosted results and source revisions are recorded in the fix's pull request and release after execution. Earlier release evidence requires the matching tag's source because the signed dependency patch and VEX profile must agree.
 
+## Hosted results
+
+The [protected fix run](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41739135181) passed all quality gates on 2026-11-03. It tested checkout `1a98f1c96d6e4d8edbd89a796aee9e28c3ad8d17`. The PR head and merged source `77c03fab4e0d47fcb7cff2a9effe91ccf8ed3fa8` share the same source tree `a28749549a5625c54823942470406eac809dc7b8`. [Structured hosted evidence](evidence/advisory-review-hosted.json) records the image identity, all outcomes and raw report hashes.
+
+| Suite | Observations | Result |
+| --- | --- | --- |
+| Signature and attestations | 31 | Passed |
+| Availability and recovery | 43 | Passed |
+| Maintenance gate | 65 | Passed |
+| Three-control-plane decisions | 16 | Passed |
+| Trust updates | 183 | Passed |
+| Admission total | 338 in 517.009s | Zero unexpected admissions |
+| Runtime network policy | 80 | Zero mismatches |
+| Verifier unit cases | 74 | Passed |
+| Fresh raw scan | Zero findings | No filtering applied |
+
+The full admission run was selected, with no suite filter. Transient fail-closed errors are retained separately from successful policy denials. The hosted Linux amd64 manifest matches the local cross-build. The [controller-v0.1.4 release workflow](https://github.com/jayekwere/hardened-container-supply-chain/actions/runs/41742227700) separately requires independent recompilation, signing, both attestations, negative verification cases and a full replay against the published digest. Its release assets record those publication-specific results after execution.
+
 ## Limits
 
 The daily quality workflow remains enabled, with pinned actions, restricted job permissions and mandatory negative security checks. There are no success overrides or retries that accept a security denial. New vulnerabilities, invalid evidence and unavailable required services can still stop the pipeline. Passing results are dated observations, not a guarantee that future scans will remain clear. The existing single-host, administrator/build-host trust and unmeasured-capacity limits still apply.
